@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Word } from '@/lib/types'
-import { normalizeRomaji } from '@/lib/romaji-utils'
+import { normalizeRomaji, getMatchingVariation } from '@/lib/romaji-utils'
 
 interface TypingDisplayProps {
   word: Word
@@ -9,14 +9,18 @@ interface TypingDisplayProps {
 }
 
 export function TypingDisplay({ word, currentInput, showError }: TypingDisplayProps) {
-  const normalizedTarget = normalizeRomaji(word.romaji)
   const normalizedInput = normalizeRomaji(currentInput)
+  
+  // Get the variation that matches the current input
+  const matchingVariation = getMatchingVariation(word.romaji, currentInput)
+  const displayTarget = matchingVariation || normalizeRomaji(word.romaji)
 
   const renderRomaji = () => {
-    return normalizedTarget.split('').map((char, index) => {
+    return displayTarget.split('').map((char, index) => {
       let className = 'text-muted-foreground'
       
       if (index < normalizedInput.length) {
+        // Since we're showing the matching variation, all typed characters should match
         className = normalizedInput[index] === char 
           ? 'text-primary' 
           : 'text-accent'

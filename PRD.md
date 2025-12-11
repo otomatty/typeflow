@@ -1,110 +1,129 @@
-# Planning Guide
+# PRD: エンジニア向けReactタイピングアプリ (コードネーム: **TypeFlow**)
 
-A minimalist typing practice application for engineers to train muscle memory on technical terms and code syntax in a widget-like interface that can run in a narrow window alongside their development environment.
+## 1. 製品概要
+開発作業の合間やビルドの待ち時間に、ブラウザの別ウィンドウで手軽に起動・練習できるWebアプリケーション。
+ユーザー自身が登録した技術用語を、ウィジェットのような極小UIで、ゲーム感覚（寿司打ライクなルール）で反復練習し、指に定着させる。
 
-**Experience Qualities**:
-1. **Focused** - Strip away all distractions to create a pure typing practice experience that fits in a tiny window
-2. **Instant** - Zero loading times, immediate feedback, and instant word generation without server calls
-3. **Adaptive** - Intelligently surfaces difficult words and tracks weaknesses to optimize learning
+## 2. ターゲットユーザーとユースケース
+*   **ターゲット**: 新しい言語・ライブラリの構文を覚えたいエンジニア。
+*   **ユースケース**:
+    *   メインモニタでVSCodeを開きつつ、サブモニタや画面の隅にこのアプリを「幅の狭い細長いウィンドウ」として配置し、隙間時間にプレイする。
 
-**Complexity Level**: Light Application (multiple features with basic state)
-This is a focused typing trainer with word management, game logic, and statistics tracking - more than a micro tool but not requiring complex multi-view navigation.
+## 3. コア機能要件
 
-## Essential Features
+### 3.1 UI/UXデザイン (Widget-First Design)
+画面占有率を極限まで下げるため、レスポンシブデザインを徹底し、**「高さ150px程度の極小ウィンドウ」でも全ての機能が破綻なく動作する**UIとする。
 
-**Word Management with Auto-Processing**
-- Functionality: Users input Japanese/English technical terms, system auto-generates furigana and romaji using browser-side processing
-- Purpose: Eliminates tedious manual entry while building a personalized vocabulary for practice
-- Trigger: User clicks "Add Word" button or uses keyboard shortcut
-- Progression: Input text → Auto-generate readings → Preview/edit if needed → Save to local storage
-- Success criteria: Words are saved with accurate romaji conversion and can be immediately used in practice
+*   **Mini Mode**:
+    *   ヘッダーやフッターを排除。
+    *   画面中央に「日本語」「ローマ字」「制限時間ゲージ」のみを表示。
+    *   余計な装飾を削ぎ落としたダークモードベースのミニマルデザイン。
+*   **Visual Feedback**:
+    *   タイプミス時は画面全体が一瞬赤くフラッシュ、またはウィンドウの枠が赤く光る（音が出せない環境への配慮）。
 
-**Time Attack Typing Game**
-- Functionality: Display words one at a time with a depleting time gauge; correct input advances to next word, timeout ends game
-- Purpose: Creates urgency and game-like engagement to make practice sessions addictive
-- Trigger: User clicks "Start" or presses Enter on home screen
-- Progression: Word displays → Timer starts depleting → User types → Correct input refills time and shows next word → Mistakes flash red → Time runs out triggers game over
-- Success criteria: Smooth typing flow with accurate romaji input validation (including variations like shi/si)
+### 3.2 キーワード管理 (Auto-Processing)
+*   **登録フロー**:
+    1.  登録画面（モーダルまたは専用ページ）で単語を入力。
+    2.  **ブラウザ側での形態素解析**: `kuroshiro` (JSライブラリ) を使用し、サーバー通信なしで即座に「ふりがな」「ローマ字」を推論・生成。
+    3.  プレビューが表示され、必要であればその場で修正して保存。
+*   **一括登録**: クリップボードからのペーストや、特定フォーマット（JSON/CSV）のテキスト貼り付けによる一括登録に対応。
 
-**Weakness Tracking & Retry**
-- Functionality: Track accuracy per word and allow instant retry of only the words missed in last session
-- Purpose: Optimize learning by focusing repetition on difficult words
-- Trigger: Game over screen shows "Retry Weak Words" option; statistics page shows weakness list
-- Progression: Game ends → System identifies missed words → User presses Enter → New game with only those words
-- Success criteria: Weak words appear more frequently and users can see measurable improvement over time
+### 3.3 ゲームロジック (Time Attack / Survival)
+*   **ルール**:
+    *   1単語ごとに制限時間ゲージ（プログレスバー）が減少。
+    *   入力完了で時間回復（または次へ遷移）、時間切れでゲームオーバー。
+*   **判定**:
+    *   ローマ字入力の揺らぎ許容（`si` / `shi`, `nn` / `n` など）を実装。
+    *   正確率（Accuracy）とKPM（Keystrokes Per Minute）をリアルタイム計測。
 
-**Real-time Performance Metrics**
-- Functionality: Display WPM, accuracy, and remaining time during gameplay with live updates
-- Purpose: Provide immediate feedback to motivate improvement and track progress
-- Trigger: Automatically displayed during gameplay
-- Progression: User types → Metrics update in real-time → Final stats shown at game over
-- Success criteria: Metrics are accurate and update smoothly without affecting typing responsiveness
+### 3.4 復習・分析 (Review Cycle)
+*   **Instant Retry**: ゲームオーバー直後に、ミスした単語のみを再構成した「復習セット」を1キー（例: `Enter`）で開始できる。
+*   **Weakness Tracking**:
+    *   キーワードごとに「正解率」をデータベースに蓄積。
+    *   正解率ワースト10の単語を重点的に出題する「苦手克服モード」を実装。
 
-## Edge Case Handling
-- **Empty Word List**: Show onboarding prompt to add words before playing
-- **Window Resize**: Layout gracefully adapts from 150px height widget mode to full screen
-- **Rapid Input**: Debounce and queue keystrokes to prevent input loss during fast typing
-- **Ambiguous Romaji**: Accept common variations (shi/si, tsu/tu, fu/hu, n/nn) in input validation
-- **Long Words**: Truncate or wrap text elegantly in mini-widget mode
+### 3.5 データ永続化 (Local-First)
+*   ユーザー登録やログインを不要とする。
+*   全ての学習データ（単語リスト、成績）はブラウザの **IndexedDB** に保存。
+*   これにより、オフラインでも完全に動作し、エンジニアが嫌う「無駄な通信待ち」を排除する。
 
-## Design Direction
-The design should evoke a developer's terminal or code editor - dark, high-contrast, monospaced, with subtle neon accents that pulse and flash during gameplay. It should feel like a tool, not a toy, with every pixel serving a functional purpose in the extremely constrained widget layout.
+---
 
-## Color Selection
-A cyberpunk-inspired dark terminal aesthetic with electric accent colors.
+## 4. 技術スタック選定
 
-- **Primary Color**: Electric Cyan `oklch(0.75 0.15 195)` - Represents active typing state and primary actions, evoking the glow of terminal text
-- **Secondary Colors**: 
-  - Deep Space Gray `oklch(0.20 0.01 240)` - Background that reduces eye strain during long practice sessions
-  - Slate `oklch(0.35 0.02 240)` - Secondary surfaces like cards
-- **Accent Color**: Hot Pink `oklch(0.70 0.20 350)` - Error flashes and urgent notifications that demand attention
-- **Foreground/Background Pairings**: 
-  - Background (Deep Space Gray #2a2c3e): Electric Cyan text (#6be9ff) - Ratio 8.2:1 ✓
-  - Card (Slate #494d64): White text (#ffffff) - Ratio 7.1:1 ✓
-  - Accent (Hot Pink #e94b96): White text (#ffffff) - Ratio 5.2:1 ✓
+開発効率とパフォーマンス、要件（特に日本語処理とローカル保存）を満たすための構成です。
 
-## Font Selection
-Typography must be monospaced for precise character alignment during typing, with a technical aesthetic that feels native to development tools.
+*   **Framework**: React (Vite)
+    *   高速なHMRで開発体験が良い。
+*   **Language**: TypeScript
+*   **State Management**: Zustand
+    *   Reduxより軽量で、ゲームの状態管理（タイマー、入力判定）に適している。
+*   **Styling**: Tailwind CSS
+    *   「極小ウィンドウ」へのレスポンシブ対応（Media Queries）が容易。
+*   **Database (Client-side)**: Dexie.js (IndexedDB wrapper)
+    *   ReactからSQLライクにデータを扱え、大量の学習履歴も高速に処理可能。
+*   **Japanese Processing**:
+    *   `kuroshiro` + `kuroshiro-analyzer-kuromoji`: 漢字→ひらがな変換。
+    *   自作ユーティリティ or 軽量ライブラリ: ひらがな→ローマ字変換。
 
-- **Typographic Hierarchy**: 
-  - Display Word (Current typing target): JetBrains Mono Bold/32px/tight tracking for maximum readability
-  - Romaji Guide (Input helper): JetBrains Mono Regular/20px/loose tracking to show typing progress
-  - Metrics (WPM/Accuracy): JetBrains Mono Medium/14px/tabular numbers for consistent alignment
-  - UI Labels: JetBrains Mono Regular/12px/uppercase for compact button labels
+---
 
-## Animations
-Animations should provide instant tactile feedback without delaying input - every animation reinforces the game state.
+## 5. 画面構成案 (Wireframe)
 
-Use framer-motion for micro-interactions: red flash on incorrect keystrokes (100ms), smooth gauge depletion with spring physics, word transitions that slide up (200ms), and celebration pulses on completion. The time gauge should have a subtle pulse that intensifies as time runs low, creating natural urgency without explicit warnings.
+ウィンドウサイズを自由に変更できるWebアプリの特性を活かしたレイアウトです。
 
-## Component Selection
-- **Components**: 
-  - Dialog (word entry modal with keyboard shortcuts)
-  - Button (primary actions with distinct pressed states)
-  - Progress (time gauge with animated depletion)
-  - Card (word list items and stat displays)
-  - Badge (accuracy indicators and difficulty tags)
-  - Input (word entry field with auto-focus)
-- **Customizations**: 
-  - Custom typing display component with character-by-character state tracking
-  - Custom gauge that depletes smoothly with CSS transitions
-  - Flash overlay component for error feedback
-- **States**: 
-  - Buttons glow on hover with cyan border, scale slightly on press
-  - Input fields have thick cyan bottom border on focus
-  - Gauge changes from cyan to orange to red as time depletes
-- **Icon Selection**: 
-  - Plus (add words)
-  - Play (start game)
-  - ArrowCounterClockwise (retry)
-  - ChartLine (statistics)
-  - Keyboard (typing indicator)
-- **Spacing**: 
-  - Tight spacing throughout (p-2, gap-2) to maximize widget density
-  - Cards use p-4 for comfortable tap targets
-  - Consistent 8px (space-2) gaps between UI elements
-- **Mobile**: 
-  - Stack metrics vertically on narrow screens
-  - Reduce font sizes proportionally below 400px width
-  - Hide secondary UI elements in extreme widget mode (<200px height)
-  - Touch-friendly button sizes (min 44px) even in compact mode
+### A. プレイ画面 (Play Screen) - 通常/極小サイズ共通
+```text
++--------------------------------------------------+
+|  Promise.all                                     |  <- 日本語/英語キーワード
+|  p r o m i s e . a l l                           |  <- 入力ガイド（打った文字は薄くなる）
+| [==========================            ]         |  <- 残り時間ゲージ（CSSアニメーション）
++--------------------------------------------------+
+```
+
+### B. 単語登録モーダル (Quick Add)
+```text
++--------------------------------------------------+
+| Add New Keyword                                  |
+| Input: [ 非同期処理           ] -> Auto Generate |
+| ------------------------------------------------ |
+| Read : [ ひどうきしょり       ]                  |
+| Romaji:[ hidoukishori         ]                  |
+|                                                  |
+| [Save(Enter)]  [Cancel(Esc)]                     |
++--------------------------------------------------+
+```
+
+---
+
+## 6. データモデル設計 (IndexedDB / Dexie.js)
+
+`words` テーブル（ストア）のスキーマ設計です。
+
+| Field Name | Type | Description |
+| :--- | :--- | :--- |
+| `id` | number (Auto Inc) | 主キー |
+| `text` | string | 表示単語 (例: "useEffect") |
+| `reading` | string | ふりがな (例: "ゆーずえふぇくと") |
+| `romaji` | string | タイピング用ローマ字 (例: "yu-zuefekuto") |
+| `stats.correct` | number | 正解回数 |
+| `stats.miss` | number | ミス回数 |
+| `stats.lastPlayed` | Date | 最終プレイ日時 |
+| `stats.accuracy` | number | (computed) 正解率 |
+
+---
+
+## 7. 開発ロードマップ案
+
+1.  **Project Setup**: Vite + React + Tailwind CSS + Dexie.js の環境構築。
+2.  **Core Engine**:
+    *   キー入力イベントのハンドリング。
+    *   ローマ字判定ロジック（`s`, `h`, `i` と打った時に `shi` と `si` 両方を許容するロジックなど）。
+3.  **Data Logic**:
+    *   Dexie.jsを用いたデータのCRUD実装。
+    *   `kuroshiro` を導入し、テキスト入力からローマ字を生成する機能の実装。
+4.  **UI Implementation**:
+    *   ウィンドウ幅を狭めても崩れないレイアウトの実装。
+    *   ゲージアニメーションの実装。
+5.  **Game Loop**:
+    *   タイマー処理、ゲームオーバー判定、リザルト表示の結合。

@@ -59,16 +59,19 @@ export function GameOverScreen({
             <Button onClick={onRetryWeak} className="w-full gap-2">
               <ArrowCounterClockwise weight="bold" />
               Retry Weak Words
+              <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">R</kbd>
             </Button>
           )}
           
           <Button onClick={onRestart} variant="secondary" className="w-full gap-2">
             <Play weight="fill" />
             Play Again (All Words)
+            <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">Enter</kbd>
           </Button>
           
-          <Button onClick={onExit} variant="outline" className="w-full">
+          <Button onClick={onExit} variant="outline" className="w-full gap-2">
             Back to Menu
+            <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">Esc</kbd>
           </Button>
         </div>
       </Card>

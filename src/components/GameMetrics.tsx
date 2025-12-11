@@ -25,6 +25,11 @@ export function GameMetrics({ gameState, wpm, accuracy }: GameMetricsProps) {
           {gameState.currentWordIndex}/{gameState.words.length}
         </span>
       </div>
+
+      <div className="hidden sm:flex items-center gap-1.5 text-muted-foreground/60">
+        <kbd className="px-1.5 py-0.5 text-xs bg-secondary/50 rounded border border-border/30">Esc</kbd>
+        <span className="text-xs">Exit</span>
+      </div>
     </div>
   )
 }
