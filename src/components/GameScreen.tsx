@@ -8,7 +8,7 @@ interface GameScreenProps {
   currentWord: Word
   gameState: GameState
   showError: boolean
-  liveStats: { wpm: number; accuracy: number }
+  liveStats: { kps: number; accuracy: number }
 }
 
 export function GameScreen({ currentWord, gameState, showError, liveStats }: GameScreenProps) {
@@ -34,7 +34,7 @@ export function GameScreen({ currentWord, gameState, showError, liveStats }: Gam
         />
         <GameMetrics
           gameState={gameState}
-          wpm={liveStats.wpm}
+          kps={liveStats.kps}
           accuracy={liveStats.accuracy}
         />
       </div>

@@ -33,8 +33,8 @@ export function GameOverScreen({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="text-center p-4 bg-secondary rounded-lg">
-            <div className="text-3xl sm:text-4xl font-bold text-primary">{stats.wpm}</div>
-            <div className="text-xs sm:text-sm text-muted-foreground uppercase mt-1">WPM</div>
+            <div className="text-3xl sm:text-4xl font-bold text-primary">{stats.kps}</div>
+            <div className="text-xs sm:text-sm text-muted-foreground uppercase mt-1">Keys/Sec</div>
           </div>
           
           <div className="text-center p-4 bg-secondary rounded-lg">
@@ -45,8 +45,12 @@ export function GameOverScreen({
 
         <div className="space-y-2 text-sm text-center">
           <div className="flex justify-between px-4">
-            <span className="text-muted-foreground">Correct Words:</span>
-            <span className="font-bold">{stats.correctWords} / {stats.totalWords}</span>
+            <span className="text-muted-foreground">Total Keystrokes:</span>
+            <span className="font-bold">{stats.totalKeystrokes}</span>
+          </div>
+          <div className="flex justify-between px-4">
+            <span className="text-muted-foreground">Perfect Words:</span>
+            <span className="font-bold">{stats.perfectWords} / {stats.correctWords}</span>
           </div>
           <div className="flex justify-between px-4">
             <span className="text-muted-foreground">Total Time:</span>

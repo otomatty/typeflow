@@ -26,9 +26,11 @@ export function useGame({ words, updateWordStats }: UseGameProps) {
   })
   const [showError, setShowError] = useState(false)
   const [gameStats, setGameStats] = useState<GameStats>({
-    wpm: 0,
+    kps: 0,
+    totalKeystrokes: 0,
     accuracy: 100,
     correctWords: 0,
+    perfectWords: 0,
     totalWords: 0,
     totalTime: 0,
   })
@@ -38,15 +40,26 @@ export function useGame({ words, updateWordStats }: UseGameProps) {
     const startTime = gameState.startTime || endTime
     const totalSeconds = (endTime - startTime) / 1000
     const wordsCompleted = completed ? gameState.words.length : gameState.correctCount
-    const wpm = Math.round((wordsCompleted / totalSeconds) * 60)
-    const accuracy = gameState.totalKeystrokes > 0
-      ? Math.round(((gameState.totalKeystrokes - gameState.mistakeWords.length) / gameState.totalKeystrokes) * 100)
+    
+    // KPS = 総打鍵数 / 総時間（秒）
+    const kps = totalSeconds > 0 
+      ? Math.round((gameState.totalKeystrokes / totalSeconds) * 10) / 10 
+      : 0
+    
+    // ノーミスで完了したワード数 = 完了ワード数 - ミスがあったワード数
+    const perfectWords = wordsCompleted - gameState.mistakeWords.length
+    
+    // 正確率 = ノーミスワード数 / 完了ワード数 * 100
+    const accuracy = wordsCompleted > 0
+      ? Math.round((perfectWords / wordsCompleted) * 100)
       : 100
 
     setGameStats({
-      wpm,
+      kps,
+      totalKeystrokes: gameState.totalKeystrokes,
       accuracy,
       correctWords: wordsCompleted,
+      perfectWords: Math.max(0, perfectWords),
       totalWords: gameState.words.length,
       totalTime: totalSeconds,
     })
@@ -193,15 +206,22 @@ export function useGame({ words, updateWordStats }: UseGameProps) {
   }, [view, gameState, updateWordStats, words, startGame, retryWeakWords, exitToMenu, endGame])
 
   const calculateLiveStats = useCallback(() => {
-    if (!gameState.startTime) return { wpm: 0, accuracy: 100 }
+    if (!gameState.startTime) return { kps: 0, accuracy: 100 }
     
     const elapsed = (Date.now() - gameState.startTime) / 1000
-    const wpm = elapsed > 0 ? Math.round((gameState.correctCount / elapsed) * 60) : 0
-    const accuracy = gameState.totalKeystrokes > 0
-      ? Math.round(((gameState.totalKeystrokes - gameState.mistakeWords.length) / gameState.totalKeystrokes) * 100)
+    
+    // KPS = 総打鍵数 / 経過時間（秒）
+    const kps = elapsed > 0 
+      ? Math.round((gameState.totalKeystrokes / elapsed) * 10) / 10 
+      : 0
+    
+    // 正確率 = ノーミスワード数 / 完了ワード数 * 100
+    const perfectWords = gameState.correctCount - gameState.mistakeWords.length
+    const accuracy = gameState.correctCount > 0
+      ? Math.round((perfectWords / gameState.correctCount) * 100)
       : 100
 
-    return { wpm, accuracy }
+    return { kps, accuracy }
   }, [gameState.startTime, gameState.correctCount, gameState.totalKeystrokes, gameState.mistakeWords.length])
 
   // Timer effect
