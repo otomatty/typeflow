@@ -1,82 +1,121 @@
+import { useState } from 'react'
 import { Card } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Keyboard, ChartLine } from '@phosphor-icons/react'
+import { Button } from '@/components/ui/button'
 import { AddWordDialog } from '@/components/AddWordDialog'
+import { PresetDialog } from '@/components/PresetDialog'
+import { CSVImportDialog } from '@/components/CSVImportDialog'
 import { WordList } from '@/components/WordList'
-import { Word } from '@/lib/types'
+import { ScreenHeader } from '@/components/ScreenHeader'
+import { Container } from '@/components/Container'
+import { Word, PresetWord } from '@/lib/types'
+import { Trash } from '@phosphor-icons/react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 interface WordManagementScreenProps {
   words: Word[]
   onAddWord: (wordData: Omit<Word, 'id' | 'stats'>) => void
+  onEditWord: (id: string, word: { text: string; reading: string; romaji: string }) => void
   onDeleteWord: (id: string) => void
+  onLoadPreset: (words: PresetWord[], options: { clearExisting?: boolean; presetName?: string }) => Promise<unknown>
+  onClearAllWords: () => Promise<void>
 }
 
-export function WordManagementScreen({ words, onAddWord, onDeleteWord }: WordManagementScreenProps) {
+export function WordManagementScreen({ 
+  words, 
+  onAddWord,
+  onEditWord,
+  onDeleteWord,
+  onLoadPreset,
+  onClearAllWords,
+}: WordManagementScreenProps) {
+  const [isClearing, setIsClearing] = useState(false)
+
+  const handleLoadPreset = async (
+    presetWords: PresetWord[], 
+    options: { clearExisting: boolean; presetName: string }
+  ) => {
+    await onLoadPreset(presetWords, options)
+  }
+
+  const handleClearAll = async () => {
+    setIsClearing(true)
+    try {
+      await onClearAllWords()
+    } finally {
+      setIsClearing(false)
+    }
+  }
+
   return (
-    <div className="min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Word Management
-            </h1>
-            <p className="text-muted-foreground text-sm mt-1">
-              Add and manage your typing practice words
-            </p>
-          </div>
-          <AddWordDialog onAddWord={onAddWord} />
-        </div>
-
-        <Tabs defaultValue="words" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="words" className="gap-2">
-              <Keyboard className="w-4 h-4" />
-              <span>All Words</span>
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="gap-2">
-              <ChartLine className="w-4 h-4" />
-              <span>Statistics</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="words" className="space-y-4">
-            {words.length === 0 ? (
-              <Card className="p-8 text-center space-y-4">
-                <p className="text-muted-foreground">
-                  No words yet. Add your first word to start practicing!
-                </p>
-                <AddWordDialog onAddWord={onAddWord} />
-              </Card>
-            ) : (
-              <>
-                <div className="text-sm text-muted-foreground mb-2">
-                  {words.length} word{words.length !== 1 ? 's' : ''} registered
-                </div>
-                <WordList words={words} onDeleteWord={onDeleteWord} />
-              </>
-            )}
-          </TabsContent>
-
-          <TabsContent value="stats">
-            <Card className="p-6">
-              <h3 className="font-bold text-lg mb-4">Weakest Words</h3>
-              {words.filter((w) => w.stats.correct + w.stats.miss > 0).length === 0 ? (
-                <p className="text-muted-foreground text-sm">
-                  No practice data yet. Start playing to see your statistics!
-                </p>
-              ) : (
-                <WordList
-                  words={words
-                    .filter((w) => w.stats.correct + w.stats.miss > 0)
-                    .sort((a, b) => a.stats.accuracy - b.stats.accuracy)
-                    .slice(0, 10)}
-                  onDeleteWord={onDeleteWord}
-                />
+    <Container maxWidth="4xl">
+      <div className="mb-6">
+        <ScreenHeader
+          title="Word Management"
+          description="Add and manage your typing practice words"
+          action={
+            <div className="flex gap-2">
+              {words.length > 0 && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                      <Trash className="w-4 h-4 mr-1" />
+                      全削除
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>すべての単語を削除しますか？</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        この操作は取り消せません。登録されている {words.length} 件の単語がすべて削除されます。
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleClearAll}
+                        disabled={isClearing}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {isClearing ? '削除中...' : '削除する'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
-            </Card>
-          </TabsContent>
-        </Tabs>
+              <PresetDialog onLoadPreset={handleLoadPreset} />
+              <CSVImportDialog onImport={handleLoadPreset} />
+              <AddWordDialog onAddWord={onAddWord} />
+            </div>
+          }
+        />
       </div>
-    </div>
+
+      {words.length === 0 ? (
+        <Card className="p-8 text-center space-y-4">
+          <p className="text-muted-foreground">
+            単語がありません。最初の単語を追加するか、プリセットを読み込んでください！
+          </p>
+          <div className="flex justify-center gap-2 flex-wrap">
+            <PresetDialog onLoadPreset={handleLoadPreset} />
+            <CSVImportDialog onImport={handleLoadPreset} />
+            <AddWordDialog onAddWord={onAddWord} />
+          </div>
+        </Card>
+      ) : (
+        <>
+          <WordList words={words} onDeleteWord={onDeleteWord} onEditWord={onEditWord} />
+        </>
+      )}
+    </Container>
   )
 }

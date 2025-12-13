@@ -4,8 +4,10 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "dev": "vite",
-        "kill": "fuser -k 5000/tcp",
+        "dev": "bun run dev:server & bun run dev:client",
+        "dev:client": "vite",
+        "dev:server": "bun run --watch server/index.ts",
+        "kill": "fuser -k 5000/tcp 3456/tcp",
         "build": "tsc -b --noCheck && vite build",
         "lint": "eslint .",
         "optimize": "vite optimize",

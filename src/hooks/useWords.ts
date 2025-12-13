@@ -1,8 +1,8 @@
-import { useCallback } from 'react'
-import { useLiveQuery } from 'dexie-react-hooks'
-import { db, WordRecord } from '@/lib/db'
-import { Word } from '@/lib/types'
+import { useCallback, useEffect, useState } from 'react'
+import { getAllWords, addWord as addWordApi, deleteWord as deleteWordApi, updateWord, bulkInsertWords, deleteAllWords, WordRecord } from '@/lib/db'
+import { Word, PresetWord } from '@/lib/types'
 import { toast } from 'sonner'
+import { updateMasteryLevel, calculateNextReviewAt } from '@/lib/srs-utils'
 
 // Convert database record to Word type
 function toWord(record: WordRecord): Word {
@@ -16,75 +16,172 @@ function toWord(record: WordRecord): Word {
       miss: record.miss,
       lastPlayed: record.lastPlayed,
       accuracy: record.accuracy,
+      createdAt: record.createdAt || Date.now(),
+      masteryLevel: record.masteryLevel ?? 0,
+      nextReviewAt: record.nextReviewAt ?? 0,
+      consecutiveCorrect: record.consecutiveCorrect ?? 0,
     },
   }
 }
 
 export function useWords() {
-  // Live query - automatically updates when database changes
-  const wordRecords = useLiveQuery(
-    () => db.words.toArray(),
-    [],
-    [] // Default value while loading
-  )
+  const [words, setWords] = useState<Word[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const words: Word[] = (wordRecords || []).map(toWord)
+  // データを取得
+  const fetchWords = useCallback(async () => {
+    try {
+      const records = await getAllWords()
+      setWords(records.map(toWord))
+    } catch (error) {
+      console.error('Failed to fetch words:', error)
+      toast.error('Failed to load words. Is the server running?')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  // 初回ロード
+  useEffect(() => {
+    fetchWords()
+  }, [fetchWords])
 
   const addWord = useCallback(async (wordData: Omit<Word, 'id' | 'stats'>) => {
     try {
-      await db.words.add({
+      await addWordApi({
         text: wordData.text,
         reading: wordData.reading,
         romaji: wordData.romaji,
         correct: 0,
         miss: 0,
-        lastPlayed: Date.now(),
+        lastPlayed: 0,
         accuracy: 100,
         createdAt: Date.now(),
-      } as WordRecord)
+        masteryLevel: 0,
+        nextReviewAt: 0,
+        consecutiveCorrect: 0,
+      })
       toast.success('Word added successfully!')
+      // データを再取得
+      await fetchWords()
     } catch (error) {
       console.error('Failed to add word:', error)
       toast.error('Failed to add word')
     }
-  }, [])
+  }, [fetchWords])
 
   const deleteWord = useCallback(async (id: string) => {
     try {
-      await db.words.delete(Number(id))
+      await deleteWordApi(Number(id))
       toast.success('Word deleted')
+      // データを再取得
+      await fetchWords()
     } catch (error) {
       console.error('Failed to delete word:', error)
       toast.error('Failed to delete word')
     }
-  }, [])
+  }, [fetchWords])
+
+  const editWord = useCallback(async (id: string, wordData: { text: string; reading: string; romaji: string }) => {
+    try {
+      await updateWord(Number(id), {
+        text: wordData.text,
+        reading: wordData.reading,
+        romaji: wordData.romaji,
+      })
+      toast.success('Word updated successfully!')
+      // データを再取得
+      await fetchWords()
+    } catch (error) {
+      console.error('Failed to edit word:', error)
+      toast.error('Failed to edit word')
+    }
+  }, [fetchWords])
 
   const updateWordStats = useCallback(async (wordId: string, correct: boolean) => {
     try {
       const id = Number(wordId)
-      const word = await db.words.get(id)
+      const word = words.find(w => w.id === wordId)
       if (!word) return
 
-      const newCorrect = correct ? word.correct + 1 : word.correct
-      const newMiss = correct ? word.miss : word.miss + 1
+      const newCorrect = correct ? word.stats.correct + 1 : word.stats.correct
+      const newMiss = correct ? word.stats.miss : word.stats.miss + 1
       const total = newCorrect + newMiss
       const accuracy = total > 0 ? (newCorrect / total) * 100 : 100
 
-      await db.words.update(id, {
+      // SRS（間隔反復）の更新
+      const { newLevel, newConsecutiveCorrect } = updateMasteryLevel(
+        word.stats.masteryLevel,
+        correct,
+        word.stats.consecutiveCorrect
+      )
+      const now = Date.now()
+      const nextReviewAt = calculateNextReviewAt(newLevel, now)
+
+      await updateWord(id, {
         correct: newCorrect,
         miss: newMiss,
-        lastPlayed: Date.now(),
+        lastPlayed: now,
         accuracy,
+        masteryLevel: newLevel,
+        nextReviewAt,
+        consecutiveCorrect: newConsecutiveCorrect,
       })
+      // データを再取得
+      await fetchWords()
     } catch (error) {
       console.error('Failed to update word stats:', error)
     }
-  }, [])
+  }, [words, fetchWords])
+
+  // プリセットを読み込む
+  const loadPreset = useCallback(async (
+    presetWords: PresetWord[],
+    options: { clearExisting?: boolean; presetName?: string } = {}
+  ) => {
+    const { clearExisting = false, presetName = 'プリセット' } = options
+    
+    try {
+      const result = await bulkInsertWords(presetWords, clearExisting)
+      
+      if (result.success) {
+        toast.success(
+          `${presetName}を読み込みました（${result.insertedCount}件）`
+        )
+        await fetchWords()
+      } else {
+        toast.error('プリセットの読み込みに失敗しました')
+      }
+      
+      return result
+    } catch (error) {
+      console.error('Failed to load preset:', error)
+      toast.error('プリセットの読み込みに失敗しました')
+      throw error
+    }
+  }, [fetchWords])
+
+  // 全単語を削除
+  const clearAllWords = useCallback(async () => {
+    try {
+      await deleteAllWords()
+      toast.success('すべての単語を削除しました')
+      await fetchWords()
+    } catch (error) {
+      console.error('Failed to clear words:', error)
+      toast.error('単語の削除に失敗しました')
+    }
+  }, [fetchWords])
 
   return {
     words,
+    isLoading,
     addWord,
+    editWord,
     deleteWord,
     updateWordStats,
+    loadPreset,
+    clearAllWords,
+    refetch: fetchWords,
   }
 }

@@ -65,13 +65,46 @@ const ROMAJI_VARIANTS: Record<string, string[]> = {
 // Sort by length (longest first) for proper matching
 const SORTED_CANONICAL_FORMS = Object.keys(ROMAJI_VARIANTS).sort((a, b) => b.length - a.length)
 
+// Characters that require xn before them (vowels, y, n')
+// When 'n' is followed by these characters, it needs to be distinguished from 'na', 'ni', etc.
+const VOWELS_AND_SPECIAL = new Set(['a', 'i', 'u', 'e', 'o', 'y', 'n', "'"])
+
 /**
  * Generate all valid input variations for a target romaji string.
  * For example: "shiken" -> ["shiken", "siken"]
+ * 
+ * Special handling for 'n' (ん):
+ * - If followed by consonant or at end: 'n' alone is acceptable
+ * - If followed by vowel, y, n, or ': use 'xn' (nn is inefficient so excluded)
  */
 function generateAllVariations(target: string): string[] {
   if (target.length === 0) {
     return ['']
+  }
+
+  // Special handling for 'xn' (explicit ん)
+  if (target.startsWith('xn')) {
+    const rest = target.substring(2)
+    const restVariations = generateAllVariations(rest)
+    const result: string[] = []
+    
+    // xn can be typed as: xn, nn (but nn is inefficient, so we only use xn and n when applicable)
+    const nextChar = rest[0]
+    
+    if (!nextChar || !VOWELS_AND_SPECIAL.has(nextChar.toLowerCase())) {
+      // Followed by consonant or end of string - both 'n' and 'xn' work
+      for (const restVar of restVariations) {
+        result.push('n' + restVar)
+        result.push('xn' + restVar)
+      }
+    } else {
+      // Followed by vowel/y/n/' - must use 'xn' (not nn since it's inefficient)
+      for (const restVar of restVariations) {
+        result.push('xn' + restVar)
+      }
+    }
+    
+    return result
   }
 
   // Try to match canonical forms at the current position
@@ -85,6 +118,28 @@ function generateAllVariations(target: string): string[] {
         for (const restVar of restVariations) {
           result.push(variant + restVar)
         }
+      }
+      
+      return result
+    }
+  }
+
+  // Special handling for 'n' that might represent ん
+  // This handles cases where the romaji data uses 'n' before consonants (e.g., 'anshoubangou')
+  if (target[0] === 'n' && target.length >= 2) {
+    const nextChar = target[1]
+    
+    // Check if this 'n' could be ん (followed by consonant, not vowel/y/n/')
+    // Note: 'na', 'ni', 'nu', 'ne', 'no' are regular n+vowel, not ん
+    if (!VOWELS_AND_SPECIAL.has(nextChar.toLowerCase())) {
+      // This 'n' before consonant could be ん - allow both 'n' and 'xn'
+      const rest = target.substring(1)
+      const restVariations = generateAllVariations(rest)
+      const result: string[] = []
+      
+      for (const restVar of restVariations) {
+        result.push('n' + restVar)  // n alone is acceptable before consonant
+        result.push('xn' + restVar) // xn is also acceptable
       }
       
       return result

@@ -1,18 +1,26 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Word, GameState, GameStats } from '@/lib/types'
-import { validateRomajiInput } from '@/lib/romaji-utils'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Word, GameState, GameStats, KeystrokeRecord, AppSettings, DifficultyParams } from '@/lib/types'
+import { validateRomajiInput, getMatchingVariation, normalizeRomaji } from '@/lib/romaji-utils'
+import { calculateWordTimeLimit } from '@/lib/adaptive-time-utils'
+import { calculateMissPenalty } from '@/lib/difficulty-presets'
+import { GameScoreRecord } from '@/lib/db'
 import { toast } from 'sonner'
 
-export type ViewType = 'menu' | 'words' | 'game' | 'gameover'
+export type ViewType = 'menu' | 'words' | 'stats' | 'settings' | 'game' | 'gameover'
 
 interface UseGameProps {
   words: Word[]
   updateWordStats: (wordId: string, correct: boolean) => void
+  onSessionEnd?: (keystrokes: KeystrokeRecord[]) => void
+  getGameWords?: () => Word[]  // Returns words with settings applied (e.g., word count limit)
+  // 動的制限時間用
+  gameScores?: GameScoreRecord[]
+  settings?: AppSettings
 }
 
-export function useGame({ words, updateWordStats }: UseGameProps) {
+export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, gameScores = [], settings }: UseGameProps) {
   const [view, setView] = useState<ViewType>('menu')
-  const [gameState, setGameState] = useState<GameState>({
+  const [gameState, setGameState] = useState<GameState & { currentWordMissCount: number }>({
     isPlaying: false,
     currentWordIndex: 0,
     currentInput: '',
@@ -23,6 +31,7 @@ export function useGame({ words, updateWordStats }: UseGameProps) {
     correctCount: 0,
     totalKeystrokes: 0,
     startTime: null,
+    currentWordMissCount: 0,  // 現在の単語でのミス数（ペナルティ計算用）
   })
   const [showError, setShowError] = useState(false)
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -34,6 +43,11 @@ export function useGame({ words, updateWordStats }: UseGameProps) {
     totalWords: 0,
     totalTime: 0,
   })
+
+  // キーストローク記録用
+  const keystrokesRef = useRef<KeystrokeRecord[]>([])
+  const lastKeystrokeTimeRef = useRef<number>(0)
+  const previousKeyRef = useRef<string | null>(null)
 
   const endGame = useCallback((completed: boolean = false) => {
     const endTime = Date.now()
@@ -64,9 +78,14 @@ export function useGame({ words, updateWordStats }: UseGameProps) {
       totalTime: totalSeconds,
     })
 
+    // セッション終了時にキーストローク記録を渡す
+    if (onSessionEnd && keystrokesRef.current.length > 0) {
+      onSessionEnd(keystrokesRef.current)
+    }
+
     setGameState((prev) => ({ ...prev, isPlaying: false }))
     setView('gameover')
-  }, [gameState])
+  }, [gameState, onSessionEnd])
 
   const startGame = useCallback((wordsToPlay?: Word[]) => {
     if (words.length === 0) {
@@ -74,22 +93,35 @@ export function useGame({ words, updateWordStats }: UseGameProps) {
       return
     }
 
-    const gameWords = wordsToPlay || [...words].sort(() => Math.random() - 0.5)
+    // Use provided words, or get words from callback (with settings applied), or fallback to shuffled words
+    const gameWords = wordsToPlay || (getGameWords ? getGameWords() : [...words].sort(() => Math.random() - 0.5))
+    
+    // キーストローク記録をリセット
+    keystrokesRef.current = []
+    lastKeystrokeTimeRef.current = Date.now()
+    previousKeyRef.current = null
+    
+    // 最初の単語の制限時間を計算
+    const firstWord = gameWords[0]
+    const initialTimeLimit = settings && firstWord
+      ? calculateWordTimeLimit(firstWord, gameScores, settings)
+      : 10
     
     setGameState({
       isPlaying: true,
       currentWordIndex: 0,
       currentInput: '',
-      timeRemaining: 10,
-      totalTime: 10,
+      timeRemaining: initialTimeLimit,
+      totalTime: initialTimeLimit,
       words: gameWords,
       mistakeWords: [],
       correctCount: 0,
       totalKeystrokes: 0,
       startTime: Date.now(),
+      currentWordMissCount: 0,
     })
     setView('game')
-  }, [words])
+  }, [words, getGameWords, gameScores, settings])
 
   const retryWeakWords = useCallback(() => {
     const weakWords = words.filter((w) => gameState.mistakeWords.includes(w.id))
@@ -115,7 +147,7 @@ export function useGame({ words, updateWordStats }: UseGameProps) {
       if (e.key === ' ') {
         e.preventDefault()
         if (words.length > 0) {
-          startGame()
+          startGame()  // Uses getGameWords callback if provided to apply settings
         }
       }
       return
@@ -125,7 +157,7 @@ export function useGame({ words, updateWordStats }: UseGameProps) {
     if (view === 'gameover') {
       if (e.key === 'Enter') {
         e.preventDefault()
-        startGame()
+        startGame()  // Uses getGameWords callback if provided to apply settings
       } else if (e.key === 'r' || e.key === 'R') {
         e.preventDefault()
         retryWeakWords()
@@ -152,16 +184,35 @@ export function useGame({ words, updateWordStats }: UseGameProps) {
       return
     }
 
-    if (e.key.length === 1 && /[a-zA-Z0-9.\-_]/.test(e.key)) {
+    if (e.key.length === 1 && /[a-zA-Z0-9.\-_?!,;:'"]/.test(e.key)) {
       e.preventDefault()
       
       const currentWord = gameState.words[gameState.currentWordIndex]
-      const newInput = gameState.currentInput + e.key
+      const newInput = gameState.currentInput + e.key.toLowerCase()
+      const now = Date.now()
 
       // Validate current input (before adding new character)
       const prevValidation = validateRomajiInput(currentWord.romaji, gameState.currentInput)
       // Validate new input (after adding new character)
       const newValidation = validateRomajiInput(currentWord.romaji, newInput)
+
+      // 期待されるキーを計算
+      const matchingVariation = getMatchingVariation(currentWord.romaji, gameState.currentInput)
+      const normalizedTarget = matchingVariation || normalizeRomaji(currentWord.romaji)
+      const expectedKey = normalizedTarget[gameState.currentInput.length] || ''
+
+      // キーストロークを記録
+      const latency = now - lastKeystrokeTimeRef.current
+      const keystrokeRecord: KeystrokeRecord = {
+        key: expectedKey,
+        actualKey: e.key.toLowerCase(),
+        isCorrect: newValidation.progress > prevValidation.progress || newValidation.isCorrect,
+        timestamp: now,
+        latency,
+        previousKey: previousKeyRef.current,
+      }
+      keystrokesRef.current.push(keystrokeRecord)
+      lastKeystrokeTimeRef.current = now
 
       // If progress didn't increase, the new character is invalid - reject it
       if (newValidation.progress <= prevValidation.progress && !newValidation.isCorrect) {
@@ -169,18 +220,38 @@ export function useGame({ words, updateWordStats }: UseGameProps) {
         setTimeout(() => setShowError(false), 200)
         updateWordStats(currentWord.id, false)
         
+        // ミスペナルティを計算して適用
+        const newMissCount = gameState.currentWordMissCount + 1
+        let timePenalty = 0
+        
+        if (settings) {
+          const difficultyParams: DifficultyParams = {
+            comfortZoneRatio: settings.comfortZoneRatio,
+            missPenaltyEnabled: settings.missPenaltyEnabled,
+            basePenaltyPercent: settings.basePenaltyPercent,
+            penaltyEscalationFactor: settings.penaltyEscalationFactor,
+            maxPenaltyPercent: settings.maxPenaltyPercent,
+            minTimeAfterPenalty: settings.minTimeAfterPenalty,
+          }
+          timePenalty = calculateMissPenalty(newMissCount, gameState.timeRemaining, difficultyParams)
+        }
+        
         setGameState((prev) => ({
           ...prev,
           mistakeWords: prev.mistakeWords.includes(currentWord.id) 
             ? prev.mistakeWords 
             : [...prev.mistakeWords, currentWord.id],
           totalKeystrokes: prev.totalKeystrokes + 1,
+          currentWordMissCount: newMissCount,
+          timeRemaining: Math.max(0, prev.timeRemaining - timePenalty),
         }))
         // Don't accept the input - just return without updating currentInput
         return
       }
 
       // Input is valid - accept it
+      previousKeyRef.current = e.key.toLowerCase()
+      
       setGameState((prev) => ({
         ...prev,
         currentInput: newInput,
@@ -190,20 +261,33 @@ export function useGame({ words, updateWordStats }: UseGameProps) {
       if (newValidation.isCorrect) {
         updateWordStats(currentWord.id, true)
         
+        // 単語が完了したら previousKey をリセット（次の単語は新しい遷移）
+        previousKeyRef.current = null
+        lastKeystrokeTimeRef.current = Date.now()
+        
         if (gameState.currentWordIndex + 1 >= gameState.words.length) {
           endGame(true)
         } else {
+          const nextWord = gameState.words[gameState.currentWordIndex + 1]
+          
+          // 次の単語の制限時間を計算（問題ごとにリセット）
+          const nextTimeLimit = settings && nextWord
+            ? calculateWordTimeLimit(nextWord, gameScores, settings)
+            : 10
+          
           setGameState((prev) => ({
             ...prev,
             currentWordIndex: prev.currentWordIndex + 1,
             currentInput: '',
-            timeRemaining: Math.min(prev.timeRemaining + 3, prev.totalTime),
+            timeRemaining: nextTimeLimit,
+            totalTime: nextTimeLimit,
             correctCount: prev.correctCount + 1,
+            currentWordMissCount: 0,  // 次の単語ではミスカウントをリセット
           }))
         }
       }
     }
-  }, [view, gameState, updateWordStats, words, startGame, retryWeakWords, exitToMenu, endGame])
+  }, [view, gameState, updateWordStats, words, startGame, retryWeakWords, exitToMenu, endGame, gameScores, settings])
 
   const calculateLiveStats = useCallback(() => {
     if (!gameState.startTime) return { kps: 0, accuracy: 100 }

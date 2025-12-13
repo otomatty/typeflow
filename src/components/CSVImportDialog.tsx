@@ -1,0 +1,200 @@
+import { useState, useRef } from 'react'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Card } from '@/components/ui/card'
+import { parseCSV, readCSVFile } from '@/lib/csv-utils'
+import type { PresetWord } from '@/lib/types'
+import { FileUp, Upload, Loader2, AlertCircle } from 'lucide-react'
+import { toast } from 'sonner'
+
+interface CSVImportDialogProps {
+  onImport: (words: PresetWord[], options: { clearExisting: boolean; presetName: string }) => Promise<void>
+}
+
+export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
+  const [open, setOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [clearExisting, setClearExisting] = useState(false)
+  const [previewWords, setPreviewWords] = useState<PresetWord[]>([])
+  const [fileName, setFileName] = useState<string>('')
+  const [error, setError] = useState<string>('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setError('')
+    setFileName(file.name)
+
+    try {
+      const csvText = await readCSVFile(file)
+      const words = parseCSV(csvText)
+      
+      if (words.length === 0) {
+        setError('CSVファイルから単語を読み取れませんでした。形式を確認してください。')
+        setPreviewWords([])
+        return
+      }
+      
+      setPreviewWords(words)
+    } catch (err) {
+      setError('ファイルの読み込みに失敗しました')
+      setPreviewWords([])
+      console.error(err)
+    }
+  }
+
+  const handleImport = async () => {
+    if (previewWords.length === 0) {
+      toast.error('インポートする単語がありません')
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      await onImport(previewWords, {
+        clearExisting,
+        presetName: fileName.replace(/\.csv$/i, '') || 'CSVインポート',
+      })
+      setOpen(false)
+      resetState()
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const resetState = () => {
+    setPreviewWords([])
+    setFileName('')
+    setError('')
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen)
+    if (!newOpen) {
+      resetState()
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="gap-2">
+          <FileUp className="h-4 w-4" />
+          CSVインポート
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>CSVファイルをインポート</DialogTitle>
+          <DialogDescription>
+            CSVファイルから単語リストを読み込みます。形式: ワード,読み,ローマ字
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          {/* ファイル選択 */}
+          <div className="space-y-2">
+            <Label>CSVファイルを選択</Label>
+            <div className="flex gap-2">
+              <Input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                onChange={handleFileSelect}
+                className="flex-1"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              1行目がヘッダー（ワード,読み,入力例）の場合は自動的にスキップされます
+            </p>
+          </div>
+
+          {/* エラー表示 */}
+          {error && (
+            <Card className="p-3 border-destructive bg-destructive/10">
+              <div className="flex items-center gap-2 text-destructive">
+                <AlertCircle className="h-4 w-4" />
+                <span className="text-sm">{error}</span>
+              </div>
+            </Card>
+          )}
+
+          {/* プレビュー */}
+          {previewWords.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>プレビュー</Label>
+                <span className="text-sm text-muted-foreground">
+                  {previewWords.length}語を検出
+                </span>
+              </div>
+              <Card className="p-3 max-h-48 overflow-y-auto">
+                <div className="space-y-1">
+                  {previewWords.slice(0, 10).map((word, i) => (
+                    <div key={i} className="text-sm grid grid-cols-3 gap-2">
+                      <span className="truncate">{word.text}</span>
+                      <span className="truncate text-muted-foreground">{word.reading}</span>
+                      <span className="truncate text-muted-foreground font-mono text-xs">{word.romaji}</span>
+                    </div>
+                  ))}
+                  {previewWords.length > 10 && (
+                    <p className="text-xs text-muted-foreground pt-2">
+                      ...他 {previewWords.length - 10} 語
+                    </p>
+                  )}
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* オプション */}
+          <div className="flex items-center space-x-2 py-2 border-t">
+            <Switch
+              id="clear-existing-csv"
+              checked={clearExisting}
+              onCheckedChange={setClearExisting}
+            />
+            <Label htmlFor="clear-existing-csv" className="text-sm text-muted-foreground">
+              既存の単語を削除してから読み込む
+            </Label>
+          </div>
+
+          {/* インポートボタン */}
+          <Button
+            onClick={handleImport}
+            disabled={previewWords.length === 0 || isLoading}
+            className="w-full gap-2"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Upload className="h-4 w-4" />
+            )}
+            {previewWords.length > 0
+              ? `${previewWords.length}語をインポート`
+              : 'ファイルを選択してください'}
+          </Button>
+        </div>
+
+        <div className="border-t pt-4">
+          <p className="text-xs text-muted-foreground">
+            💡 CSV形式の例:
+            <br />
+            <code className="text-xs bg-muted px-1 rounded">ワード,読み,入力例</code>
+            <br />
+            <code className="text-xs bg-muted px-1 rounded">ありがとう,ありがとう,arigatou</code>
+          </p>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
