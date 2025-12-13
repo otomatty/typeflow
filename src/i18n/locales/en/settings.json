@@ -1,0 +1,90 @@
+{
+  "title": "Settings",
+  "description": "Customize your game settings",
+  "word_count": {
+    "title": "Word Count",
+    "description": "Select the number of words per game",
+    "use_all": "Use all words",
+    "use_all_description": "Use all registered words",
+    "select": "Select word count",
+    "questions": "words",
+    "note": "Note: If registered words are less than selected, all registered words will be used"
+  },
+  "difficulty": {
+    "title": "Difficulty",
+    "description": "Select game difficulty. Time limit and miss penalty will be adjusted",
+    "easy": "Easy",
+    "easy_desc": "For beginners. Generous time limit and mild penalties",
+    "normal": "Normal",
+    "normal_desc": "Balanced standard settings. Recommended for most users",
+    "hard": "Hard",
+    "hard_desc": "For advanced users. Tight time limit and strict penalties",
+    "expert": "Expert",
+    "expert_desc": "For experts. Push your limits",
+    "custom": "Custom",
+    "custom_desc": "Fine-tune to your preference"
+  },
+  "penalty": {
+    "title": "Miss Penalty (Progressive Reduction)",
+    "time_nth": "{{n}}th: {{percent}}%"
+  },
+  "practice_mode": {
+    "title": "Practice Mode",
+    "description": "Select the word selection algorithm",
+    "balanced": "Balanced",
+    "balanced_desc": "Balanced mix of weaknesses, review, and new words",
+    "weakness": "Weakness Focus",
+    "weakness_desc": "Focus on words you struggle with",
+    "review": "Review Priority",
+    "review_desc": "Prioritize words you're forgetting",
+    "random": "Random",
+    "random_desc": "Completely random selection"
+  },
+  "time_limit": {
+    "title": "Time Limit",
+    "description": "Set the game time limit",
+    "adaptive": "Adaptive",
+    "adaptive_desc": "Automatically adjusts to your skill level",
+    "fixed": "Fixed",
+    "fixed_desc": "Practice with a constant time limit",
+    "your_avg_kps": "Your Average Typing Speed",
+    "games_played": "{{count}} games",
+    "keys_per_sec": "keys/sec",
+    "confidence": "Confidence",
+    "comfort_note": "Note: Time limit comfort can be adjusted in difficulty settings",
+    "seconds": "sec"
+  },
+  "advanced": {
+    "title": "Advanced Settings",
+    "description": "Fine-tune the word selection algorithm",
+    "srs": "Spaced Repetition System (SRS)",
+    "srs_desc": "Present review words at optimal timing based on the forgetting curve",
+    "warmup": "Warmup Phase",
+    "warmup_desc": "Start with easier words and gradually increase difficulty"
+  },
+  "theme": {
+    "title": "Theme",
+    "description": "Choose the app appearance",
+    "light": "Light",
+    "light_desc": "Bright theme",
+    "dark": "Dark",
+    "dark_desc": "Dark theme",
+    "system": "System",
+    "system_desc": "Follow system settings",
+    "note": "Note: Theme changes will be reflected in future updates"
+  },
+  "custom": {
+    "title": "Detailed Settings",
+    "time_comfort": "Time Limit Comfort",
+    "miss_penalty": "Miss Penalty",
+    "base_penalty": "Base Penalty",
+    "escalation_factor": "Escalation Factor",
+    "max_penalty": "Max Penalty",
+    "min_time": "Minimum Remaining Time"
+  },
+  "language": {
+    "title": "Language",
+    "description": "Select the app display language"
+  }
+}
+

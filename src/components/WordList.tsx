@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -34,6 +35,8 @@ interface WordListProps {
 const WORDS_PER_PAGE = 50
 
 export function WordList({ words, onDeleteWord, onEditWord, showSortAndPagination = true }: WordListProps) {
+  const { t } = useTranslation('words')
+  
   const [sortOrder, setSortOrder] = useState<SortOrder>('accuracy')
   const [currentPage, setCurrentPage] = useState(1)
   const [editingWord, setEditingWord] = useState<Word | null>(null)
@@ -85,7 +88,7 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
   if (words.length === 0) {
     return (
       <Card className="p-6 text-center text-muted-foreground">
-        <p>No words yet. Add some words to start practicing!</p>
+        <p>{t('no_words')}</p>
       </Card>
     )
   }
@@ -165,24 +168,24 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 justify-between w-full">
             <div className="text-sm text-muted-foreground">
-            {words.length} word{words.length !== 1 ? 's' : ''} registered
+              {t('n_words', { count: words.length })}
             </div>
             <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Sort by:</span>
+            <span className="text-sm text-muted-foreground">{t('word_list.sort_by')}:</span>
             <Select value={sortOrder} onValueChange={handleSortChange}>
               <SelectTrigger className="w-[180px]" size="sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="accuracy">Accuracy (Worst First)</SelectItem>
-                <SelectItem value="createdAt">Recently Added</SelectItem>
+                <SelectItem value="accuracy">{t('word_list.sort_accuracy')}</SelectItem>
+                <SelectItem value="createdAt">{t('word_list.sort_newest')}</SelectItem>
               </SelectContent>
               </Select>
             </div>
           </div>
           {totalPages > 1 && (
             <div className="text-sm text-muted-foreground">
-              Page {currentPage} of {totalPages}
+              {currentPage} / {totalPages}
             </div>
           )}
         </div>

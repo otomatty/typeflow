@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Container } from '@/components/Container'
 import { ScreenHeader } from '@/components/ScreenHeader'
@@ -5,11 +6,11 @@ import { Card } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
-import { Check, Target, Shuffle, ClockCounterClockwise, Scales, Timer, Lightning, Gauge, Flame, Trophy, Skull, Wrench } from '@phosphor-icons/react'
+import { Check, Target, Shuffle, ClockCounterClockwise, Scales, Timer, Lightning, Gauge, Flame, Trophy, Skull, Wrench, Globe } from '@phosphor-icons/react'
 import { WordCountPreset, ThemeType, PracticeMode, TimeLimitMode, DifficultyPreset } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { getKpsStatus } from '@/lib/adaptive-time-utils'
-import { DIFFICULTY_LABELS, generatePenaltyPreview, DIFFICULTY_PRESETS } from '@/lib/difficulty-presets'
+import { generatePenaltyPreview, DIFFICULTY_PRESETS } from '@/lib/difficulty-presets'
 import { GameScoreRecord } from '@/lib/db'
 
 interface SettingsScreenProps {
@@ -50,111 +51,9 @@ interface SettingsScreenProps {
   onMinTimeAfterPenaltyChange: (value: number) => void
 }
 
-const THEME_OPTIONS: { value: ThemeType; label: string; description: string }[] = [
-  { value: 'light', label: 'Light', description: '明るいテーマ' },
-  { value: 'dark', label: 'Dark', description: '暗いテーマ' },
-  { value: 'system', label: 'System', description: 'システム設定に従う' },
-]
-
-const PRACTICE_MODE_OPTIONS: { 
-  value: PracticeMode
-  label: string
-  description: string
-  icon: typeof Target
-}[] = [
-  { 
-    value: 'balanced', 
-    label: 'バランス', 
-    description: '弱点・復習・新規をバランスよく出題',
-    icon: Scales,
-  },
-  { 
-    value: 'weakness-focus', 
-    label: '弱点強化', 
-    description: '苦手な単語を重点的に練習',
-    icon: Target,
-  },
-  { 
-    value: 'review', 
-    label: '復習優先', 
-    description: '忘れかけの単語を優先して復習',
-    icon: ClockCounterClockwise,
-  },
-  { 
-    value: 'random', 
-    label: 'ランダム', 
-    description: '完全にランダムに出題',
-    icon: Shuffle,
-  },
-]
-
 const MIN_WORD_COUNT = 5
 const MAX_WORD_COUNT = 100
 const STEP = 5
-
-const TIME_LIMIT_MODE_OPTIONS: { 
-  value: TimeLimitMode
-  label: string
-  description: string
-  icon: typeof Timer
-}[] = [
-  { 
-    value: 'adaptive', 
-    label: '適応型', 
-    description: 'あなたの実力に合わせて自動調整',
-    icon: Lightning,
-  },
-  { 
-    value: 'fixed', 
-    label: '固定', 
-    description: '一定の制限時間で練習',
-    icon: Timer,
-  },
-]
-
-const DIFFICULTY_OPTIONS: {
-  value: DifficultyPreset
-  label: string
-  description: string
-  icon: typeof Flame
-  color: string
-}[] = [
-  {
-    value: 'easy',
-    label: DIFFICULTY_LABELS.easy.name,
-    description: DIFFICULTY_LABELS.easy.description,
-    icon: Target,
-    color: 'text-green-500',
-  },
-  {
-    value: 'normal',
-    label: DIFFICULTY_LABELS.normal.name,
-    description: DIFFICULTY_LABELS.normal.description,
-    icon: Flame,
-    color: 'text-yellow-500',
-  },
-  {
-    value: 'hard',
-    label: DIFFICULTY_LABELS.hard.name,
-    description: DIFFICULTY_LABELS.hard.description,
-    icon: Trophy,
-    color: 'text-orange-500',
-  },
-  {
-    value: 'expert',
-    label: DIFFICULTY_LABELS.expert.name,
-    description: DIFFICULTY_LABELS.expert.description,
-    icon: Skull,
-    color: 'text-red-500',
-  },
-  {
-    value: 'custom',
-    label: DIFFICULTY_LABELS.custom.name,
-    description: DIFFICULTY_LABELS.custom.description,
-    icon: Wrench,
-    color: 'text-purple-500',
-  },
-]
 
 export function SettingsScreen({
   wordCount,
@@ -187,6 +86,8 @@ export function SettingsScreen({
   onMaxPenaltyPercentChange,
   onMinTimeAfterPenaltyChange,
 }: SettingsScreenProps) {
+  const { t, i18n } = useTranslation('settings')
+  
   const isAllWords = wordCount === 'all'
   const sliderValue = typeof wordCount === 'number' ? wordCount : 20
   const kpsStatus = getKpsStatus(gameScores)
@@ -203,6 +104,49 @@ export function SettingsScreen({
       }
     : DIFFICULTY_PRESETS[difficultyPreset]
   const penaltyPreview = generatePenaltyPreview(currentDifficultyParams, 4)
+
+  // Options with translations
+  const THEME_OPTIONS: { value: ThemeType; labelKey: string; descKey: string }[] = [
+    { value: 'light', labelKey: 'theme.light', descKey: 'theme.light_desc' },
+    { value: 'dark', labelKey: 'theme.dark', descKey: 'theme.dark_desc' },
+    { value: 'system', labelKey: 'theme.system', descKey: 'theme.system_desc' },
+  ]
+
+  const PRACTICE_MODE_OPTIONS: { 
+    value: PracticeMode
+    labelKey: string
+    descKey: string
+    icon: typeof Target
+  }[] = [
+    { value: 'balanced', labelKey: 'practice_mode.balanced', descKey: 'practice_mode.balanced_desc', icon: Scales },
+    { value: 'weakness-focus', labelKey: 'practice_mode.weakness', descKey: 'practice_mode.weakness_desc', icon: Target },
+    { value: 'review', labelKey: 'practice_mode.review', descKey: 'practice_mode.review_desc', icon: ClockCounterClockwise },
+    { value: 'random', labelKey: 'practice_mode.random', descKey: 'practice_mode.random_desc', icon: Shuffle },
+  ]
+
+  const TIME_LIMIT_MODE_OPTIONS: { 
+    value: TimeLimitMode
+    labelKey: string
+    descKey: string
+    icon: typeof Timer
+  }[] = [
+    { value: 'adaptive', labelKey: 'time_limit.adaptive', descKey: 'time_limit.adaptive_desc', icon: Lightning },
+    { value: 'fixed', labelKey: 'time_limit.fixed', descKey: 'time_limit.fixed_desc', icon: Timer },
+  ]
+
+  const DIFFICULTY_OPTIONS: {
+    value: DifficultyPreset
+    labelKey: string
+    descKey: string
+    icon: typeof Flame
+    color: string
+  }[] = [
+    { value: 'easy', labelKey: 'difficulty.easy', descKey: 'difficulty.easy_desc', icon: Target, color: 'text-green-500' },
+    { value: 'normal', labelKey: 'difficulty.normal', descKey: 'difficulty.normal_desc', icon: Flame, color: 'text-yellow-500' },
+    { value: 'hard', labelKey: 'difficulty.hard', descKey: 'difficulty.hard_desc', icon: Trophy, color: 'text-orange-500' },
+    { value: 'expert', labelKey: 'difficulty.expert', descKey: 'difficulty.expert_desc', icon: Skull, color: 'text-red-500' },
+    { value: 'custom', labelKey: 'difficulty.custom', descKey: 'difficulty.custom_desc', icon: Wrench, color: 'text-purple-500' },
+  ]
 
   const handleSliderChange = (values: number[]) => {
     if (!isAllWords && values[0] !== undefined) {
@@ -224,14 +168,80 @@ export function SettingsScreen({
     }
   }
 
+  const changeLanguage = (lang: 'ja' | 'en') => {
+    i18n.changeLanguage(lang)
+  }
+
+  const currentLanguage = i18n.language?.startsWith('ja') ? 'ja' : 'en'
+
   return (
     <Container>
       <ScreenHeader
-        title="Settings"
-        description="ゲームの設定を変更できます"
+        title={t('title')}
+        description={t('description')}
       />
 
       <div className="mt-8 space-y-6">
+        {/* Language Setting */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.05 }}
+        >
+          <Card className="p-6">
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-primary" weight="bold" />
+                  <Label className="text-base font-semibold">{t('language.title')}</Label>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t('language.description')}
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => changeLanguage('ja')}
+                  className={cn(
+                    'relative p-4 rounded-lg border text-left transition-all',
+                    'hover:bg-secondary/80',
+                    currentLanguage === 'ja'
+                      ? 'bg-primary/10 border-primary'
+                      : 'bg-secondary/50 border-border/50'
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">🇯🇵</span>
+                    <span className="font-medium">日本語</span>
+                  </div>
+                  {currentLanguage === 'ja' && (
+                    <Check className="absolute top-2 right-2 w-5 h-5 text-primary" weight="bold" />
+                  )}
+                </button>
+                <button
+                  onClick={() => changeLanguage('en')}
+                  className={cn(
+                    'relative p-4 rounded-lg border text-left transition-all',
+                    'hover:bg-secondary/80',
+                    currentLanguage === 'en'
+                      ? 'bg-primary/10 border-primary'
+                      : 'bg-secondary/50 border-border/50'
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">🇺🇸</span>
+                    <span className="font-medium">English</span>
+                  </div>
+                  {currentLanguage === 'en' && (
+                    <Check className="absolute top-2 right-2 w-5 h-5 text-primary" weight="bold" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
         {/* Word Count Setting */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -241,9 +251,9 @@ export function SettingsScreen({
           <Card className="p-6">
             <div className="space-y-6">
               <div>
-                <Label className="text-base font-semibold">出題数</Label>
+                <Label className="text-base font-semibold">{t('word_count.title')}</Label>
                 <p className="text-sm text-muted-foreground mt-1">
-                  1ゲームで出題する単語の数を選択します
+                  {t('word_count.description')}
                 </p>
               </div>
 
@@ -251,10 +261,10 @@ export function SettingsScreen({
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="all-words" className="text-sm font-medium">
-                    全ての単語を使用
+                    {t('word_count.use_all')}
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    登録されている全ての単語を出題します
+                    {t('word_count.use_all_description')}
                   </p>
                 </div>
                 <Switch
@@ -270,10 +280,10 @@ export function SettingsScreen({
                 isAllWords && 'opacity-50 pointer-events-none'
               )}>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">出題数を選択</span>
+                  <span className="text-sm text-muted-foreground">{t('word_count.select')}</span>
                   <span className="text-2xl font-bold tabular-nums">
                     {sliderValue}
-                    <span className="text-sm font-normal text-muted-foreground ml-1">問</span>
+                    <span className="text-sm font-normal text-muted-foreground ml-1">{t('word_count.questions')}</span>
                   </span>
                 </div>
                 
@@ -288,13 +298,13 @@ export function SettingsScreen({
                 />
                 
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{MIN_WORD_COUNT}問</span>
-                  <span>{MAX_WORD_COUNT}問</span>
+                  <span>{MIN_WORD_COUNT} {t('word_count.questions')}</span>
+                  <span>{MAX_WORD_COUNT} {t('word_count.questions')}</span>
                 </div>
               </div>
               
               <p className="text-xs text-muted-foreground">
-                ※ 登録単語数が選択した数より少ない場合は、登録されている全ての単語が出題されます
+                {t('word_count.note')}
               </p>
             </div>
           </Card>
@@ -311,10 +321,10 @@ export function SettingsScreen({
               <div>
                 <div className="flex items-center gap-2">
                   <Flame className="w-5 h-5 text-primary" weight="bold" />
-                  <Label className="text-base font-semibold">難易度</Label>
+                  <Label className="text-base font-semibold">{t('difficulty.title')}</Label>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  ゲームの難易度を選択します。制限時間とミスペナルティが調整されます
+                  {t('difficulty.description')}
                 </p>
               </div>
               
@@ -335,7 +345,7 @@ export function SettingsScreen({
                     >
                       <div className="flex items-center gap-2">
                         <Icon className={cn('w-5 h-5', option.color)} weight="bold" />
-                        <span className="font-medium text-sm">{option.label}</span>
+                        <span className="font-medium text-sm">{t(option.labelKey)}</span>
                       </div>
                       {difficultyPreset === option.value && (
                         <Check className="absolute top-2 right-2 w-4 h-4 text-primary" weight="bold" />
@@ -348,7 +358,7 @@ export function SettingsScreen({
               {/* Penalty Preview */}
               {currentDifficultyParams.missPenaltyEnabled && (
                 <div className="p-4 rounded-lg bg-secondary/50">
-                  <p className="text-sm font-medium mb-2">ミスペナルティ（段階的割合減少）</p>
+                  <p className="text-sm font-medium mb-2">{t('penalty.title')}</p>
                   <div className="flex items-center gap-2 text-xs">
                     {penaltyPreview.map((percent, index) => (
                       <span key={index} className={cn(
@@ -358,7 +368,7 @@ export function SettingsScreen({
                         index === 2 ? 'bg-red-500/20 text-red-600' :
                         'bg-red-600/20 text-red-700'
                       )}>
-                        {index + 1}回目: {percent}%
+                        {t('penalty.time_nth', { n: index + 1, percent })}
                       </span>
                     ))}
                   </div>
@@ -368,12 +378,12 @@ export function SettingsScreen({
               {/* Custom settings (only shown when custom is selected) */}
               {difficultyPreset === 'custom' && (
                 <div className="space-y-4 pt-4 border-t border-border/50">
-                  <p className="text-sm text-muted-foreground">詳細設定</p>
+                  <p className="text-sm text-muted-foreground">{t('custom.title')}</p>
                   
                   {/* Comfort Zone Slider */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label className="text-sm">制限時間の余裕</Label>
+                      <Label className="text-sm">{t('custom.time_comfort')}</Label>
                       <span className="text-sm font-medium">{Math.round(comfortZoneRatio * 100)}%</span>
                     </div>
                     <Slider
@@ -388,7 +398,7 @@ export function SettingsScreen({
 
                   {/* Miss Penalty Toggle */}
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm">ミスペナルティ</Label>
+                    <Label className="text-sm">{t('custom.miss_penalty')}</Label>
                     <Switch
                       checked={missPenaltyEnabled}
                       onCheckedChange={onMissPenaltyEnabledChange}
@@ -400,7 +410,7 @@ export function SettingsScreen({
                       {/* Base Penalty Percent */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <Label className="text-sm">基本ペナルティ</Label>
+                          <Label className="text-sm">{t('custom.base_penalty')}</Label>
                           <span className="text-sm font-medium">{basePenaltyPercent}%</span>
                         </div>
                         <Slider
@@ -416,7 +426,7 @@ export function SettingsScreen({
                       {/* Escalation Factor */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <Label className="text-sm">増加倍率</Label>
+                          <Label className="text-sm">{t('custom.escalation_factor')}</Label>
                           <span className="text-sm font-medium">{penaltyEscalationFactor}x</span>
                         </div>
                         <Slider
@@ -432,7 +442,7 @@ export function SettingsScreen({
                       {/* Max Penalty */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <Label className="text-sm">最大ペナルティ</Label>
+                          <Label className="text-sm">{t('custom.max_penalty')}</Label>
                           <span className="text-sm font-medium">{maxPenaltyPercent}%</span>
                         </div>
                         <Slider
@@ -448,8 +458,8 @@ export function SettingsScreen({
                       {/* Min Time After Penalty */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <Label className="text-sm">最低残り時間</Label>
-                          <span className="text-sm font-medium">{minTimeAfterPenalty}秒</span>
+                          <Label className="text-sm">{t('custom.min_time')}</Label>
+                          <span className="text-sm font-medium">{minTimeAfterPenalty}{t('time_limit.seconds')}</span>
                         </div>
                         <Slider
                           value={[minTimeAfterPenalty]}
@@ -477,9 +487,9 @@ export function SettingsScreen({
           <Card className="p-6">
             <div className="space-y-4">
               <div>
-                <Label className="text-base font-semibold">練習モード</Label>
+                <Label className="text-base font-semibold">{t('practice_mode.title')}</Label>
                 <p className="text-sm text-muted-foreground mt-1">
-                  出題アルゴリズムを選択します
+                  {t('practice_mode.description')}
                 </p>
               </div>
               
@@ -500,10 +510,10 @@ export function SettingsScreen({
                     >
                       <div className="flex items-center gap-2">
                         <Icon className="w-5 h-5 text-muted-foreground" />
-                        <span className="font-medium">{option.label}</span>
+                        <span className="font-medium">{t(option.labelKey)}</span>
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">
-                        {option.description}
+                        {t(option.descKey)}
                       </div>
                       {practiceMode === option.value && (
                         <Check className="absolute top-2 right-2 w-5 h-5 text-primary" weight="bold" />
@@ -527,10 +537,10 @@ export function SettingsScreen({
               <div>
                 <div className="flex items-center gap-2">
                   <Gauge className="w-5 h-5 text-primary" weight="bold" />
-                  <Label className="text-base font-semibold">制限時間</Label>
+                  <Label className="text-base font-semibold">{t('time_limit.title')}</Label>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  ゲームの制限時間を設定します
+                  {t('time_limit.description')}
                 </p>
               </div>
 
@@ -552,10 +562,10 @@ export function SettingsScreen({
                     >
                       <div className="flex items-center gap-2">
                         <Icon className="w-5 h-5 text-muted-foreground" />
-                        <span className="font-medium">{option.label}</span>
+                        <span className="font-medium">{t(option.labelKey)}</span>
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">
-                        {option.description}
+                        {t(option.descKey)}
                       </div>
                       {timeLimitMode === option.value && (
                         <Check className="absolute top-2 right-2 w-5 h-5 text-primary" weight="bold" />
@@ -572,18 +582,18 @@ export function SettingsScreen({
                   <div className="p-4 rounded-lg bg-secondary/50">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium">あなたの平均打鍵速度</p>
-                        <p className="text-xs text-muted-foreground">{kpsStatus.label} ({kpsStatus.gamesPlayed}ゲーム)</p>
+                        <p className="text-sm font-medium">{t('time_limit.your_avg_kps')}</p>
+                        <p className="text-xs text-muted-foreground">{kpsStatus.label} ({t('time_limit.games_played', { count: kpsStatus.gamesPlayed })})</p>
                       </div>
                       <div className="text-right">
                         <span className="text-2xl font-bold tabular-nums">{kpsStatus.averageKps}</span>
-                        <span className="text-sm text-muted-foreground ml-1">打/秒</span>
+                        <span className="text-sm text-muted-foreground ml-1">{t('time_limit.keys_per_sec')}</span>
                       </div>
                     </div>
                     {kpsStatus.confidence < 100 && (
                       <div className="mt-3">
                         <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                          <span>信頼度</span>
+                          <span>{t('time_limit.confidence')}</span>
                           <span>{kpsStatus.confidence}%</span>
                         </div>
                         <div className="h-1.5 bg-muted rounded-full overflow-hidden">
@@ -596,7 +606,7 @@ export function SettingsScreen({
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    ※ 制限時間の余裕は難易度設定で調整できます
+                    {t('time_limit.comfort_note')}
                   </p>
                 </div>
               )}
@@ -605,10 +615,10 @@ export function SettingsScreen({
               {timeLimitMode === 'fixed' && (
                 <div className="space-y-4 pt-4 border-t border-border/50">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">制限時間</span>
+                    <span className="text-sm text-muted-foreground">{t('time_limit.title')}</span>
                     <span className="text-2xl font-bold tabular-nums">
                       {fixedTimeLimit}
-                      <span className="text-sm font-normal text-muted-foreground ml-1">秒</span>
+                      <span className="text-sm font-normal text-muted-foreground ml-1">{t('time_limit.seconds')}</span>
                     </span>
                   </div>
                   
@@ -622,8 +632,8 @@ export function SettingsScreen({
                   />
                   
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>3秒</span>
-                    <span>30秒</span>
+                    <span>3{t('time_limit.seconds')}</span>
+                    <span>30{t('time_limit.seconds')}</span>
                   </div>
                 </div>
               )}
@@ -641,9 +651,9 @@ export function SettingsScreen({
           <Card className="p-6">
             <div className="space-y-6">
               <div>
-                <Label className="text-base font-semibold">高度な設定</Label>
+                <Label className="text-base font-semibold">{t('advanced.title')}</Label>
                 <p className="text-sm text-muted-foreground mt-1">
-                  出題アルゴリズムの詳細設定
+                  {t('advanced.description')}
                 </p>
               </div>
 
@@ -651,10 +661,10 @@ export function SettingsScreen({
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="srs-enabled" className="text-sm font-medium">
-                    間隔反復システム（SRS）
+                    {t('advanced.srs')}
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    忘却曲線に基づいて最適なタイミングで復習単語を出題
+                    {t('advanced.srs_desc')}
                   </p>
                 </div>
                 <Switch
@@ -668,10 +678,10 @@ export function SettingsScreen({
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="warmup-enabled" className="text-sm font-medium">
-                    ウォームアップフェーズ
+                    {t('advanced.warmup')}
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    セッション開始時は易しい単語から徐々に難易度を上げる
+                    {t('advanced.warmup_desc')}
                   </p>
                 </div>
                 <Switch
@@ -693,9 +703,9 @@ export function SettingsScreen({
           <Card className="p-6">
             <div className="space-y-4">
               <div>
-                <Label className="text-base font-semibold">テーマ</Label>
+                <Label className="text-base font-semibold">{t('theme.title')}</Label>
                 <p className="text-sm text-muted-foreground mt-1">
-                  アプリの外観を選択します
+                  {t('theme.description')}
                 </p>
               </div>
               
@@ -712,9 +722,9 @@ export function SettingsScreen({
                         : 'bg-secondary/50 border-border/50'
                     )}
                   >
-                    <div className="font-medium">{option.label}</div>
+                    <div className="font-medium">{t(option.labelKey)}</div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      {option.description}
+                      {t(option.descKey)}
                     </div>
                     {theme === option.value && (
                       <Check className="absolute top-2 right-2 w-5 h-5 text-primary" weight="bold" />
@@ -724,7 +734,7 @@ export function SettingsScreen({
               </div>
               
               <p className="text-xs text-muted-foreground">
-                ※ テーマの変更は今後のアップデートで反映されます
+                {t('theme.note')}
               </p>
             </div>
           </Card>

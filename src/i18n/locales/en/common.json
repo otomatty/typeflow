@@ -1,0 +1,24 @@
+{
+  "app_name": "TypeFlow",
+  "app_tagline": "Developer Typing Trainer",
+  "cancel": "Cancel",
+  "save": "Save",
+  "delete": "Delete",
+  "edit": "Edit",
+  "update": "Update",
+  "loading": "Loading...",
+  "confirm": "Confirm",
+  "close": "Close",
+  "back": "Back",
+  "reset": "Reset",
+  "yes": "Yes",
+  "no": "No",
+  "language": "Language",
+  "header": {
+    "home": "Home",
+    "words": "Words",
+    "stats": "Stats",
+    "settings": "Settings"
+  }
+}
+

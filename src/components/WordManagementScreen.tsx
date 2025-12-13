@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AddWordDialog } from '@/components/AddWordDialog'
@@ -38,6 +39,8 @@ export function WordManagementScreen({
   onLoadPreset,
   onClearAllWords,
 }: WordManagementScreenProps) {
+  const { t } = useTranslation('words')
+  const { t: tc } = useTranslation('common')
   const [isClearing, setIsClearing] = useState(false)
 
   const handleLoadPreset = async (
@@ -60,8 +63,8 @@ export function WordManagementScreen({
     <Container maxWidth="4xl">
       <div className="mb-6">
         <ScreenHeader
-          title="Word Management"
-          description="Add and manage your typing practice words"
+          title={t('title')}
+          description={t('description')}
           action={
             <div className="flex gap-2">
               {words.length > 0 && (
@@ -69,24 +72,24 @@ export function WordManagementScreen({
                   <AlertDialogTrigger asChild>
                     <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
                       <Trash className="w-4 h-4 mr-1" />
-                      全削除
+                      {t('delete_all')}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>すべての単語を削除しますか？</AlertDialogTitle>
+                      <AlertDialogTitle>{t('delete_all_confirm')}</AlertDialogTitle>
                       <AlertDialogDescription>
-                        この操作は取り消せません。登録されている {words.length} 件の単語がすべて削除されます。
+                        {t('delete_all_desc', { count: words.length })}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                      <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleClearAll}
                         disabled={isClearing}
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       >
-                        {isClearing ? '削除中...' : '削除する'}
+                        {isClearing ? t('deleting') : t('delete_confirm')}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -103,7 +106,7 @@ export function WordManagementScreen({
       {words.length === 0 ? (
         <Card className="p-8 text-center space-y-4">
           <p className="text-muted-foreground">
-            単語がありません。最初の単語を追加するか、プリセットを読み込んでください！
+            {t('no_words')}
           </p>
           <div className="flex justify-center gap-2 flex-wrap">
             <PresetDialog onLoadPreset={handleLoadPreset} />

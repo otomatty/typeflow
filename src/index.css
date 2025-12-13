@@ -41,6 +41,11 @@
   --ring: oklch(0.75 0.15 195);
 
   --radius: 0.375rem;
+
+  /* Chart colors - distinct and vibrant */
+  --chart-1: 160 80% 55%;    /* Cyan/Teal - KPS */
+  --chart-2: 45 95% 60%;     /* Amber/Yellow - Accuracy */
+  --chart-3: 280 70% 65%;    /* Purple/Violet - Words */
 }
 
 @theme {

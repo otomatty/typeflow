@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +16,8 @@ interface CSVImportDialogProps {
 }
 
 export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
+  const { t, i18n } = useTranslation('words')
+  
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [clearExisting, setClearExisting] = useState(false)
@@ -22,6 +25,8 @@ export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
   const [fileName, setFileName] = useState<string>('')
   const [error, setError] = useState<string>('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const isJa = i18n.language?.startsWith('ja')
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -35,14 +40,16 @@ export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
       const words = parseCSV(csvText)
       
       if (words.length === 0) {
-        setError('CSVファイルから単語を読み取れませんでした。形式を確認してください。')
+        setError(isJa 
+          ? 'CSVファイルから単語を読み取れませんでした。形式を確認してください。' 
+          : 'Could not read words from CSV file. Please check the format.')
         setPreviewWords([])
         return
       }
       
       setPreviewWords(words)
     } catch (err) {
-      setError('ファイルの読み込みに失敗しました')
+      setError(isJa ? 'ファイルの読み込みに失敗しました' : 'Failed to read file')
       setPreviewWords([])
       console.error(err)
     }
@@ -50,7 +57,7 @@ export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
 
   const handleImport = async () => {
     if (previewWords.length === 0) {
-      toast.error('インポートする単語がありません')
+      toast.error(isJa ? 'インポートする単語がありません' : 'No words to import')
       return
     }
 
@@ -58,7 +65,7 @@ export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
     try {
       await onImport(previewWords, {
         clearExisting,
-        presetName: fileName.replace(/\.csv$/i, '') || 'CSVインポート',
+        presetName: fileName.replace(/\.csv$/i, '') || (isJa ? 'CSVインポート' : 'CSV Import'),
       })
       setOpen(false)
       resetState()
@@ -88,21 +95,23 @@ export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline" className="gap-2">
           <FileUp className="h-4 w-4" />
-          CSVインポート
+          {t('csv.import')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>CSVファイルをインポート</DialogTitle>
+          <DialogTitle>{t('csv.title')}</DialogTitle>
           <DialogDescription>
-            CSVファイルから単語リストを読み込みます。形式: ワード,読み,ローマ字
+            {isJa 
+              ? 'CSVファイルから単語リストを読み込みます。形式: ワード,読み,ローマ字' 
+              : 'Load word list from CSV file. Format: word,reading,romaji'}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           {/* ファイル選択 */}
           <div className="space-y-2">
-            <Label>CSVファイルを選択</Label>
+            <Label>{isJa ? 'CSVファイルを選択' : 'Select CSV file'}</Label>
             <div className="flex gap-2">
               <Input
                 ref={fileInputRef}
@@ -113,7 +122,9 @@ export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              1行目がヘッダー（ワード,読み,入力例）の場合は自動的にスキップされます
+              {isJa 
+                ? '1行目がヘッダー（ワード,読み,入力例）の場合は自動的にスキップされます' 
+                : 'Header row (word,reading,romaji) will be automatically skipped'}
             </p>
           </div>
 
@@ -131,9 +142,9 @@ export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
           {previewWords.length > 0 && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>プレビュー</Label>
+                <Label>{isJa ? 'プレビュー' : 'Preview'}</Label>
                 <span className="text-sm text-muted-foreground">
-                  {previewWords.length}語を検出
+                  {t('n_words', { count: previewWords.length })}
                 </span>
               </div>
               <Card className="p-3 max-h-48 overflow-y-auto">
@@ -147,7 +158,7 @@ export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
                   ))}
                   {previewWords.length > 10 && (
                     <p className="text-xs text-muted-foreground pt-2">
-                      ...他 {previewWords.length - 10} 語
+                      {isJa ? `...他 ${previewWords.length - 10} 語` : `...and ${previewWords.length - 10} more`}
                     </p>
                   )}
                 </div>
@@ -163,7 +174,7 @@ export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
               onCheckedChange={setClearExisting}
             />
             <Label htmlFor="clear-existing-csv" className="text-sm text-muted-foreground">
-              既存の単語を削除してから読み込む
+              {t('preset_clear_existing')}
             </Label>
           </div>
 
@@ -179,16 +190,16 @@ export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
               <Upload className="h-4 w-4" />
             )}
             {previewWords.length > 0
-              ? `${previewWords.length}語をインポート`
-              : 'ファイルを選択してください'}
+              ? (isJa ? `${previewWords.length}語をインポート` : `Import ${previewWords.length} words`)
+              : (isJa ? 'ファイルを選択してください' : 'Select a file')}
           </Button>
         </div>
 
         <div className="border-t pt-4">
           <p className="text-xs text-muted-foreground">
-            💡 CSV形式の例:
+            💡 {isJa ? 'CSV形式の例:' : 'CSV format example:'}
             <br />
-            <code className="text-xs bg-muted px-1 rounded">ワード,読み,入力例</code>
+            <code className="text-xs bg-muted px-1 rounded">{isJa ? 'ワード,読み,入力例' : 'word,reading,romaji'}</code>
             <br />
             <code className="text-xs bg-muted px-1 rounded">ありがとう,ありがとう,arigatou</code>
           </p>
@@ -197,4 +208,3 @@ export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
     </Dialog>
   )
 }
-

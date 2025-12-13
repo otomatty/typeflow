@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Keyboard } from '@phosphor-icons/react'
 import { Word } from '@/lib/types'
@@ -8,6 +9,8 @@ interface MenuScreenProps {
 }
 
 export function MenuScreen({ words }: MenuScreenProps) {
+  const { t } = useTranslation('menu')
+  const { t: tc } = useTranslation('common')
   const canStart = words.length > 0
 
   return (
@@ -20,10 +23,10 @@ export function MenuScreen({ words }: MenuScreenProps) {
       >
         <div className="space-y-2">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
-            TypeFlow
+            {tc('app_name')}
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base">
-            Developer Typing Trainer
+            {tc('app_tagline')}
           </p>
         </div>
 
@@ -36,7 +39,7 @@ export function MenuScreen({ words }: MenuScreenProps) {
           >
             <div className="flex items-center justify-center gap-3 text-muted-foreground">
               <Keyboard className="w-6 h-6" />
-              <span className="text-lg">{words.length} words ready</span>
+              <span className="text-lg">{t('words_ready', { count: words.length })}</span>
             </div>
 
             <motion.div
@@ -48,7 +51,7 @@ export function MenuScreen({ words }: MenuScreenProps) {
                 <kbd className="px-3 py-1.5 text-sm font-mono bg-background rounded border border-border shadow-sm">
                   Space
                 </kbd>
-                <span className="text-muted-foreground">Press to Start</span>
+                <span className="text-muted-foreground">{t('press_to_start')}</span>
               </div>
             </motion.div>
           </motion.div>
@@ -60,10 +63,10 @@ export function MenuScreen({ words }: MenuScreenProps) {
             className="space-y-4"
           >
             <p className="text-muted-foreground">
-              No words yet. Add words to start practicing!
+              {t('no_words_yet')}
             </p>
             <p className="text-sm text-muted-foreground/60">
-              Go to <span className="font-medium text-muted-foreground">Words</span> in the menu to add words
+              {t('go_to_words')}
             </p>
           </motion.div>
         )}
@@ -75,7 +78,7 @@ export function MenuScreen({ words }: MenuScreenProps) {
         transition={{ delay: 0.6, duration: 0.5 }}
         className="absolute bottom-8 text-center text-xs text-muted-foreground/50"
       >
-        <p>Press <kbd className="px-1 py-0.5 bg-secondary/50 rounded">Esc</kbd> during game to exit</p>
+        <p>{t('press_esc_to_exit')}</p>
       </motion.div>
     </div>
   )

@@ -1,0 +1,24 @@
+{
+  "app_name": "TypeFlow",
+  "app_tagline": "デベロッパー向けタイピング練習",
+  "cancel": "キャンセル",
+  "save": "保存",
+  "delete": "削除",
+  "edit": "編集",
+  "update": "更新",
+  "loading": "読み込み中...",
+  "confirm": "確認",
+  "close": "閉じる",
+  "back": "戻る",
+  "reset": "リセット",
+  "yes": "はい",
+  "no": "いいえ",
+  "language": "言語",
+  "header": {
+    "home": "ホーム",
+    "words": "単語",
+    "stats": "統計",
+    "settings": "設定"
+  }
+}
+

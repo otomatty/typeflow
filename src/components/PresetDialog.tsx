@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -14,23 +15,27 @@ interface PresetDialogProps {
   isLoading?: boolean
 }
 
-const difficultyColors: Record<WordPreset['difficulty'], string> = {
-  easy: 'bg-green-500/20 text-green-400 border-green-500/30',
-  normal: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  hard: 'bg-red-500/20 text-red-400 border-red-500/30',
-}
-
-const difficultyLabels: Record<WordPreset['difficulty'], string> = {
-  easy: '初級',
-  normal: '中級',
-  hard: '上級',
-}
-
 export function PresetDialog({ onLoadPreset, isLoading }: PresetDialogProps) {
+  const { t } = useTranslation('words')
+  
   const [open, setOpen] = useState(false)
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null)
   const [clearExisting, setClearExisting] = useState(false)
   const [loadingPresetId, setLoadingPresetId] = useState<string | null>(null)
+
+  const difficultyColors: Record<WordPreset['difficulty'], string> = {
+    easy: 'bg-green-500/20 text-green-400 border-green-500/30',
+    normal: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+    hard: 'bg-red-500/20 text-red-400 border-red-500/30',
+  }
+
+  const getDifficultyLabel = (difficulty: WordPreset['difficulty']) => {
+    switch (difficulty) {
+      case 'easy': return t('difficulty_beginner')
+      case 'normal': return t('difficulty_intermediate')
+      case 'hard': return t('difficulty_advanced')
+    }
+  }
 
   const handleLoadPreset = async (presetId: string) => {
     const preset = getPresetById(presetId)
@@ -54,14 +59,14 @@ export function PresetDialog({ onLoadPreset, isLoading }: PresetDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline" className="gap-2">
           <Package className="h-4 w-4" />
-          プリセット
+          {t('preset')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>プリセットを読み込む</DialogTitle>
+          <DialogTitle>{t('preset_title')}</DialogTitle>
           <DialogDescription>
-            あらかじめ用意された単語リストを読み込んで練習を開始できます
+            {t('preset_desc')}
           </DialogDescription>
         </DialogHeader>
 
@@ -72,7 +77,7 @@ export function PresetDialog({ onLoadPreset, isLoading }: PresetDialogProps) {
             onCheckedChange={setClearExisting}
           />
           <Label htmlFor="clear-existing" className="text-sm text-muted-foreground">
-            既存の単語を削除してから読み込む
+            {t('preset_clear_existing')}
           </Label>
         </div>
 
@@ -90,9 +95,9 @@ export function PresetDialog({ onLoadPreset, isLoading }: PresetDialogProps) {
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold">{preset.name}</h3>
                     <Badge variant="outline" className={difficultyColors[preset.difficulty]}>
-                      {difficultyLabels[preset.difficulty]}
+                      {getDifficultyLabel(preset.difficulty)}
                     </Badge>
-                    <Badge variant="secondary">{preset.wordCount}語</Badge>
+                    <Badge variant="secondary">{t('n_words', { count: preset.wordCount })}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">{preset.description}</p>
                   
@@ -108,7 +113,7 @@ export function PresetDialog({ onLoadPreset, isLoading }: PresetDialogProps) {
                     ))}
                     {preset.words.length > 5 && (
                       <span className="text-xs px-2 py-0.5 text-muted-foreground">
-                        +{preset.words.length - 5}語
+                        +{t('n_words', { count: preset.words.length - 5 })}
                       </span>
                     )}
                   </div>
@@ -128,7 +133,7 @@ export function PresetDialog({ onLoadPreset, isLoading }: PresetDialogProps) {
                   ) : (
                     <>
                       <Download className="h-4 w-4 mr-1" />
-                      読み込む
+                      {t('preset_load')}
                     </>
                   )}
                 </Button>
@@ -139,11 +144,10 @@ export function PresetDialog({ onLoadPreset, isLoading }: PresetDialogProps) {
 
         <div className="border-t pt-4">
           <p className="text-xs text-muted-foreground">
-            💡 ヒント: 寿司打など外部サイトの単語リストをインポートする機能は近日追加予定です
+            {t('preset_hint')}
           </p>
         </div>
       </DialogContent>
     </Dialog>
   )
 }
-

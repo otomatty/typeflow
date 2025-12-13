@@ -1,0 +1,17 @@
+{
+  "kps": "KPS",
+  "accuracy": "Accuracy",
+  "keys": "Keys",
+  "words": "Words",
+  "exit": "Exit",
+  "game_over": "Game Over!",
+  "great_session": "Great practice session",
+  "keys_per_sec": "Keys/Sec",
+  "total_keystrokes": "Total Keystrokes",
+  "perfect_words": "Perfect Words",
+  "total_time": "Total Time",
+  "retry_weak_words": "Retry Weak Words",
+  "play_again": "Play Again (All Words)",
+  "back_to_menu": "Back to Menu"
+}
+

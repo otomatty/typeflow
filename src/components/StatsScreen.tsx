@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -7,7 +8,7 @@ import { KeyboardHeatmap } from '@/components/KeyboardHeatmap'
 import { ScreenHeader } from '@/components/ScreenHeader'
 import { Container } from '@/components/Container'
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
-import { XAxis, YAxis, CartesianGrid, AreaChart, Area } from 'recharts'
+import { XAxis, YAxis, CartesianGrid, ComposedChart, Area, Line, Legend } from 'recharts'
 import type { KeyStats, KeyTransitionStats } from '@/lib/types'
 import type { GameScoreRecord } from '@/lib/db'
 
@@ -19,6 +20,9 @@ interface StatsScreenProps {
 }
 
 export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: StatsScreenProps) {
+  const { t, i18n } = useTranslation('stats')
+  const { t: tc } = useTranslation('common')
+
   // Calculate summary statistics
   const summary = useMemo(() => {
     const allKeys = Object.values(keyStats)
@@ -41,41 +45,36 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
     }
   }, [keyStats])
 
-  // Prepare chart data (最新30件を古い順に並べる)
+  // Prepare chart data (最新30件を古い順に並べる、マイナス値は0に変換)
   const chartData = useMemo(() => {
     const scores = [...gameScores].reverse().slice(-30)
+    const locale = i18n.language?.startsWith('ja') ? 'ja-JP' : 'en-US'
     return scores.map((score, index) => ({
       game: index + 1,
-      kps: score.kps,
-      accuracy: score.accuracy,
-      correctWords: score.correctWords,
-      date: new Date(score.playedAt).toLocaleDateString('ja-JP', { 
+      kps: Math.max(0, score.kps),
+      accuracy: Math.max(0, score.accuracy),
+      correctWords: Math.max(0, score.correctWords),
+      date: new Date(score.playedAt).toLocaleDateString(locale, { 
         month: 'short', 
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
       }),
     }))
-  }, [gameScores])
+  }, [gameScores, i18n.language])
 
-  // Chart configurations
-  const kpsChartConfig: ChartConfig = {
+  // Combined chart configuration
+  const combinedChartConfig: ChartConfig = {
     kps: {
       label: 'KPS',
       color: 'hsl(var(--chart-1))',
     },
-  }
-
-  const accuracyChartConfig: ChartConfig = {
     accuracy: {
-      label: 'Accuracy',
+      label: t('accuracy'),
       color: 'hsl(var(--chart-2))',
     },
-  }
-
-  const wordsChartConfig: ChartConfig = {
     correctWords: {
-      label: 'Words',
+      label: t('words_chart'),
       color: 'hsl(var(--chart-3))',
     },
   }
@@ -121,8 +120,8 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
   return (
     <Container className="space-y-6">
       <ScreenHeader
-        title="Statistics"
-        description="Analyze your typing weaknesses and practice efficiently"
+        title={t('title')}
+        description={t('description')}
       />
 
         {!hasData ? (
@@ -133,9 +132,9 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
           >
             <Card className="p-8 text-center">
               <Keyboard className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <h2 className="text-lg font-semibold mb-2">No Data Yet</h2>
+              <h2 className="text-lg font-semibold mb-2">{t('no_data')}</h2>
               <p className="text-muted-foreground text-sm">
-                Play some games to see your statistics here
+                {t('no_data_desc')}
               </p>
             </Card>
           </motion.div>
@@ -153,25 +152,25 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                     <div className="text-2xl sm:text-3xl font-bold text-primary">
                       {summary.totalKeystrokes.toLocaleString()}
                     </div>
-                    <div className="text-xs text-muted-foreground uppercase mt-1">Keystrokes</div>
+                    <div className="text-xs text-muted-foreground uppercase mt-1">{t('keystrokes')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl sm:text-3xl font-bold text-primary">
                       {summary.accuracy}%
                     </div>
-                    <div className="text-xs text-muted-foreground uppercase mt-1">Accuracy</div>
+                    <div className="text-xs text-muted-foreground uppercase mt-1">{t('accuracy')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl sm:text-3xl font-bold text-primary">
                       {summary.totalErrors.toLocaleString()}
                     </div>
-                    <div className="text-xs text-muted-foreground uppercase mt-1">Errors</div>
+                    <div className="text-xs text-muted-foreground uppercase mt-1">{t('errors')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl sm:text-3xl font-bold text-primary">
                       {summary.avgLatency}ms
                     </div>
-                    <div className="text-xs text-muted-foreground uppercase mt-1">Avg Latency</div>
+                    <div className="text-xs text-muted-foreground uppercase mt-1">{t('avg_latency')}</div>
                   </div>
                 </div>
               </Card>
@@ -187,134 +186,92 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                 <Card className="p-4 sm:p-6">
                   <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <ChartLine className="w-5 h-5" />
-                    Performance History
+                    {t('performance_history')}
                   </h2>
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* KPS Chart */}
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">
-                        Keys Per Second (KPS)
-                      </h3>
-                      <ChartContainer config={kpsChartConfig} className="h-[200px] w-full">
-                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                          <defs>
-                            <linearGradient id="kpsGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.4} />
-                              <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-                          <XAxis 
-                            dataKey="game" 
-                            tickLine={false} 
-                            axisLine={false}
-                            className="text-xs"
-                          />
-                          <YAxis 
-                            tickLine={false} 
-                            axisLine={false}
-                            className="text-xs"
-                            domain={[0, 'auto']}
-                          />
-                          <ChartTooltip 
-                            content={<ChartTooltipContent />}
-                            labelFormatter={(_, payload) => payload[0]?.payload?.date || ''}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="kps"
-                            stroke="hsl(var(--chart-1))"
-                            strokeWidth={2}
-                            fill="url(#kpsGradient)"
-                          />
-                        </AreaChart>
-                      </ChartContainer>
-                    </div>
-
-                    {/* Accuracy Chart */}
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">
-                        Accuracy (%)
-                      </h3>
-                      <ChartContainer config={accuracyChartConfig} className="h-[200px] w-full">
-                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                          <defs>
-                            <linearGradient id="accuracyGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.4} />
-                              <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-                          <XAxis 
-                            dataKey="game" 
-                            tickLine={false} 
-                            axisLine={false}
-                            className="text-xs"
-                          />
-                          <YAxis 
-                            tickLine={false} 
-                            axisLine={false}
-                            className="text-xs"
-                            domain={[0, 100]}
-                          />
-                          <ChartTooltip 
-                            content={<ChartTooltipContent />}
-                            labelFormatter={(_, payload) => payload[0]?.payload?.date || ''}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="accuracy"
-                            stroke="hsl(var(--chart-2))"
-                            strokeWidth={2}
-                            fill="url(#accuracyGradient)"
-                          />
-                        </AreaChart>
-                      </ChartContainer>
-                    </div>
-
-                    {/* Words Chart */}
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">
-                        Words Completed
-                      </h3>
-                      <ChartContainer config={wordsChartConfig} className="h-[200px] w-full">
-                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                          <defs>
-                            <linearGradient id="wordsGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="hsl(var(--chart-3))" stopOpacity={0.4} />
-                              <stop offset="95%" stopColor="hsl(var(--chart-3))" stopOpacity={0} />
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-                          <XAxis 
-                            dataKey="game" 
-                            tickLine={false} 
-                            axisLine={false}
-                            className="text-xs"
-                          />
-                          <YAxis 
-                            tickLine={false} 
-                            axisLine={false}
-                            className="text-xs"
-                            domain={[0, 'auto']}
-                          />
-                          <ChartTooltip 
-                            content={<ChartTooltipContent />}
-                            labelFormatter={(_, payload) => payload[0]?.payload?.date || ''}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="correctWords"
-                            stroke="hsl(var(--chart-3))"
-                            strokeWidth={2}
-                            fill="url(#wordsGradient)"
-                          />
-                        </AreaChart>
-                      </ChartContainer>
-                    </div>
-                  </div>
+                  <ChartContainer config={combinedChartConfig} className="h-[300px] w-full">
+                    <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="kpsGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="accuracyGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="wordsGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--chart-3))" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="hsl(var(--chart-3))" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                      <XAxis 
+                        dataKey="game" 
+                        tickLine={false} 
+                        axisLine={false}
+                        className="text-xs"
+                      />
+                      {/* Left Y-axis for KPS */}
+                      <YAxis 
+                        yAxisId="left"
+                        tickLine={false} 
+                        axisLine={false}
+                        className="text-xs"
+                        domain={[0, 'auto']}
+                        allowDataOverflow={false}
+                        tickFormatter={(value) => value >= 0 ? value : 0}
+                      />
+                      {/* Right Y-axis for Accuracy (%) */}
+                      <YAxis 
+                        yAxisId="right"
+                        orientation="right"
+                        tickLine={false} 
+                        axisLine={false}
+                        className="text-xs"
+                        domain={[0, 100]}
+                        allowDataOverflow={false}
+                        tickFormatter={(value) => `${value >= 0 ? value : 0}%`}
+                      />
+                      <ChartTooltip 
+                        content={<ChartTooltipContent />}
+                        labelFormatter={(_, payload) => payload[0]?.payload?.date || ''}
+                      />
+                      <Legend />
+                      {/* KPS - Area with line */}
+                      <Area
+                        yAxisId="left"
+                        type="monotone"
+                        dataKey="kps"
+                        name="KPS"
+                        baseValue={0}
+                        stroke="hsl(var(--chart-1))"
+                        strokeWidth={2}
+                        fill="url(#kpsGradient)"
+                      />
+                      {/* Accuracy - Line */}
+                      <Line
+                        yAxisId="right"
+                        type="monotone"
+                        dataKey="accuracy"
+                        name={t('accuracy')}
+                        stroke="hsl(var(--chart-2))"
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                      {/* Words - Line */}
+                      <Line
+                        yAxisId="left"
+                        type="monotone"
+                        dataKey="correctWords"
+                        name={t('words_chart')}
+                        stroke="hsl(var(--chart-3))"
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                    </ComposedChart>
+                  </ChartContainer>
                   <p className="text-xs text-muted-foreground text-center mt-4">
-                    Last {chartData.length} games
+                    {t('last_n_games', { count: chartData.length })}
                   </p>
                 </Card>
               </motion.div>
@@ -329,7 +286,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
               <Card className="p-4 sm:p-6">
                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <Keyboard className="w-5 h-5" />
-                  Keyboard Heatmap
+                  {t('keyboard_heatmap')}
                 </h2>
                 <KeyboardHeatmap keyStats={keyStats} />
               </Card>
@@ -345,35 +302,35 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                 <Card className="p-4 sm:p-6">
                   <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <Warning className="w-5 h-5 text-orange-500" />
-                    Difficult Transitions
+                    {t('difficult_transitions')}
                   </h2>
                   <div className="space-y-3">
-                    {weakTransitions.map((t, index) => (
-                      <div key={`${t.fromKey}-${t.toKey}`} className="flex items-center gap-3">
+                    {weakTransitions.map((tr, index) => (
+                      <div key={`${tr.fromKey}-${tr.toKey}`} className="flex items-center gap-3">
                         <span className="text-muted-foreground text-sm w-4">{index + 1}.</span>
                         <div className="flex items-center gap-2 font-mono">
                           <span className="px-2 py-1 bg-secondary rounded text-sm font-bold">
-                            {t.fromKey.toUpperCase()}
+                            {tr.fromKey.toUpperCase()}
                           </span>
                           <ArrowRight className="w-4 h-4 text-muted-foreground" />
                           <span className="px-2 py-1 bg-secondary rounded text-sm font-bold">
-                            {t.toKey.toUpperCase()}
+                            {tr.toKey.toUpperCase()}
                           </span>
                         </div>
                         <div className="flex-1">
                           <div className="h-2 bg-secondary rounded-full overflow-hidden">
                             <div
                               className="h-full bg-orange-500 rounded-full transition-all"
-                              style={{ width: `${Math.min(t.errorRate * 100 * 2, 100)}%` }}
+                              style={{ width: `${Math.min(tr.errorRate * 100 * 2, 100)}%` }}
                             />
                           </div>
                         </div>
                         <div className="text-right text-sm whitespace-nowrap">
                           <span className="font-semibold text-orange-500">
-                            {Math.round(t.errorRate * 100)}%
+                            {Math.round(tr.errorRate * 100)}%
                           </span>
                           <span className="text-muted-foreground ml-2">
-                            {t.avgLatency}ms
+                            {tr.avgLatency}ms
                           </span>
                         </div>
                       </div>
@@ -393,7 +350,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                 <Card className="p-4 sm:p-6">
                   <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <Swap className="w-5 h-5 text-red-500" />
-                    Common Mistakes
+                    {t('common_mistakes')}
                   </h2>
                   <div className="space-y-2">
                     {confusionPairs.map((pair, index) => (
@@ -410,7 +367,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                           {pair.actual.toUpperCase()}
                         </span>
                         <span className="text-muted-foreground">:</span>
-                        <span className="font-semibold">{pair.count} times</span>
+                        <span className="font-semibold">{pair.count} {t('times')}</span>
                       </div>
                     ))}
                   </div>
@@ -427,9 +384,9 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
               <Card className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-medium">Reset Statistics</h3>
+                    <h3 className="font-medium">{t('reset_stats')}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Delete all statistics data
+                      {t('reset_stats_desc')}
                     </p>
                   </div>
                   <Button
@@ -439,7 +396,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                     className="gap-2"
                   >
                     <Trash className="w-4 h-4" />
-                    Reset
+                    {tc('reset')}
                   </Button>
                 </div>
               </Card>

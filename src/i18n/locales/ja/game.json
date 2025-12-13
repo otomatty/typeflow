@@ -1,0 +1,17 @@
+{
+  "kps": "KPS",
+  "accuracy": "正確率",
+  "keys": "打鍵数",
+  "words": "単語",
+  "exit": "終了",
+  "game_over": "ゲーム終了！",
+  "great_session": "お疲れ様でした",
+  "keys_per_sec": "打鍵/秒",
+  "total_keystrokes": "総打鍵数",
+  "perfect_words": "完璧な単語",
+  "total_time": "総時間",
+  "retry_weak_words": "苦手な単語を復習",
+  "play_again": "もう一度プレイ（全単語）",
+  "back_to_menu": "メニューに戻る"
+}
+

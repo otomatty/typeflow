@@ -1,0 +1,54 @@
+{
+  "title": "単語管理",
+  "description": "タイピング練習用の単語を追加・管理します",
+  "add_word": "単語を追加",
+  "delete_all": "全削除",
+  "delete_all_confirm": "すべての単語を削除しますか？",
+  "delete_all_desc": "この操作は取り消せません。登録されている {{count}} 件の単語がすべて削除されます。",
+  "deleting": "削除中...",
+  "delete_confirm": "削除する",
+  "no_words": "単語がありません。最初の単語を追加するか、プリセットを読み込んでください！",
+  "preset": "プリセット",
+  "preset_title": "プリセットを読み込む",
+  "preset_desc": "あらかじめ用意された単語リストを読み込んで練習を開始できます",
+  "preset_clear_existing": "既存の単語を削除してから読み込む",
+  "preset_load": "読み込む",
+  "preset_hint": "💡 ヒント: 寿司打など外部サイトの単語リストをインポートする機能は近日追加予定です",
+  "difficulty_beginner": "初級",
+  "difficulty_intermediate": "中級",
+  "difficulty_advanced": "上級",
+  "n_words": "{{count}}語",
+  "dialog": {
+    "add_title": "新しい単語を追加",
+    "edit_title": "単語を編集",
+    "word_text": "単語 / テキスト",
+    "word_placeholder": "例: Promise.all, 非同期処理, ひらがな",
+    "reading": "読み仮名（ひらがな）",
+    "reading_required": "要入力",
+    "reading_placeholder_manual": "ひらがなで入力してください",
+    "reading_placeholder_auto": "自動生成",
+    "reading_hint": "漢字を含む場合は、読み仮名を手動で入力してください",
+    "romaji": "ローマ字（タイピング用）",
+    "romaji_placeholder": "自動生成 / 手動入力可"
+  },
+  "csv": {
+    "import": "CSVインポート",
+    "title": "CSVから単語をインポート"
+  },
+  "word_list": {
+    "search_placeholder": "単語を検索...",
+    "sort_by": "並び替え",
+    "sort_newest": "新しい順",
+    "sort_oldest": "古い順",
+    "sort_alphabetical": "アルファベット順",
+    "sort_accuracy": "正確率順",
+    "items_per_page": "{{count}} 件表示",
+    "showing": "{{from}}-{{to}} / {{total}} 件",
+    "no_results": "検索結果がありません",
+    "accuracy": "正確率",
+    "correct": "正解",
+    "miss": "ミス",
+    "mastery": "習熟度"
+  }
+}
+

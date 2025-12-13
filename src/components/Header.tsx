@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { House, ListBullets, ChartBar, Gear } from '@phosphor-icons/react'
 
@@ -9,6 +10,8 @@ interface HeaderProps {
 }
 
 export function Header({ currentView, onNavigate }: HeaderProps) {
+  const { t } = useTranslation()
+
   // Don't show header during game or gameover
   if (currentView === 'game' || currentView === 'gameover') {
     return null
@@ -32,7 +35,7 @@ export function Header({ currentView, onNavigate }: HeaderProps) {
             className="gap-2"
           >
             <House className="w-4 h-4" />
-            <span className="hidden sm:inline">Home</span>
+            <span className="hidden sm:inline">{t('header.home')}</span>
           </Button>
           <Button
             variant={currentView === 'words' ? 'secondary' : 'ghost'}
@@ -41,7 +44,7 @@ export function Header({ currentView, onNavigate }: HeaderProps) {
             className="gap-2"
           >
             <ListBullets className="w-4 h-4" />
-            <span className="hidden sm:inline">Words</span>
+            <span className="hidden sm:inline">{t('header.words')}</span>
           </Button>
           <Button
             variant={currentView === 'stats' ? 'secondary' : 'ghost'}
@@ -50,7 +53,7 @@ export function Header({ currentView, onNavigate }: HeaderProps) {
             className="gap-2"
           >
             <ChartBar className="w-4 h-4" />
-            <span className="hidden sm:inline">Stats</span>
+            <span className="hidden sm:inline">{t('header.stats')}</span>
           </Button>
           <Button
             variant={currentView === 'settings' ? 'secondary' : 'ghost'}
@@ -59,7 +62,7 @@ export function Header({ currentView, onNavigate }: HeaderProps) {
             className="gap-2"
           >
             <Gear className="w-4 h-4" />
-            <span className="hidden sm:inline">Settings</span>
+            <span className="hidden sm:inline">{t('header.settings')}</span>
           </Button>
         </nav>
       </div>

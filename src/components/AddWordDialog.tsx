@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -29,6 +30,9 @@ export function AddWordDialog({
   onOpenChange, 
   showTrigger = true 
 }: AddWordDialogProps) {
+  const { t } = useTranslation('words')
+  const { t: tc } = useTranslation('common')
+  
   const [internalOpen, setInternalOpen] = useState(false)
   
   // 制御モードかどうか
@@ -140,33 +144,33 @@ export function AddWordDialog({
         <DialogTrigger asChild>
           <Button className="gap-2">
             <Plus weight="bold" />
-            <span className="hidden sm:inline">Add Word</span>
+            <span className="hidden sm:inline">{t('add_word')}</span>
           </Button>
         </DialogTrigger>
       )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? 'Edit Word' : 'Add New Word'}</DialogTitle>
+          <DialogTitle>{isEditMode ? t('dialog.edit_title') : t('dialog.add_title')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="text">Word / Text</Label>
+            <Label htmlFor="text">{t('dialog.word_text')}</Label>
             <Input
               id="text"
               value={text}
               onChange={(e) => handleTextChange(e.target.value)}
-              placeholder="例: Promise.all, 非同期処理, ひらがな"
+              placeholder={t('dialog.word_placeholder')}
               autoFocus
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="reading" className="flex items-center gap-2">
-              Reading (Hiragana)
+              {t('dialog.reading')}
               {needsManualReading && (
                 <span className="text-xs text-amber-500 flex items-center gap-1">
                   <Warning className="w-3 h-3" />
-                  要入力
+                  {t('dialog.reading_required')}
                 </span>
               )}
             </Label>
@@ -174,32 +178,32 @@ export function AddWordDialog({
               id="reading"
               value={reading}
               onChange={(e) => handleReadingChange(e.target.value)}
-              placeholder={needsManualReading ? "ひらがなで入力してください" : "自動生成"}
+              placeholder={needsManualReading ? t('dialog.reading_placeholder_manual') : t('dialog.reading_placeholder_auto')}
               className={needsManualReading && !reading ? "border-amber-500" : ""}
             />
             {needsManualReading && (
               <p className="text-xs text-muted-foreground">
-                漢字を含む場合は、読み仮名を手動で入力してください
+                {t('dialog.reading_hint')}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="romaji">Romaji (for typing)</Label>
+            <Label htmlFor="romaji">{t('dialog.romaji')}</Label>
             <Input
               id="romaji"
               value={romaji}
               onChange={(e) => setRomaji(e.target.value)}
-              placeholder="自動生成 / 手動入力可"
+              placeholder={t('dialog.romaji_placeholder')}
             />
           </div>
 
           <div className="flex gap-2 justify-end">
             <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button type="submit" disabled={!isValid}>
-              {isEditMode ? 'Update' : 'Save'}
+              {isEditMode ? tc('update') : tc('save')}
             </Button>
           </div>
         </form>

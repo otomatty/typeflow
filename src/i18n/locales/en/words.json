@@ -1,0 +1,54 @@
+{
+  "title": "Word Management",
+  "description": "Add and manage your typing practice words",
+  "add_word": "Add Word",
+  "delete_all": "Delete All",
+  "delete_all_confirm": "Delete all words?",
+  "delete_all_desc": "This action cannot be undone. All {{count}} registered words will be deleted.",
+  "deleting": "Deleting...",
+  "delete_confirm": "Delete",
+  "no_words": "No words yet. Add your first word or load a preset!",
+  "preset": "Preset",
+  "preset_title": "Load Preset",
+  "preset_desc": "Load pre-made word lists to start practicing",
+  "preset_clear_existing": "Clear existing words before loading",
+  "preset_load": "Load",
+  "preset_hint": "💡 Hint: Import feature for external word lists (like Sushida) coming soon",
+  "difficulty_beginner": "Beginner",
+  "difficulty_intermediate": "Intermediate",
+  "difficulty_advanced": "Advanced",
+  "n_words": "{{count}} words",
+  "dialog": {
+    "add_title": "Add New Word",
+    "edit_title": "Edit Word",
+    "word_text": "Word / Text",
+    "word_placeholder": "e.g. Promise.all, async processing",
+    "reading": "Reading (Hiragana)",
+    "reading_required": "Required",
+    "reading_placeholder_manual": "Enter in hiragana",
+    "reading_placeholder_auto": "Auto-generated",
+    "reading_hint": "For kanji, please enter the reading manually",
+    "romaji": "Romaji (for typing)",
+    "romaji_placeholder": "Auto-generated / Manual entry"
+  },
+  "csv": {
+    "import": "Import CSV",
+    "title": "Import Words from CSV"
+  },
+  "word_list": {
+    "search_placeholder": "Search words...",
+    "sort_by": "Sort by",
+    "sort_newest": "Newest first",
+    "sort_oldest": "Oldest first",
+    "sort_alphabetical": "Alphabetical",
+    "sort_accuracy": "By accuracy",
+    "items_per_page": "{{count}} items",
+    "showing": "{{from}}-{{to}} of {{total}}",
+    "no_results": "No results found",
+    "accuracy": "Accuracy",
+    "correct": "Correct",
+    "miss": "Miss",
+    "mastery": "Mastery"
+  }
+}
+

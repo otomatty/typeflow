@@ -1,0 +1,22 @@
+{
+  "title": "統計",
+  "description": "タイピングの弱点を分析して効率的に練習しましょう",
+  "no_data": "データがありません",
+  "no_data_desc": "ゲームをプレイして統計を確認しましょう",
+  "keystrokes": "打鍵数",
+  "accuracy": "正確率",
+  "errors": "エラー",
+  "avg_latency": "平均反応時間",
+  "performance_history": "パフォーマンス履歴",
+  "kps_chart": "打鍵速度 (KPS)",
+  "accuracy_chart": "正確率 (%)",
+  "words_chart": "完了単語数",
+  "last_n_games": "直近 {{count}} ゲーム",
+  "keyboard_heatmap": "キーボードヒートマップ",
+  "difficult_transitions": "苦手なキー遷移",
+  "common_mistakes": "よくあるミス",
+  "times": "回",
+  "reset_stats": "統計をリセット",
+  "reset_stats_desc": "すべての統計データを削除します"
+}
+

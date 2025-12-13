@@ -1,0 +1,22 @@
+{
+  "title": "Statistics",
+  "description": "Analyze your typing weaknesses and practice efficiently",
+  "no_data": "No Data Yet",
+  "no_data_desc": "Play some games to see your statistics here",
+  "keystrokes": "Keystrokes",
+  "accuracy": "Accuracy",
+  "errors": "Errors",
+  "avg_latency": "Avg Latency",
+  "performance_history": "Performance History",
+  "kps_chart": "Keys Per Second (KPS)",
+  "accuracy_chart": "Accuracy (%)",
+  "words_chart": "Words Completed",
+  "last_n_games": "Last {{count}} games",
+  "keyboard_heatmap": "Keyboard Heatmap",
+  "difficult_transitions": "Difficult Transitions",
+  "common_mistakes": "Common Mistakes",
+  "times": "times",
+  "reset_stats": "Reset Statistics",
+  "reset_stats_desc": "Delete all statistics data"
+}
+
