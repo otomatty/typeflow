@@ -10,6 +10,8 @@ const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
 
 // https://vite.dev/config/
 export default defineConfig({
+  // GitHub Pages用のbase path設定
+  base: process.env.NODE_ENV === 'production' ? '/typeflow/' : '/',
   plugins: [
     react(),
     tailwindcss(),
