@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { AppSettings, WordCountPreset, ThemeType, PracticeMode, TimeLimitMode, DifficultyPreset } from '@/lib/types'
+import { AppSettings, WordCountPreset, ThemeType, PracticeMode, DifficultyPreset } from '@/lib/types'
 import { getSettings, saveSettings, initializeSettings, DEFAULT_SETTINGS } from '@/lib/db'
 import { DIFFICULTY_PRESETS } from '@/lib/difficulty-presets'
 
@@ -20,9 +20,8 @@ export function useSettings() {
           warmupEnabled: savedSettings.warmupEnabled ?? DEFAULT_SETTINGS.warmupEnabled,
           // 難易度設定
           difficultyPreset: savedSettings.difficultyPreset ?? DEFAULT_SETTINGS.difficultyPreset,
-          // 動的制限時間設定
-          timeLimitMode: savedSettings.timeLimitMode ?? DEFAULT_SETTINGS.timeLimitMode,
-          fixedTimeLimit: savedSettings.fixedTimeLimit ?? DEFAULT_SETTINGS.fixedTimeLimit,
+          // 制限時間設定（難易度に応じて自動計算）
+          targetKpsMultiplier: savedSettings.targetKpsMultiplier ?? DEFAULT_SETTINGS.targetKpsMultiplier,
           comfortZoneRatio: savedSettings.comfortZoneRatio ?? DEFAULT_SETTINGS.comfortZoneRatio,
           minTimeLimit: savedSettings.minTimeLimit ?? DEFAULT_SETTINGS.minTimeLimit,
           maxTimeLimit: savedSettings.maxTimeLimit ?? DEFAULT_SETTINGS.maxTimeLimit,
@@ -99,6 +98,7 @@ export function useSettings() {
       const presetParams = DIFFICULTY_PRESETS[difficultyPreset]
       const updates = {
         difficultyPreset,
+        targetKpsMultiplier: presetParams.targetKpsMultiplier,
         comfortZoneRatio: presetParams.comfortZoneRatio,
         missPenaltyEnabled: presetParams.missPenaltyEnabled,
         basePenaltyPercent: presetParams.basePenaltyPercent,
@@ -110,86 +110,6 @@ export function useSettings() {
       setSettings((prev) => ({ ...prev, ...updates }))
     } catch (error) {
       console.error('Failed to save difficulty preset:', error)
-    }
-  }, [])
-
-  // Update miss penalty enabled setting
-  const updateMissPenaltyEnabled = useCallback(async (missPenaltyEnabled: boolean) => {
-    try {
-      await saveSettings({ missPenaltyEnabled, difficultyPreset: 'custom' })
-      setSettings((prev) => ({ ...prev, missPenaltyEnabled, difficultyPreset: 'custom' }))
-    } catch (error) {
-      console.error('Failed to save miss penalty enabled setting:', error)
-    }
-  }, [])
-
-  // Update base penalty percent setting
-  const updateBasePenaltyPercent = useCallback(async (basePenaltyPercent: number) => {
-    try {
-      await saveSettings({ basePenaltyPercent, difficultyPreset: 'custom' })
-      setSettings((prev) => ({ ...prev, basePenaltyPercent, difficultyPreset: 'custom' }))
-    } catch (error) {
-      console.error('Failed to save base penalty percent setting:', error)
-    }
-  }, [])
-
-  // Update penalty escalation factor setting
-  const updatePenaltyEscalationFactor = useCallback(async (penaltyEscalationFactor: number) => {
-    try {
-      await saveSettings({ penaltyEscalationFactor, difficultyPreset: 'custom' })
-      setSettings((prev) => ({ ...prev, penaltyEscalationFactor, difficultyPreset: 'custom' }))
-    } catch (error) {
-      console.error('Failed to save penalty escalation factor setting:', error)
-    }
-  }, [])
-
-  // Update max penalty percent setting
-  const updateMaxPenaltyPercent = useCallback(async (maxPenaltyPercent: number) => {
-    try {
-      await saveSettings({ maxPenaltyPercent, difficultyPreset: 'custom' })
-      setSettings((prev) => ({ ...prev, maxPenaltyPercent, difficultyPreset: 'custom' }))
-    } catch (error) {
-      console.error('Failed to save max penalty percent setting:', error)
-    }
-  }, [])
-
-  // Update min time after penalty setting
-  const updateMinTimeAfterPenalty = useCallback(async (minTimeAfterPenalty: number) => {
-    try {
-      await saveSettings({ minTimeAfterPenalty, difficultyPreset: 'custom' })
-      setSettings((prev) => ({ ...prev, minTimeAfterPenalty, difficultyPreset: 'custom' }))
-    } catch (error) {
-      console.error('Failed to save min time after penalty setting:', error)
-    }
-  }, [])
-
-  // Update time limit mode setting
-  const updateTimeLimitMode = useCallback(async (timeLimitMode: TimeLimitMode) => {
-    try {
-      await saveSettings({ timeLimitMode })
-      setSettings((prev) => ({ ...prev, timeLimitMode }))
-    } catch (error) {
-      console.error('Failed to save time limit mode setting:', error)
-    }
-  }, [])
-
-  // Update fixed time limit setting
-  const updateFixedTimeLimit = useCallback(async (fixedTimeLimit: number) => {
-    try {
-      await saveSettings({ fixedTimeLimit })
-      setSettings((prev) => ({ ...prev, fixedTimeLimit }))
-    } catch (error) {
-      console.error('Failed to save fixed time limit setting:', error)
-    }
-  }, [])
-
-  // Update comfort zone ratio setting (switches to custom difficulty)
-  const updateComfortZoneRatio = useCallback(async (comfortZoneRatio: number) => {
-    try {
-      await saveSettings({ comfortZoneRatio, difficultyPreset: 'custom' })
-      setSettings((prev) => ({ ...prev, comfortZoneRatio, difficultyPreset: 'custom' }))
-    } catch (error) {
-      console.error('Failed to save comfort zone ratio setting:', error)
     }
   }, [])
 
@@ -232,17 +152,8 @@ export function useSettings() {
     getEffectiveWordCount,
     // 難易度プリセット
     updateDifficultyPreset,
-    // 動的制限時間設定
-    updateTimeLimitMode,
-    updateFixedTimeLimit,
-    updateComfortZoneRatio,
+    // 制限時間設定
     updateMinTimeLimit,
     updateMaxTimeLimit,
-    // ミスペナルティ設定
-    updateMissPenaltyEnabled,
-    updateBasePenaltyPercent,
-    updatePenaltyEscalationFactor,
-    updateMaxPenaltyPercent,
-    updateMinTimeAfterPenalty,
   }
 }

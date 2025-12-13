@@ -1,4 +1,4 @@
-import type { KeyStats, KeyTransitionStats, AppSettings, WordCountPreset, ThemeType, PresetWord, GameStats, PracticeMode, TimeLimitMode, DifficultyPreset } from './types'
+import type { KeyStats, KeyTransitionStats, AppSettings, WordCountPreset, ThemeType, PresetWord, GameStats, PracticeMode, DifficultyPreset } from './types'
 
 // APIベースURL
 const API_BASE = 'http://localhost:3456/api'
@@ -38,9 +38,8 @@ export interface SettingsRecord {
   warmupEnabled: boolean
   // 難易度設定
   difficultyPreset: DifficultyPreset
-  // 動的制限時間設定
-  timeLimitMode: TimeLimitMode
-  fixedTimeLimit: number
+  // 制限時間設定（難易度に応じて自動計算）
+  targetKpsMultiplier: number
   comfortZoneRatio: number
   minTimeLimit: number
   maxTimeLimit: number
@@ -193,10 +192,9 @@ export const DEFAULT_SETTINGS: AppSettings = {
   warmupEnabled: true,
   // 難易度設定（デフォルトは「ふつう」）
   difficultyPreset: 'normal',
-  // 動的制限時間のデフォルト設定
-  timeLimitMode: 'adaptive',           // デフォルトは適応型
-  fixedTimeLimit: 10,                  // 固定モード時のデフォルト制限時間
-  comfortZoneRatio: 0.85,              // 15%挑戦的（ギリギリクリアできる程度）
+  // 制限時間設定（難易度に応じて自動計算）
+  targetKpsMultiplier: 1.05,           // normalプリセット相当（5%速い目標）
+  comfortZoneRatio: 1.0,               // 1.0 = 目標KPSぴったりの制限時間
   minTimeLimit: 1.5,                   // 最小1.5秒（あまりに短すぎないように）
   maxTimeLimit: 15,                    // 最大15秒（長すぎないように）
   // ミスペナルティのデフォルト設定（normalプリセット相当）

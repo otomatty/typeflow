@@ -35,16 +35,6 @@ function App() {
     getEffectiveWordCount,
     // 難易度プリセット
     updateDifficultyPreset,
-    // 動的制限時間設定
-    updateTimeLimitMode,
-    updateFixedTimeLimit,
-    updateComfortZoneRatio,
-    // ミスペナルティ設定
-    updateMissPenaltyEnabled,
-    updateBasePenaltyPercent,
-    updatePenaltyEscalationFactor,
-    updateMaxPenaltyPercent,
-    updateMinTimeAfterPenalty,
   } = useSettings()
 
   // セッション終了時にキーストローク統計を更新
@@ -84,7 +74,7 @@ function App() {
     updateWordStats, 
     onSessionEnd: handleSessionEnd, 
     getGameWords,
-    // 動的制限時間用
+    // 制限時間計算用
     gameScores,
     settings,
   })
@@ -227,16 +217,9 @@ function App() {
           warmupEnabled={settings.warmupEnabled}
           // 難易度設定
           difficultyPreset={settings.difficultyPreset}
-          // 動的制限時間設定
-          timeLimitMode={settings.timeLimitMode}
-          fixedTimeLimit={settings.fixedTimeLimit}
-          comfortZoneRatio={settings.comfortZoneRatio}
-          // ミスペナルティ設定
-          missPenaltyEnabled={settings.missPenaltyEnabled}
-          basePenaltyPercent={settings.basePenaltyPercent}
-          penaltyEscalationFactor={settings.penaltyEscalationFactor}
-          maxPenaltyPercent={settings.maxPenaltyPercent}
-          minTimeAfterPenalty={settings.minTimeAfterPenalty}
+          // 制限時間設定
+          minTimeLimit={settings.minTimeLimit}
+          maxTimeLimit={settings.maxTimeLimit}
           gameScores={gameScores}
           onWordCountChange={updateWordCount}
           onThemeChange={updateTheme}
@@ -245,16 +228,6 @@ function App() {
           onWarmupEnabledChange={updateWarmupEnabled}
           // 難易度設定のコールバック
           onDifficultyPresetChange={updateDifficultyPreset}
-          // 動的制限時間設定のコールバック
-          onTimeLimitModeChange={updateTimeLimitMode}
-          onFixedTimeLimitChange={updateFixedTimeLimit}
-          onComfortZoneRatioChange={updateComfortZoneRatio}
-          // ミスペナルティ設定のコールバック
-          onMissPenaltyEnabledChange={updateMissPenaltyEnabled}
-          onBasePenaltyPercentChange={updateBasePenaltyPercent}
-          onPenaltyEscalationFactorChange={updatePenaltyEscalationFactor}
-          onMaxPenaltyPercentChange={updateMaxPenaltyPercent}
-          onMinTimeAfterPenaltyChange={updateMinTimeAfterPenalty}
         />
       </>
     )

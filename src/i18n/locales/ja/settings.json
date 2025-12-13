@@ -20,9 +20,7 @@
     "hard": "むずかしい",
     "hard_desc": "上級者向け。タイトな制限時間と厳しめのペナルティ",
     "expert": "エキスパート",
-    "expert_desc": "超上級者向け。限界に挑戦したい方へ",
-    "custom": "カスタム",
-    "custom_desc": "自分好みに細かく設定"
+    "expert_desc": "超上級者向け。限界に挑戦したい方へ"
   },
   "penalty": {
     "title": "ミスペナルティ（段階的割合減少）",
@@ -42,17 +40,16 @@
   },
   "time_limit": {
     "title": "制限時間",
-    "description": "ゲームの制限時間を設定します",
-    "adaptive": "適応型",
-    "adaptive_desc": "あなたの実力に合わせて自動調整",
-    "fixed": "固定",
-    "fixed_desc": "一定の制限時間で練習",
-    "your_avg_kps": "あなたの平均打鍵速度",
+    "description": "難易度に応じた目標打鍵速度に基づいて、各単語の制限時間が自動計算されます",
+    "current": "現在",
+    "target": "目標",
     "games_played": "{{count}}ゲーム",
     "keys_per_sec": "打/秒",
-    "confidence": "信頼度",
-    "comfort_note": "※ 制限時間の余裕は難易度設定で調整できます",
-    "seconds": "秒"
+    "keystrokes": "打鍵",
+    "seconds": "秒",
+    "example_title": "制限時間の例",
+    "example_word": "「さくらんぼ」",
+    "example_note": "※ 難易度を変更すると目標打鍵速度も変わります"
   },
   "advanced": {
     "title": "高度な設定",
@@ -72,15 +69,6 @@
     "system": "システム",
     "system_desc": "システム設定に従う",
     "note": "※ テーマの変更は今後のアップデートで反映されます"
-  },
-  "custom": {
-    "title": "詳細設定",
-    "time_comfort": "制限時間の余裕",
-    "miss_penalty": "ミスペナルティ",
-    "base_penalty": "基本ペナルティ",
-    "escalation_factor": "増加倍率",
-    "max_penalty": "最大ペナルティ",
-    "min_time": "最低残り時間"
   },
   "language": {
     "title": "言語",

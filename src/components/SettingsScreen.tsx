@@ -6,10 +6,10 @@ import { Card } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
-import { Check, Target, Shuffle, ClockCounterClockwise, Scales, Timer, Lightning, Gauge, Flame, Trophy, Skull, Wrench, Globe } from '@phosphor-icons/react'
-import { WordCountPreset, ThemeType, PracticeMode, TimeLimitMode, DifficultyPreset } from '@/lib/types'
+import { Check, Target, Shuffle, ClockCounterClockwise, Scales, Gauge, Flame, Trophy, Skull, Globe, ArrowRight, TrendUp } from '@phosphor-icons/react'
+import { WordCountPreset, ThemeType, PracticeMode, DifficultyPreset } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { getKpsStatus } from '@/lib/adaptive-time-utils'
+import { getKpsStatus, getTargetKpsInfo, calculateTimeLimitExample } from '@/lib/adaptive-time-utils'
 import { generatePenaltyPreview, DIFFICULTY_PRESETS } from '@/lib/difficulty-presets'
 import { GameScoreRecord } from '@/lib/db'
 
@@ -21,16 +21,9 @@ interface SettingsScreenProps {
   warmupEnabled: boolean
   // 難易度設定
   difficultyPreset: DifficultyPreset
-  // 動的制限時間設定
-  timeLimitMode: TimeLimitMode
-  fixedTimeLimit: number
-  comfortZoneRatio: number
-  // ミスペナルティ設定
-  missPenaltyEnabled: boolean
-  basePenaltyPercent: number
-  penaltyEscalationFactor: number
-  maxPenaltyPercent: number
-  minTimeAfterPenalty: number
+  // 制限時間設定
+  minTimeLimit: number
+  maxTimeLimit: number
   gameScores: GameScoreRecord[]
   onWordCountChange: (value: WordCountPreset) => void
   onThemeChange: (value: ThemeType) => void
@@ -39,16 +32,6 @@ interface SettingsScreenProps {
   onWarmupEnabledChange: (value: boolean) => void
   // 難易度設定のコールバック
   onDifficultyPresetChange: (value: DifficultyPreset) => void
-  // 動的制限時間設定のコールバック
-  onTimeLimitModeChange: (value: TimeLimitMode) => void
-  onFixedTimeLimitChange: (value: number) => void
-  onComfortZoneRatioChange: (value: number) => void
-  // ミスペナルティ設定のコールバック
-  onMissPenaltyEnabledChange: (value: boolean) => void
-  onBasePenaltyPercentChange: (value: number) => void
-  onPenaltyEscalationFactorChange: (value: number) => void
-  onMaxPenaltyPercentChange: (value: number) => void
-  onMinTimeAfterPenaltyChange: (value: number) => void
 }
 
 const MIN_WORD_COUNT = 5
@@ -62,14 +45,8 @@ export function SettingsScreen({
   srsEnabled,
   warmupEnabled,
   difficultyPreset,
-  timeLimitMode,
-  fixedTimeLimit,
-  comfortZoneRatio,
-  missPenaltyEnabled,
-  basePenaltyPercent,
-  penaltyEscalationFactor,
-  maxPenaltyPercent,
-  minTimeAfterPenalty,
+  minTimeLimit,
+  maxTimeLimit,
   gameScores,
   onWordCountChange,
   onThemeChange,
@@ -77,14 +54,6 @@ export function SettingsScreen({
   onSrsEnabledChange,
   onWarmupEnabledChange,
   onDifficultyPresetChange,
-  onTimeLimitModeChange,
-  onFixedTimeLimitChange,
-  onComfortZoneRatioChange,
-  onMissPenaltyEnabledChange,
-  onBasePenaltyPercentChange,
-  onPenaltyEscalationFactorChange,
-  onMaxPenaltyPercentChange,
-  onMinTimeAfterPenaltyChange,
 }: SettingsScreenProps) {
   const { t, i18n } = useTranslation('settings')
   
@@ -92,17 +61,24 @@ export function SettingsScreen({
   const sliderValue = typeof wordCount === 'number' ? wordCount : 20
   const kpsStatus = getKpsStatus(gameScores)
   
-  // ペナルティプレビュー用のパラメータ
-  const currentDifficultyParams = difficultyPreset === 'custom' 
-    ? { 
-        comfortZoneRatio,
-        missPenaltyEnabled, 
-        basePenaltyPercent, 
-        penaltyEscalationFactor, 
-        maxPenaltyPercent,
-        minTimeAfterPenalty,
-      }
-    : DIFFICULTY_PRESETS[difficultyPreset]
+  // 現在の難易度に応じたパラメータを取得
+  const currentDifficultyParams = DIFFICULTY_PRESETS[difficultyPreset]
+  
+  // 目標KPS情報を取得
+  const targetKpsInfo = getTargetKpsInfo(gameScores, currentDifficultyParams.targetKpsMultiplier)
+  
+  // 制限時間の例（9打鍵の単語「さくらんぼ」を想定）
+  const exampleKeystrokeCount = 9
+  const timeLimitExample = calculateTimeLimitExample(
+    exampleKeystrokeCount,
+    kpsStatus.averageKps,
+    currentDifficultyParams.targetKpsMultiplier,
+    currentDifficultyParams.comfortZoneRatio,
+    minTimeLimit,
+    maxTimeLimit
+  )
+  
+  // ペナルティプレビュー
   const penaltyPreview = generatePenaltyPreview(currentDifficultyParams, 4)
 
   // Options with translations
@@ -124,16 +100,6 @@ export function SettingsScreen({
     { value: 'random', labelKey: 'practice_mode.random', descKey: 'practice_mode.random_desc', icon: Shuffle },
   ]
 
-  const TIME_LIMIT_MODE_OPTIONS: { 
-    value: TimeLimitMode
-    labelKey: string
-    descKey: string
-    icon: typeof Timer
-  }[] = [
-    { value: 'adaptive', labelKey: 'time_limit.adaptive', descKey: 'time_limit.adaptive_desc', icon: Lightning },
-    { value: 'fixed', labelKey: 'time_limit.fixed', descKey: 'time_limit.fixed_desc', icon: Timer },
-  ]
-
   const DIFFICULTY_OPTIONS: {
     value: DifficultyPreset
     labelKey: string
@@ -145,7 +111,6 @@ export function SettingsScreen({
     { value: 'normal', labelKey: 'difficulty.normal', descKey: 'difficulty.normal_desc', icon: Flame, color: 'text-yellow-500' },
     { value: 'hard', labelKey: 'difficulty.hard', descKey: 'difficulty.hard_desc', icon: Trophy, color: 'text-orange-500' },
     { value: 'expert', labelKey: 'difficulty.expert', descKey: 'difficulty.expert_desc', icon: Skull, color: 'text-red-500' },
-    { value: 'custom', labelKey: 'difficulty.custom', descKey: 'difficulty.custom_desc', icon: Wrench, color: 'text-purple-500' },
   ]
 
   const handleSliderChange = (values: number[]) => {
@@ -159,12 +124,6 @@ export function SettingsScreen({
       onWordCountChange('all')
     } else {
       onWordCountChange(sliderValue as WordCountPreset)
-    }
-  }
-
-  const handleFixedTimeLimitChange = (values: number[]) => {
-    if (values[0] !== undefined) {
-      onFixedTimeLimitChange(values[0])
     }
   }
 
@@ -328,7 +287,7 @@ export function SettingsScreen({
                 </p>
               </div>
               
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {DIFFICULTY_OPTIONS.map((option) => {
                   const Icon = option.icon
                   return (
@@ -375,105 +334,6 @@ export function SettingsScreen({
                 </div>
               )}
 
-              {/* Custom settings (only shown when custom is selected) */}
-              {difficultyPreset === 'custom' && (
-                <div className="space-y-4 pt-4 border-t border-border/50">
-                  <p className="text-sm text-muted-foreground">{t('custom.title')}</p>
-                  
-                  {/* Comfort Zone Slider */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm">{t('custom.time_comfort')}</Label>
-                      <span className="text-sm font-medium">{Math.round(comfortZoneRatio * 100)}%</span>
-                    </div>
-                    <Slider
-                      value={[comfortZoneRatio]}
-                      onValueChange={(v) => onComfortZoneRatioChange(v[0])}
-                      min={0.60}
-                      max={1.00}
-                      step={0.05}
-                      className="w-full"
-                    />
-                  </div>
-
-                  {/* Miss Penalty Toggle */}
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm">{t('custom.miss_penalty')}</Label>
-                    <Switch
-                      checked={missPenaltyEnabled}
-                      onCheckedChange={onMissPenaltyEnabledChange}
-                    />
-                  </div>
-
-                  {missPenaltyEnabled && (
-                    <>
-                      {/* Base Penalty Percent */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm">{t('custom.base_penalty')}</Label>
-                          <span className="text-sm font-medium">{basePenaltyPercent}%</span>
-                        </div>
-                        <Slider
-                          value={[basePenaltyPercent]}
-                          onValueChange={(v) => onBasePenaltyPercentChange(v[0])}
-                          min={1}
-                          max={20}
-                          step={1}
-                          className="w-full"
-                        />
-                      </div>
-
-                      {/* Escalation Factor */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm">{t('custom.escalation_factor')}</Label>
-                          <span className="text-sm font-medium">{penaltyEscalationFactor}x</span>
-                        </div>
-                        <Slider
-                          value={[penaltyEscalationFactor]}
-                          onValueChange={(v) => onPenaltyEscalationFactorChange(v[0])}
-                          min={1.0}
-                          max={3.0}
-                          step={0.1}
-                          className="w-full"
-                        />
-                      </div>
-
-                      {/* Max Penalty */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm">{t('custom.max_penalty')}</Label>
-                          <span className="text-sm font-medium">{maxPenaltyPercent}%</span>
-                        </div>
-                        <Slider
-                          value={[maxPenaltyPercent]}
-                          onValueChange={(v) => onMaxPenaltyPercentChange(v[0])}
-                          min={10}
-                          max={80}
-                          step={5}
-                          className="w-full"
-                        />
-                      </div>
-
-                      {/* Min Time After Penalty */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm">{t('custom.min_time')}</Label>
-                          <span className="text-sm font-medium">{minTimeAfterPenalty}{t('time_limit.seconds')}</span>
-                        </div>
-                        <Slider
-                          value={[minTimeAfterPenalty]}
-                          onValueChange={(v) => onMinTimeAfterPenaltyChange(v[0])}
-                          min={0.1}
-                          max={2.0}
-                          step={0.1}
-                          className="w-full"
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
             </div>
           </Card>
         </motion.div>
@@ -526,7 +386,7 @@ export function SettingsScreen({
           </Card>
         </motion.div>
 
-        {/* Time Limit Settings */}
+        {/* Time Limit Settings - Card Style UI */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -544,99 +404,68 @@ export function SettingsScreen({
                 </p>
               </div>
 
-              {/* Time Limit Mode Selection */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {TIME_LIMIT_MODE_OPTIONS.map((option) => {
-                  const Icon = option.icon
-                  return (
-                    <button
-                      key={option.value}
-                      onClick={() => onTimeLimitModeChange(option.value)}
-                      className={cn(
-                        'relative p-4 rounded-lg border text-left transition-all',
-                        'hover:bg-secondary/80',
-                        timeLimitMode === option.value
-                          ? 'bg-primary/10 border-primary'
-                          : 'bg-secondary/50 border-border/50'
-                      )}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Icon className="w-5 h-5 text-muted-foreground" />
-                        <span className="font-medium">{t(option.labelKey)}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {t(option.descKey)}
-                      </div>
-                      {timeLimitMode === option.value && (
-                        <Check className="absolute top-2 right-2 w-5 h-5 text-primary" weight="bold" />
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-
-              {/* Adaptive Mode Settings */}
-              {timeLimitMode === 'adaptive' && (
-                <div className="space-y-4 pt-4 border-t border-border/50">
-                  {/* KPS Status */}
-                  <div className="p-4 rounded-lg bg-secondary/50">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium">{t('time_limit.your_avg_kps')}</p>
-                        <p className="text-xs text-muted-foreground">{kpsStatus.label} ({t('time_limit.games_played', { count: kpsStatus.gamesPlayed })})</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-2xl font-bold tabular-nums">{kpsStatus.averageKps}</span>
-                        <span className="text-sm text-muted-foreground ml-1">{t('time_limit.keys_per_sec')}</span>
-                      </div>
-                    </div>
-                    {kpsStatus.confidence < 100 && (
-                      <div className="mt-3">
-                        <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                          <span>{t('time_limit.confidence')}</span>
-                          <span>{kpsStatus.confidence}%</span>
-                        </div>
-                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-primary transition-all duration-500"
-                            style={{ width: `${kpsStatus.confidence}%` }}
-                          />
-                        </div>
+              {/* Current → Target KPS Card */}
+              <div className="p-5 rounded-xl bg-gradient-to-r from-secondary/80 to-primary/10 border border-border/50">
+                <div className="flex items-center justify-between gap-4">
+                  {/* Current KPS */}
+                  <div className="text-center flex-1">
+                    <p className="text-xs text-muted-foreground mb-1">{t('time_limit.current')}</p>
+                    <p className="text-3xl font-bold tabular-nums">{kpsStatus.averageKps}</p>
+                    <p className="text-xs text-muted-foreground">{t('time_limit.keys_per_sec')}</p>
+                  </div>
+                  
+                  {/* Arrow */}
+                  <div className="flex flex-col items-center gap-1">
+                    <ArrowRight className="w-6 h-6 text-primary" weight="bold" />
+                    {targetKpsInfo.isFaster && targetKpsInfo.percentDiff > 0 && (
+                      <div className="flex items-center gap-1 text-xs text-orange-500">
+                        <TrendUp className="w-3 h-3" weight="bold" />
+                        <span>+{targetKpsInfo.percentDiff}%</span>
                       </div>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {t('time_limit.comfort_note')}
-                  </p>
+                  
+                  {/* Target KPS */}
+                  <div className="text-center flex-1">
+                    <p className="text-xs text-muted-foreground mb-1">{t('time_limit.target')}</p>
+                    <p className="text-3xl font-bold tabular-nums text-primary">{targetKpsInfo.targetKps}</p>
+                    <p className="text-xs text-muted-foreground">{t('time_limit.keys_per_sec')}</p>
+                  </div>
                 </div>
-              )}
+                
+                {/* Confidence Bar */}
+                {kpsStatus.confidence < 100 && (
+                  <div className="mt-4 pt-4 border-t border-border/30">
+                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                      <span>{kpsStatus.label}</span>
+                      <span>{t('time_limit.games_played', { count: kpsStatus.gamesPlayed })}</span>
+                    </div>
+                    <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-primary transition-all duration-500"
+                        style={{ width: `${kpsStatus.confidence}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
 
-              {/* Fixed Mode Settings */}
-              {timeLimitMode === 'fixed' && (
-                <div className="space-y-4 pt-4 border-t border-border/50">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">{t('time_limit.title')}</span>
-                    <span className="text-2xl font-bold tabular-nums">
-                      {fixedTimeLimit}
-                      <span className="text-sm font-normal text-muted-foreground ml-1">{t('time_limit.seconds')}</span>
-                    </span>
+              {/* Time Limit Example */}
+              <div className="p-4 rounded-lg bg-muted/50 border border-border/30">
+                <p className="text-sm font-medium mb-2">{t('time_limit.example_title')}</p>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    {t('time_limit.example_word')} ({exampleKeystrokeCount}{t('time_limit.keystrokes')})
                   </div>
-                  
-                  <Slider
-                    value={[fixedTimeLimit]}
-                    onValueChange={handleFixedTimeLimitChange}
-                    min={3}
-                    max={30}
-                    step={1}
-                    className="w-full"
-                  />
-                  
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>3{t('time_limit.seconds')}</span>
-                    <span>30{t('time_limit.seconds')}</span>
+                  <div className="text-right">
+                    <span className="text-xl font-bold tabular-nums text-primary">{timeLimitExample}</span>
+                    <span className="text-sm text-muted-foreground ml-1">{t('time_limit.seconds')}</span>
                   </div>
                 </div>
-              )}
+                <p className="text-xs text-muted-foreground mt-2">
+                  {t('time_limit.example_note')}
+                </p>
+              </div>
 
             </div>
           </Card>

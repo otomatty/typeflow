@@ -85,16 +85,15 @@ export type ThemeType = 'light' | 'dark' | 'system'
 // 練習モード
 export type PracticeMode = 'balanced' | 'weakness-focus' | 'review' | 'random'
 
-// 動的制限時間モード
-export type TimeLimitMode = 'fixed' | 'adaptive'
-
 // 共通難易度プリセット
-export type DifficultyPreset = 'easy' | 'normal' | 'hard' | 'expert' | 'custom'
+export type DifficultyPreset = 'easy' | 'normal' | 'hard' | 'expert'
 
 // 難易度に関連するパラメータ（プリセットで一括設定）
 export interface DifficultyParams {
-  // 適応型制限時間
-  comfortZoneRatio: number          // コンフォートゾーン係数 (0.70〜1.00) - 低いほど挑戦的
+  // 目標KPS（現在の平均KPSに対する倍率）
+  targetKpsMultiplier: number       // 1.0 = 現在と同じ、1.1 = 10%速い目標
+  // 制限時間の余裕
+  comfortZoneRatio: number          // 1.0 = ぴったり、>1.0 = 余裕あり
   // ミスペナルティ
   missPenaltyEnabled: boolean       // ミスペナルティ有効化
   basePenaltyPercent: number        // 基本ペナルティ割合 (%)
@@ -112,10 +111,9 @@ export interface AppSettings {
   warmupEnabled: boolean      // ウォームアップフェーズ有効化
   // 難易度設定
   difficultyPreset: DifficultyPreset  // 難易度プリセット
-  // 動的制限時間設定
-  timeLimitMode: TimeLimitMode      // 制限時間モード: fixed（固定） or adaptive（適応型）
-  fixedTimeLimit: number            // 固定モード時の制限時間（秒）
-  comfortZoneRatio: number          // コンフォートゾーン係数 (0.70〜1.00) - 低いほど挑戦的
+  // 制限時間設定（難易度に応じて自動計算）
+  targetKpsMultiplier: number       // 目標KPS倍率（現在のKPSに対する比率）
+  comfortZoneRatio: number          // 制限時間の余裕（1.0 = ぴったり）
   minTimeLimit: number              // 最小制限時間（秒）
   maxTimeLimit: number              // 最大制限時間（秒）
   // ミスペナルティ設定

@@ -13,7 +13,7 @@ interface UseGameProps {
   updateWordStats: (wordId: string, correct: boolean) => void
   onSessionEnd?: (keystrokes: KeystrokeRecord[]) => void
   getGameWords?: () => Word[]  // Returns words with settings applied (e.g., word count limit)
-  // 動的制限時間用
+  // 制限時間計算用
   gameScores?: GameScoreRecord[]
   settings?: AppSettings
 }
@@ -226,6 +226,7 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
         
         if (settings) {
           const difficultyParams: DifficultyParams = {
+            targetKpsMultiplier: settings.targetKpsMultiplier,
             comfortZoneRatio: settings.comfortZoneRatio,
             missPenaltyEnabled: settings.missPenaltyEnabled,
             basePenaltyPercent: settings.basePenaltyPercent,

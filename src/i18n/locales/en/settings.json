@@ -20,9 +20,7 @@
     "hard": "Hard",
     "hard_desc": "For advanced users. Tight time limit and strict penalties",
     "expert": "Expert",
-    "expert_desc": "For experts. Push your limits",
-    "custom": "Custom",
-    "custom_desc": "Fine-tune to your preference"
+    "expert_desc": "For experts. Push your limits"
   },
   "penalty": {
     "title": "Miss Penalty (Progressive Reduction)",
@@ -42,17 +40,16 @@
   },
   "time_limit": {
     "title": "Time Limit",
-    "description": "Set the game time limit",
-    "adaptive": "Adaptive",
-    "adaptive_desc": "Automatically adjusts to your skill level",
-    "fixed": "Fixed",
-    "fixed_desc": "Practice with a constant time limit",
-    "your_avg_kps": "Your Average Typing Speed",
+    "description": "Time limit for each word is automatically calculated based on target typing speed",
+    "current": "Current",
+    "target": "Target",
     "games_played": "{{count}} games",
     "keys_per_sec": "keys/sec",
-    "confidence": "Confidence",
-    "comfort_note": "Note: Time limit comfort can be adjusted in difficulty settings",
-    "seconds": "sec"
+    "keystrokes": " keystrokes",
+    "seconds": "sec",
+    "example_title": "Time Limit Example",
+    "example_word": "\"sakuranbo\"",
+    "example_note": "Note: Changing difficulty also changes target typing speed"
   },
   "advanced": {
     "title": "Advanced Settings",
@@ -72,15 +69,6 @@
     "system": "System",
     "system_desc": "Follow system settings",
     "note": "Note: Theme changes will be reflected in future updates"
-  },
-  "custom": {
-    "title": "Detailed Settings",
-    "time_comfort": "Time Limit Comfort",
-    "miss_penalty": "Miss Penalty",
-    "base_penalty": "Base Penalty",
-    "escalation_factor": "Escalation Factor",
-    "max_penalty": "Max Penalty",
-    "min_time": "Minimum Remaining Time"
   },
   "language": {
     "title": "Language",

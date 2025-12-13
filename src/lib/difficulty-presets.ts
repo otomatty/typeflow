@@ -6,10 +6,14 @@
 import type { DifficultyPreset, DifficultyParams } from './types'
 
 // 各難易度プリセットのパラメータ
+// targetKpsMultiplier: 目標KPSの倍率（現在のKPSに対する比率）
+// comfortZoneRatio: 制限時間の倍率（1.0 = 目標KPSぴったり、>1.0 = 余裕あり）
 export const DIFFICULTY_PRESETS: Record<DifficultyPreset, DifficultyParams> = {
   easy: {
-    // 適応型制限時間: ゆとりあり
-    comfortZoneRatio: 0.95,
+    // 目標: 現在と同じ速度
+    targetKpsMultiplier: 1.0,
+    // 制限時間: 15%余裕あり
+    comfortZoneRatio: 1.15,
     // ミスペナルティ: 緩め
     missPenaltyEnabled: true,
     basePenaltyPercent: 3,
@@ -18,8 +22,10 @@ export const DIFFICULTY_PRESETS: Record<DifficultyPreset, DifficultyParams> = {
     minTimeAfterPenalty: 1.0,
   },
   normal: {
-    // 適応型制限時間: 標準
-    comfortZoneRatio: 0.85,
+    // 目標: 現在より5%速い
+    targetKpsMultiplier: 1.05,
+    // 制限時間: 目標KPSぴったり
+    comfortZoneRatio: 1.0,
     // ミスペナルティ: 標準
     missPenaltyEnabled: true,
     basePenaltyPercent: 5,
@@ -28,8 +34,10 @@ export const DIFFICULTY_PRESETS: Record<DifficultyPreset, DifficultyParams> = {
     minTimeAfterPenalty: 0.5,
   },
   hard: {
-    // 適応型制限時間: タイト
-    comfortZoneRatio: 0.75,
+    // 目標: 現在より15%速い
+    targetKpsMultiplier: 1.15,
+    // 制限時間: 目標KPSぴったり
+    comfortZoneRatio: 1.0,
     // ミスペナルティ: 厳しめ
     missPenaltyEnabled: true,
     basePenaltyPercent: 8,
@@ -38,23 +46,16 @@ export const DIFFICULTY_PRESETS: Record<DifficultyPreset, DifficultyParams> = {
     minTimeAfterPenalty: 0.3,
   },
   expert: {
-    // 適応型制限時間: 非常にタイト
-    comfortZoneRatio: 0.65,
+    // 目標: 現在より30%速い
+    targetKpsMultiplier: 1.30,
+    // 制限時間: 5%厳しい（さらに難しく）
+    comfortZoneRatio: 0.95,
     // ミスペナルティ: 非常に厳しい
     missPenaltyEnabled: true,
     basePenaltyPercent: 10,
     penaltyEscalationFactor: 2.0,
     maxPenaltyPercent: 50,
     minTimeAfterPenalty: 0.2,
-  },
-  custom: {
-    // カスタム: デフォルトはnormalと同じ（ユーザーが変更）
-    comfortZoneRatio: 0.85,
-    missPenaltyEnabled: true,
-    basePenaltyPercent: 5,
-    penaltyEscalationFactor: 1.5,
-    maxPenaltyPercent: 30,
-    minTimeAfterPenalty: 0.5,
   },
 }
 
@@ -75,10 +76,6 @@ export const DIFFICULTY_LABELS: Record<DifficultyPreset, { name: string; descrip
   expert: {
     name: 'エキスパート',
     description: '超上級者向け。限界に挑戦したい方へ',
-  },
-  custom: {
-    name: 'カスタム',
-    description: '自分好みに細かく設定',
   },
 }
 
