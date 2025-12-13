@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
-import { Check, Target, Shuffle, ClockCounterClockwise, Scales, Gauge, Flame, Trophy, Skull, Globe, ArrowRight, TrendUp } from '@phosphor-icons/react'
+import { Check, Target, Shuffle, ClockCounterClockwise, Gauge, Flame, Trophy, Skull, Globe, ArrowRight, TrendUp } from '@phosphor-icons/react'
 import { WordCountPreset, ThemeType, PracticeMode, DifficultyPreset } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { getKpsStatus, getTargetKpsInfo, calculateTimeLimitExample } from '@/lib/adaptive-time-utils'
@@ -94,10 +94,9 @@ export function SettingsScreen({
     descKey: string
     icon: typeof Target
   }[] = [
-    { value: 'balanced', labelKey: 'practice_mode.balanced', descKey: 'practice_mode.balanced_desc', icon: Scales },
+    { value: 'random', labelKey: 'practice_mode.random', descKey: 'practice_mode.random_desc', icon: Shuffle },
     { value: 'weakness-focus', labelKey: 'practice_mode.weakness', descKey: 'practice_mode.weakness_desc', icon: Target },
     { value: 'review', labelKey: 'practice_mode.review', descKey: 'practice_mode.review_desc', icon: ClockCounterClockwise },
-    { value: 'random', labelKey: 'practice_mode.random', descKey: 'practice_mode.random_desc', icon: Shuffle },
   ]
 
   const DIFFICULTY_OPTIONS: {
@@ -353,7 +352,7 @@ export function SettingsScreen({
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {PRACTICE_MODE_OPTIONS.map((option) => {
                   const Icon = option.icon
                   return (
@@ -405,7 +404,7 @@ export function SettingsScreen({
               </div>
 
               {/* Current → Target KPS Card */}
-              <div className="p-5 rounded-xl bg-gradient-to-r from-secondary/80 to-primary/10 border border-border/50">
+              <div className="p-5 rounded-xl bg-linear-to-r from-secondary/80 to-primary/10 border border-border/50">
                 <div className="flex items-center justify-between gap-4">
                   {/* Current KPS */}
                   <div className="text-center flex-1">

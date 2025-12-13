@@ -223,37 +223,33 @@ export type PracticeModeWeights = {
 export function getWeightsForPracticeMode(mode: string): PracticeModeWeights {
   switch (mode) {
     case 'weakness-focus':
+      // 弱点強化: 正確率が低い単語を優先し、ランダム順で出題
+      // 正確率（accuracy）ベースで選択し、順序はランダム
       return {
-        weakness: 0.55,
-        timeDecay: 0.20,
-        novelty: 0.10,
-        difficultyAdjust: 0.05,
-        random: 0.10,
+        weakness: 0.85,  // 正確率ベースの弱点スコアを最重視
+        timeDecay: 0.0,
+        novelty: 0.0,
+        difficultyAdjust: 0.0,
+        random: 0.15,    // ランダム性を追加して順序をシャッフル
       }
     case 'review':
+      // 復習優先: SRSに基づいて復習が必要な単語を優先
       return {
-        weakness: 0.20,
-        timeDecay: 0.50,
-        novelty: 0.10,
-        difficultyAdjust: 0.05,
-        random: 0.15,
+        weakness: 0.0,
+        timeDecay: 0.90,  // SRSのタイムディケイを最重視
+        novelty: 0.0,
+        difficultyAdjust: 0.0,
+        random: 0.10,
       }
     case 'random':
+    default:
+      // ランダム: 完全にランダムに出題
       return {
         weakness: 0.0,
         timeDecay: 0.0,
         novelty: 0.0,
         difficultyAdjust: 0.0,
         random: 1.0,
-      }
-    case 'balanced':
-    default:
-      return {
-        weakness: 0.35,
-        timeDecay: 0.25,
-        novelty: 0.15,
-        difficultyAdjust: 0.10,
-        random: 0.15,
       }
   }
 }

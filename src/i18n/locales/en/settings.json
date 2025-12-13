@@ -29,12 +29,10 @@
   "practice_mode": {
     "title": "Practice Mode",
     "description": "Select the word selection algorithm",
-    "balanced": "Balanced",
-    "balanced_desc": "Balanced mix of weaknesses, review, and new words",
     "weakness": "Weakness Focus",
-    "weakness_desc": "Focus on words you struggle with",
+    "weakness_desc": "Low accuracy words first, in random order",
     "review": "Review Priority",
-    "review_desc": "Prioritize words you're forgetting",
+    "review_desc": "SRS-based review timing priority",
     "random": "Random",
     "random_desc": "Completely random selection"
   },

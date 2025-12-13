@@ -187,7 +187,7 @@ export async function resetAggregatedStats(): Promise<void> {
 export const DEFAULT_SETTINGS: AppSettings = {
   wordCount: 'all',
   theme: 'dark',
-  practiceMode: 'balanced',
+  practiceMode: 'random',
   srsEnabled: true,
   warmupEnabled: true,
   // 難易度設定（デフォルトは「ふつう」）

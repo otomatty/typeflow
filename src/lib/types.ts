@@ -83,7 +83,7 @@ export type WordCountPreset = number | 'all'
 export type ThemeType = 'light' | 'dark' | 'system'
 
 // 練習モード
-export type PracticeMode = 'balanced' | 'weakness-focus' | 'review' | 'random'
+export type PracticeMode = 'random' | 'weakness-focus' | 'review'
 
 // 共通難易度プリセット
 export type DifficultyPreset = 'easy' | 'normal' | 'hard' | 'expert'

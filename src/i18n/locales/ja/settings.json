@@ -29,12 +29,10 @@
   "practice_mode": {
     "title": "練習モード",
     "description": "出題アルゴリズムを選択します",
-    "balanced": "バランス",
-    "balanced_desc": "弱点・復習・新規をバランスよく出題",
     "weakness": "弱点強化",
-    "weakness_desc": "苦手な単語を重点的に練習",
+    "weakness_desc": "正確率が低い単語を優先してランダム順で出題",
     "review": "復習優先",
-    "review_desc": "忘れかけの単語を優先して復習",
+    "review_desc": "SRSに基づいて復習時期の単語を優先して出題",
     "random": "ランダム",
     "random_desc": "完全にランダムに出題"
   },
