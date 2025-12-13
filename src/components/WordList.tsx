@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
@@ -31,11 +31,12 @@ interface WordListProps {
   onDeleteWord: (id: string) => void
   onEditWord?: (id: string, word: { text: string; reading: string; romaji: string }) => void
   showSortAndPagination?: boolean
+  searchQuery?: string
 }
 
 const WORDS_PER_PAGE = 50
 
-export function WordList({ words, onDeleteWord, onEditWord, showSortAndPagination = true }: WordListProps) {
+export function WordList({ words, onDeleteWord, onEditWord, showSortAndPagination = true, searchQuery = '' }: WordListProps) {
   const { t } = useTranslation('words')
   
   const [sortOrder, setSortOrder] = useState<SortOrder>('accuracy')
@@ -55,8 +56,19 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
     }
   }
 
+  // Filter words by search query
+  const filteredWords = useMemo(() => {
+    if (!searchQuery.trim()) return words
+    const query = searchQuery.toLowerCase().trim()
+    return words.filter((word) => 
+      word.text.toLowerCase().includes(query) ||
+      word.reading.toLowerCase().includes(query) ||
+      word.romaji.toLowerCase().includes(query)
+    )
+  }, [words, searchQuery])
+
   const sortedWords = useMemo(() => {
-    const sorted = [...words]
+    const sorted = [...filteredWords]
     if (sortOrder === 'accuracy') {
       // Sort by accuracy (worst first), then by miss count (more misses first)
       sorted.sort((a, b) => {
@@ -70,7 +82,7 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
       sorted.sort((a, b) => b.stats.createdAt - a.stats.createdAt)
     }
     return sorted
-  }, [words, sortOrder])
+  }, [filteredWords, sortOrder])
 
   const totalPages = Math.ceil(sortedWords.length / WORDS_PER_PAGE)
   
@@ -85,6 +97,11 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
     setSortOrder(value)
     setCurrentPage(1)
   }
+
+  // Reset to page 1 when search query changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery])
 
   if (words.length === 0) {
     return (
@@ -180,7 +197,9 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 justify-between w-full">
             <div className="text-sm text-muted-foreground">
-              {t('n_words', { count: words.length })}
+              {searchQuery.trim() 
+                ? `${filteredWords.length} / ${words.length}`
+                : t('n_words', { count: words.length })}
             </div>
             <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">{t('word_list.sort_by')}:</span>
@@ -203,6 +222,12 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
         </div>
       )}
 
+      {/* 検索結果なしの表示 */}
+      {searchQuery.trim() && filteredWords.length === 0 ? (
+        <Card className="p-6 text-center text-muted-foreground">
+          <p>{t('word_list.no_results')}</p>
+        </Card>
+      ) : (
       <div className="space-y-1">
         {paginatedWords.map((word, index) => {
           const hasStats = word.stats.correct + word.stats.miss > 0
@@ -272,6 +297,7 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
           )
         })}
       </div>
+      )}
 
       {showSortAndPagination && totalPages > 1 && (
         <Pagination className="mt-6">

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { AddWordDialog } from '@/components/AddWordDialog'
 import { PresetDialog } from '@/components/PresetDialog'
 import { CSVImportDialog } from '@/components/CSVImportDialog'
@@ -9,7 +10,7 @@ import { WordList } from '@/components/WordList'
 import { ScreenHeader } from '@/components/ScreenHeader'
 import { Container } from '@/components/Container'
 import { Word, PresetWord } from '@/lib/types'
-import { Trash, DotsThreeVertical, Package, FileArrowUp } from '@phosphor-icons/react'
+import { Trash, DotsThreeVertical, Package, FileArrowUp, MagnifyingGlass } from '@phosphor-icons/react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,6 +52,7 @@ export function WordManagementScreen({
   const [presetDialogOpen, setPresetDialogOpen] = useState(false)
   const [csvDialogOpen, setCsvDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const handleLoadPreset = async (
     presetWords: PresetWord[], 
@@ -75,11 +77,23 @@ export function WordManagementScreen({
           title={t('title')}
           description={t('description')}
           action={
-            <div className="flex gap-2">
-              {/* モバイル: ドロップダウンメニュー */}
+            <div className="flex gap-2 items-center flex-1 max-w-md ml-4">
+              {/* 検索バー */}
+              <div className="relative flex-1">
+                <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder={t('word_list.search_placeholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 h-9"
+                />
+              </div>
+
+              {/* ドロップダウンメニュー（全画面サイズ共通） */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="sm:hidden">
+                  <Button variant="outline" size="icon" className="shrink-0">
                     <DotsThreeVertical className="w-5 h-5" weight="bold" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -107,34 +121,6 @@ export function WordManagementScreen({
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* デスクトップ: 通常のボタン */}
-              {words.length > 0 && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="hidden sm:flex text-destructive hover:text-destructive"
-                  onClick={() => setDeleteDialogOpen(true)}
-                >
-                  <Trash className="w-4 h-4 mr-1" />
-                  {t('delete_all')}
-                </Button>
-              )}
-              <Button 
-                variant="outline" 
-                className="hidden sm:flex gap-2"
-                onClick={() => setPresetDialogOpen(true)}
-              >
-                <Package className="w-4 h-4" />
-                {t('preset')}
-              </Button>
-              <Button 
-                variant="outline" 
-                className="hidden sm:flex gap-2"
-                onClick={() => setCsvDialogOpen(true)}
-              >
-                <FileArrowUp className="w-4 h-4" />
-                {t('csv.import')}
-              </Button>
               <AddWordDialog onAddWord={onAddWord} />
 
               {/* ダイアログ（制御モード） */}
@@ -188,7 +174,7 @@ export function WordManagementScreen({
         </Card>
       ) : (
         <>
-          <WordList words={words} onDeleteWord={onDeleteWord} onEditWord={onEditWord} />
+          <WordList words={words} onDeleteWord={onDeleteWord} onEditWord={onEditWord} searchQuery={searchQuery} />
         </>
       )}
     </Container>
