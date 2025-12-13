@@ -12,6 +12,8 @@
   "total_time": "総時間",
   "retry_weak_words": "苦手な単語を復習",
   "play_again": "もう一度プレイ（全単語）",
-  "back_to_menu": "メニューに戻る"
+  "back_to_menu": "メニューに戻る",
+  "word_accuracy": "正確率",
+  "practice_count": "練習回数"
 }
 

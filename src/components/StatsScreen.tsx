@@ -1,8 +1,15 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Trash, Keyboard, ArrowRight, Warning, Swap, ChartLine } from '@phosphor-icons/react'
 import { KeyboardHeatmap } from '@/components/KeyboardHeatmap'
 import { ScreenHeader } from '@/components/ScreenHeader'
@@ -19,9 +26,12 @@ interface StatsScreenProps {
   onReset: () => void
 }
 
+type ChartRangeOption = 30 | 100 | 500
+
 export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: StatsScreenProps) {
   const { t, i18n } = useTranslation('stats')
   const { t: tc } = useTranslation('common')
+  const [chartRange, setChartRange] = useState<ChartRangeOption>(30)
 
   // Calculate summary statistics
   const summary = useMemo(() => {
@@ -45,9 +55,9 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
     }
   }, [keyStats])
 
-  // Prepare chart data (最新30件を古い順に並べる、マイナス値は0に変換)
+  // Prepare chart data (選択された件数を古い順に並べる、マイナス値は0に変換)
   const chartData = useMemo(() => {
-    const scores = [...gameScores].reverse().slice(-30)
+    const scores = [...gameScores].reverse().slice(-chartRange)
     const locale = i18n.language?.startsWith('ja') ? 'ja-JP' : 'en-US'
     return scores.map((score, index) => ({
       game: index + 1,
@@ -61,7 +71,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
         minute: '2-digit'
       }),
     }))
-  }, [gameScores, i18n.language])
+  }, [gameScores, i18n.language, chartRange])
 
   // Combined chart configuration
   const combinedChartConfig: ChartConfig = {
@@ -184,10 +194,25 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                 transition={{ delay: 0.15 }}
               >
                 <Card className="p-4 sm:p-6">
-                  <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <ChartLine className="w-5 h-5" />
-                    {t('performance_history')}
-                  </h2>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold flex items-center gap-2">
+                      <ChartLine className="w-5 h-5" />
+                      {t('performance_history')}
+                    </h2>
+                    <Select
+                      value={String(chartRange)}
+                      onValueChange={(value) => setChartRange(Number(value) as ChartRangeOption)}
+                    >
+                      <SelectTrigger className="w-[140px]" size="sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="30">{t('last_n_games', { count: 30 })}</SelectItem>
+                        <SelectItem value="100">{t('last_n_games', { count: 100 })}</SelectItem>
+                        <SelectItem value="500">{t('last_n_games', { count: 500 })}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <ChartContainer config={combinedChartConfig} className="h-[300px] w-full">
                     <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                       <defs>
@@ -270,9 +295,11 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                       />
                     </ComposedChart>
                   </ChartContainer>
-                  <p className="text-xs text-muted-foreground text-center mt-4">
-                    {t('last_n_games', { count: chartData.length })}
-                  </p>
+                  {chartData.length < chartRange && chartData.length > 0 && (
+                    <p className="text-xs text-muted-foreground text-center mt-4">
+                      {t('showing_games', { showing: chartData.length, total: chartRange })}
+                    </p>
+                  )}
                 </Card>
               </motion.div>
             )}

@@ -12,6 +12,7 @@
   "accuracy_chart": "Accuracy (%)",
   "words_chart": "Words Completed",
   "last_n_games": "Last {{count}} games",
+  "showing_games": "Showing {{showing}} / {{total}} games",
   "keyboard_heatmap": "Keyboard Heatmap",
   "difficult_transitions": "Difficult Transitions",
   "common_mistakes": "Common Mistakes",

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { Word } from '@/lib/types'
 import { normalizeRomaji, getMatchingVariation } from '@/lib/romaji-utils'
 
@@ -9,11 +10,15 @@ interface TypingDisplayProps {
 }
 
 export function TypingDisplay({ word, currentInput, showError }: TypingDisplayProps) {
+  const { t } = useTranslation('game')
   const normalizedInput = normalizeRomaji(currentInput)
   
   // Get the variation that matches the current input
   const matchingVariation = getMatchingVariation(word.romaji, currentInput)
   const displayTarget = matchingVariation || normalizeRomaji(word.romaji)
+
+  // 練習回数を計算
+  const practiceCount = word.stats.correct + word.stats.miss
 
   const renderRomaji = () => {
     return displayTarget.split('').map((char, index) => {
@@ -52,6 +57,30 @@ export function TypingDisplay({ word, currentInput, showError }: TypingDisplayPr
       
       <div className="text-base sm:text-lg md:text-xl font-medium tracking-wider mt-2">
         {renderRomaji()}
+      </div>
+
+      {/* 単語の過去統計（正確率・練習回数） */}
+      <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground/70">
+        <div className="flex items-center gap-1">
+          <span>{t('word_accuracy')}:</span>
+          <span className={`font-medium tabular-nums ${
+            practiceCount === 0 
+              ? 'text-muted-foreground/50' 
+              : word.stats.accuracy >= 80 
+                ? 'text-green-500' 
+                : word.stats.accuracy >= 50 
+                  ? 'text-yellow-500' 
+                  : 'text-red-500'
+          }`}>
+            {practiceCount > 0 ? `${Math.round(word.stats.accuracy)}%` : '-'}
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span>{t('practice_count')}:</span>
+          <span className="font-medium tabular-nums">
+            {practiceCount > 0 ? practiceCount : '-'}
+          </span>
+        </div>
       </div>
 
       {showError && (

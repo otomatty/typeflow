@@ -12,6 +12,7 @@
   "accuracy_chart": "正確率 (%)",
   "words_chart": "完了単語数",
   "last_n_games": "直近 {{count}} ゲーム",
+  "showing_games": "{{showing}} / {{total}} ゲームを表示中",
   "keyboard_heatmap": "キーボードヒートマップ",
   "difficult_transitions": "苦手なキー遷移",
   "common_mistakes": "よくあるミス",
