@@ -14,6 +14,15 @@
   "play_again": "もう一度プレイ（全単語）",
   "back_to_menu": "メニューに戻る",
   "word_accuracy": "正確率",
-  "practice_count": "練習回数"
+  "practice_count": "練習回数",
+  "avg_reaction_time": "平均初動時間",
+  "first_key_accuracy": "初動正確率",
+  "word_performance": "単語別パフォーマンス",
+  "word": "単語",
+  "reaction": "初動",
+  "time": "時間",
+  "miss": "ミス",
+  "first_key": "初動キー",
+  "timeout": "時間切れ"
 }
 

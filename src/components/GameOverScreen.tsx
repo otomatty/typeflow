@@ -1,9 +1,21 @@
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Play, ArrowCounterClockwise } from '@phosphor-icons/react'
-import { GameStats } from '@/lib/types'
+import { 
+  Play, 
+  ArrowCounterClockwise, 
+  Timer, 
+  Target,
+  Check,
+  X,
+  CaretUp,
+  CaretDown,
+  Clock,
+} from '@phosphor-icons/react'
+import { GameStats, WordPerformanceRecord } from '@/lib/types'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface GameOverScreenProps {
   stats: GameStats
@@ -13,6 +25,42 @@ interface GameOverScreenProps {
   onExit: () => void
 }
 
+type SortKey = 'order' | 'reactionTime' | 'missCount' | 'totalTime'
+type SortDirection = 'asc' | 'desc'
+
+// 初動時間の閾値（ms）
+const REACTION_TIME_FAST = 400
+const REACTION_TIME_SLOW = 800
+
+function getReactionTimeColor(reactionTime: number): string {
+  if (reactionTime < REACTION_TIME_FAST) return 'text-green-500'
+  if (reactionTime < REACTION_TIME_SLOW) return 'text-yellow-500'
+  return 'text-red-500'
+}
+
+function getReactionTimeBgColor(reactionTime: number): string {
+  if (reactionTime < REACTION_TIME_FAST) return 'bg-green-500/10'
+  if (reactionTime < REACTION_TIME_SLOW) return 'bg-yellow-500/10'
+  return 'bg-red-500/10'
+}
+
+// 時間をフォーマット（日本語: 秒、英語: ms）
+function formatReactionTime(ms: number, isJapanese: boolean): string {
+  if (ms <= 0) return '-'
+  if (isJapanese) {
+    return `${(ms / 1000).toFixed(2)}秒`
+  }
+  return `${ms}ms`
+}
+
+function formatTotalTime(ms: number, isJapanese: boolean): string {
+  const seconds = ms / 1000
+  if (isJapanese) {
+    return `${seconds.toFixed(1)}秒`
+  }
+  return `${seconds.toFixed(1)}s`
+}
+
 export function GameOverScreen({ 
   stats, 
   hasMistakes, 
@@ -20,7 +68,61 @@ export function GameOverScreen({
   onRetryWeak,
   onExit 
 }: GameOverScreenProps) {
-  const { t } = useTranslation('game')
+  const { t, i18n } = useTranslation('game')
+  const [sortKey, setSortKey] = useState<SortKey>('order')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  
+  // 日本語かどうかを判定
+  const isJapanese = i18n.language?.startsWith('ja') ?? false
+
+  // ソートされた単語パフォーマンスリスト
+  const sortedPerformances = useMemo(() => {
+    const performances = stats.wordPerformances.map((p, index) => ({ ...p, originalIndex: index }))
+    
+    return performances.sort((a, b) => {
+      let comparison = 0
+      
+      switch (sortKey) {
+        case 'order':
+          comparison = a.originalIndex - b.originalIndex
+          break
+        case 'reactionTime':
+          comparison = a.reactionTime - b.reactionTime
+          break
+        case 'missCount':
+          comparison = a.missCount - b.missCount
+          break
+        case 'totalTime':
+          comparison = a.totalTime - b.totalTime
+          break
+      }
+      
+      return sortDirection === 'asc' ? comparison : -comparison
+    })
+  }, [stats.wordPerformances, sortKey, sortDirection])
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDirection(key === 'order' ? 'asc' : 'desc')
+    }
+  }
+
+  const SortButton = ({ sortKeyValue, children }: { sortKeyValue: SortKey; children: React.ReactNode }) => (
+    <button
+      onClick={() => handleSort(sortKeyValue)}
+      className={`flex items-center gap-1 text-xs font-medium transition-colors hover:text-primary ${
+        sortKey === sortKeyValue ? 'text-primary' : 'text-muted-foreground'
+      }`}
+    >
+      {children}
+      {sortKey === sortKeyValue && (
+        sortDirection === 'asc' ? <CaretUp className="w-3 h-3" /> : <CaretDown className="w-3 h-3" />
+      )}
+    </button>
+  )
 
   return (
     <motion.div
@@ -28,12 +130,13 @@ export function GameOverScreen({
       animate={{ opacity: 1, scale: 1 }}
       className="flex items-center justify-center min-h-screen p-4"
     >
-      <Card className="w-full max-w-md p-6 sm:p-8 space-y-6">
+      <Card className="w-full max-w-2xl p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-hidden flex flex-col">
         <div className="text-center">
           <h2 className="text-2xl sm:text-3xl font-bold mb-2">{t('game_over')}</h2>
           <p className="text-muted-foreground">{t('great_session')}</p>
         </div>
 
+        {/* Main Stats */}
         <div className="grid grid-cols-2 gap-4">
           <div className="text-center p-4 bg-secondary rounded-lg">
             <div className="text-3xl sm:text-4xl font-bold text-primary">{stats.kps}</div>
@@ -46,6 +149,30 @@ export function GameOverScreen({
           </div>
         </div>
 
+        {/* First Key Stats */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Timer className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <div className="text-lg font-bold">{formatReactionTime(stats.avgReactionTime, isJapanese)}</div>
+              <div className="text-xs text-muted-foreground">{t('avg_reaction_time')}</div>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Target className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <div className="text-lg font-bold">{stats.firstKeyAccuracy}%</div>
+              <div className="text-xs text-muted-foreground">{t('first_key_accuracy')}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Additional Stats */}
         <div className="space-y-2 text-sm text-center">
           <div className="flex justify-between px-4">
             <span className="text-muted-foreground">{t('total_keystrokes')}:</span>
@@ -57,11 +184,41 @@ export function GameOverScreen({
           </div>
           <div className="flex justify-between px-4">
             <span className="text-muted-foreground">{t('total_time')}:</span>
-            <span className="font-bold">{Math.round(stats.totalTime)}s</span>
+            <span className="font-bold">{isJapanese ? `${Math.round(stats.totalTime)}秒` : `${Math.round(stats.totalTime)}s`}</span>
           </div>
         </div>
 
-        <div className="space-y-2">
+        {/* Word Performance Table */}
+        {stats.wordPerformances.length > 0 && (
+          <div className="flex-1 min-h-0">
+            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              {t('word_performance')}
+            </h3>
+            <div className="border rounded-lg overflow-hidden">
+              {/* Table Header */}
+              <div className="grid grid-cols-[1fr_80px_80px_70px_60px] gap-2 px-3 py-2 bg-muted/50 border-b text-xs">
+                <SortButton sortKeyValue="order">{t('word')}</SortButton>
+                <SortButton sortKeyValue="reactionTime">{t('reaction')}</SortButton>
+                <SortButton sortKeyValue="totalTime">{t('time')}</SortButton>
+                <SortButton sortKeyValue="missCount">{t('miss')}</SortButton>
+                <span className="text-muted-foreground font-medium">{t('first_key')}</span>
+              </div>
+              
+              {/* Table Body */}
+              <ScrollArea className="h-[180px]">
+                <div className="divide-y">
+                  {sortedPerformances.map((perf, index) => (
+                    <WordPerformanceRow key={`${perf.wordId}-${index}`} performance={perf} t={t} isJapanese={isJapanese} />
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="space-y-2 pt-2">
           {hasMistakes && (
             <Button onClick={onRetryWeak} className="w-full gap-2">
               <ArrowCounterClockwise weight="bold" />
@@ -83,5 +240,74 @@ export function GameOverScreen({
         </div>
       </Card>
     </motion.div>
+  )
+}
+
+interface WordPerformanceRowProps {
+  performance: WordPerformanceRecord & { originalIndex: number }
+  t: (key: string) => string
+  isJapanese: boolean
+}
+
+function WordPerformanceRow({ performance, t, isJapanese }: WordPerformanceRowProps) {
+  const reactionTimeColor = getReactionTimeColor(performance.reactionTime)
+  const reactionTimeBg = getReactionTimeBgColor(performance.reactionTime)
+  
+  return (
+    <div className={`grid grid-cols-[1fr_80px_80px_70px_60px] gap-2 px-3 py-2 text-sm items-center ${
+      !performance.completed ? 'bg-red-500/5' : ''
+    }`}>
+      {/* Word */}
+      <div className="flex flex-col min-w-0">
+        <span className="font-medium truncate">{performance.wordText}</span>
+        <span className="text-xs text-muted-foreground truncate">{performance.reading}</span>
+      </div>
+      
+      {/* Reaction Time */}
+      <div className={`text-center rounded px-2 py-0.5 ${reactionTimeBg}`}>
+        <span className={`font-mono text-xs font-medium ${reactionTimeColor}`}>
+          {formatReactionTime(performance.reactionTime, isJapanese)}
+        </span>
+      </div>
+      
+      {/* Total Time */}
+      <div className="text-center">
+        <span className="font-mono text-xs text-muted-foreground">
+          {performance.completed 
+            ? formatTotalTime(performance.totalTime, isJapanese)
+            : <span className="text-red-500">{t('timeout')}</span>
+          }
+        </span>
+      </div>
+      
+      {/* Miss Count */}
+      <div className="text-center">
+        <span className={`font-mono text-xs font-medium ${
+          performance.missCount === 0 ? 'text-green-500' : 'text-red-500'
+        }`}>
+          {performance.missCount}
+        </span>
+      </div>
+      
+      {/* First Key Correct */}
+      <div className="flex justify-center">
+        {performance.firstKeyExpected ? (
+          performance.firstKeyCorrect ? (
+            <div className="flex items-center gap-1">
+              <Check className="w-4 h-4 text-green-500" weight="bold" />
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 text-red-500">
+              <X className="w-4 h-4" weight="bold" />
+              <span className="text-xs font-mono">
+                {performance.firstKeyActual.toUpperCase()}
+              </span>
+            </div>
+          )
+        ) : (
+          <span className="text-muted-foreground">-</span>
+        )}
+      </div>
+    </div>
   )
 }

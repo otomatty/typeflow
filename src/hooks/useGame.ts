@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Word, GameState, GameStats, KeystrokeRecord, AppSettings, DifficultyParams } from '@/lib/types'
+import { Word, GameState, GameStats, KeystrokeRecord, AppSettings, DifficultyParams, WordPerformanceRecord } from '@/lib/types'
 import { validateRomajiInput, getMatchingVariation, normalizeRomaji } from '@/lib/romaji-utils'
 import { calculateWordTimeLimit } from '@/lib/adaptive-time-utils'
 import { calculateMissPenalty } from '@/lib/difficulty-presets'
@@ -18,6 +18,21 @@ interface UseGameProps {
   settings?: AppSettings
 }
 
+// 現在の単語のパフォーマンス追跡用（部分的なデータ）
+interface CurrentWordPerformance {
+  wordId: string
+  wordText: string
+  reading: string
+  romaji: string
+  startTime: number
+  firstKeyExpected: string | null
+  firstKeyActual: string | null
+  firstKeyCorrect: boolean | null
+  reactionTime: number | null
+  keystrokeCount: number
+  missCount: number
+}
+
 export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, gameScores = [], settings }: UseGameProps) {
   const [view, setView] = useState<ViewType>('menu')
   const [gameState, setGameState] = useState<GameState & { currentWordMissCount: number }>({
@@ -31,6 +46,7 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
     correctCount: 0,
     totalKeystrokes: 0,
     startTime: null,
+    wordStartTime: null,
     currentWordMissCount: 0,  // 現在の単語でのミス数（ペナルティ計算用）
   })
   const [showError, setShowError] = useState(false)
@@ -42,18 +58,45 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
     perfectWords: 0,
     totalWords: 0,
     totalTime: 0,
+    avgReactionTime: 0,
+    firstKeyAccuracy: 0,
+    wordPerformances: [],
   })
 
   // キーストローク記録用
   const keystrokesRef = useRef<KeystrokeRecord[]>([])
   const lastKeystrokeTimeRef = useRef<number>(0)
   const previousKeyRef = useRef<string | null>(null)
+  
+  // 単語ごとのパフォーマンス記録用
+  const wordPerformancesRef = useRef<WordPerformanceRecord[]>([])
+  const currentWordPerformanceRef = useRef<CurrentWordPerformance | null>(null)
 
   const endGame = useCallback((completed: boolean = false) => {
     const endTime = Date.now()
     const startTime = gameState.startTime || endTime
     const totalSeconds = (endTime - startTime) / 1000
     const wordsCompleted = completed ? gameState.words.length : gameState.correctCount
+    
+    // タイムアウト時: 現在の単語のパフォーマンスを記録（未完了として）
+    if (!completed && currentWordPerformanceRef.current) {
+      const currentPerf = currentWordPerformanceRef.current
+      const wordPerformance: WordPerformanceRecord = {
+        wordId: currentPerf.wordId,
+        wordText: currentPerf.wordText,
+        reading: currentPerf.reading,
+        romaji: currentPerf.romaji,
+        firstKeyExpected: currentPerf.firstKeyExpected || '',
+        firstKeyActual: currentPerf.firstKeyActual || '',
+        firstKeyCorrect: currentPerf.firstKeyCorrect ?? false,
+        reactionTime: currentPerf.reactionTime ?? 0,
+        totalTime: endTime - currentPerf.startTime,
+        keystrokeCount: currentPerf.keystrokeCount,
+        missCount: currentPerf.missCount,
+        completed: false,
+      }
+      wordPerformancesRef.current.push(wordPerformance)
+    }
     
     // KPS = 総打鍵数 / 総時間（秒）
     const kps = totalSeconds > 0 
@@ -67,6 +110,19 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
     const accuracy = wordsCompleted > 0
       ? Math.round((perfectWords / wordsCompleted) * 100)
       : 100
+    
+    // 初動統計を計算
+    const performances = wordPerformancesRef.current
+    const performancesWithReaction = performances.filter(p => p.reactionTime > 0)
+    const avgReactionTime = performancesWithReaction.length > 0
+      ? Math.round(performancesWithReaction.reduce((sum, p) => sum + p.reactionTime, 0) / performancesWithReaction.length)
+      : 0
+    
+    const performancesWithFirstKey = performances.filter(p => p.firstKeyExpected !== '')
+    const firstKeyCorrectCount = performancesWithFirstKey.filter(p => p.firstKeyCorrect).length
+    const firstKeyAccuracy = performancesWithFirstKey.length > 0
+      ? Math.round((firstKeyCorrectCount / performancesWithFirstKey.length) * 100)
+      : 100
 
     setGameStats({
       kps,
@@ -76,6 +132,9 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
       perfectWords: Math.max(0, perfectWords),
       totalWords: gameState.words.length,
       totalTime: totalSeconds,
+      avgReactionTime,
+      firstKeyAccuracy,
+      wordPerformances: [...performances],
     })
 
     // セッション終了時にキーストローク記録を渡す
@@ -101,11 +160,33 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
     lastKeystrokeTimeRef.current = Date.now()
     previousKeyRef.current = null
     
+    // 単語パフォーマンス記録をリセット
+    wordPerformancesRef.current = []
+    
+    const now = Date.now()
+    
     // 最初の単語の制限時間を計算
     const firstWord = gameWords[0]
     const initialTimeLimit = settings && firstWord
       ? calculateWordTimeLimit(firstWord, gameScores, settings)
       : 10
+    
+    // 最初の単語のパフォーマンス追跡を開始
+    if (firstWord) {
+      currentWordPerformanceRef.current = {
+        wordId: firstWord.id,
+        wordText: firstWord.text,
+        reading: firstWord.reading,
+        romaji: firstWord.romaji,
+        startTime: now,
+        firstKeyExpected: null,
+        firstKeyActual: null,
+        firstKeyCorrect: null,
+        reactionTime: null,
+        keystrokeCount: 0,
+        missCount: 0,
+      }
+    }
     
     setGameState({
       isPlaying: true,
@@ -117,7 +198,8 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
       mistakeWords: [],
       correctCount: 0,
       totalKeystrokes: 0,
-      startTime: Date.now(),
+      startTime: now,
+      wordStartTime: now,
       currentWordMissCount: 0,
     })
     setView('game')
@@ -200,25 +282,48 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
       const matchingVariation = getMatchingVariation(currentWord.romaji, gameState.currentInput)
       const normalizedTarget = matchingVariation || normalizeRomaji(currentWord.romaji)
       const expectedKey = normalizedTarget[gameState.currentInput.length] || ''
+      
+      // 判定: 進捗が増えたか、または完了した場合は正しい入力
+      const isCorrectInput = newValidation.progress > prevValidation.progress || newValidation.isCorrect
+
+      // 初動記録: 最初のキー入力の場合
+      if (gameState.currentInput === '' && currentWordPerformanceRef.current) {
+        const wordStartTime = gameState.wordStartTime || now
+        const reactionTime = now - wordStartTime
+        currentWordPerformanceRef.current.reactionTime = reactionTime
+        currentWordPerformanceRef.current.firstKeyExpected = expectedKey
+        currentWordPerformanceRef.current.firstKeyActual = e.key.toLowerCase()
+        currentWordPerformanceRef.current.firstKeyCorrect = isCorrectInput
+      }
 
       // キーストロークを記録
       const latency = now - lastKeystrokeTimeRef.current
       const keystrokeRecord: KeystrokeRecord = {
         key: expectedKey,
         actualKey: e.key.toLowerCase(),
-        isCorrect: newValidation.progress > prevValidation.progress || newValidation.isCorrect,
+        isCorrect: isCorrectInput,
         timestamp: now,
         latency,
         previousKey: previousKeyRef.current,
       }
       keystrokesRef.current.push(keystrokeRecord)
       lastKeystrokeTimeRef.current = now
+      
+      // 現在の単語のキーストロークカウントを更新
+      if (currentWordPerformanceRef.current) {
+        currentWordPerformanceRef.current.keystrokeCount++
+      }
 
       // If progress didn't increase, the new character is invalid - reject it
       if (newValidation.progress <= prevValidation.progress && !newValidation.isCorrect) {
         setShowError(true)
         setTimeout(() => setShowError(false), 200)
         updateWordStats(currentWord.id, false)
+        
+        // 現在の単語のミスカウントを更新
+        if (currentWordPerformanceRef.current) {
+          currentWordPerformanceRef.current.missCount++
+        }
         
         // ミスペナルティを計算して適用
         const newMissCount = gameState.currentWordMissCount + 1
@@ -264,7 +369,28 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
         
         // 単語が完了したら previousKey をリセット（次の単語は新しい遷移）
         previousKeyRef.current = null
-        lastKeystrokeTimeRef.current = Date.now()
+        const completionTime = Date.now()
+        lastKeystrokeTimeRef.current = completionTime
+        
+        // 現在の単語のパフォーマンスを記録
+        if (currentWordPerformanceRef.current) {
+          const currentPerf = currentWordPerformanceRef.current
+          const wordPerformance: WordPerformanceRecord = {
+            wordId: currentPerf.wordId,
+            wordText: currentPerf.wordText,
+            reading: currentPerf.reading,
+            romaji: currentPerf.romaji,
+            firstKeyExpected: currentPerf.firstKeyExpected || '',
+            firstKeyActual: currentPerf.firstKeyActual || '',
+            firstKeyCorrect: currentPerf.firstKeyCorrect ?? true,
+            reactionTime: currentPerf.reactionTime ?? 0,
+            totalTime: completionTime - currentPerf.startTime,
+            keystrokeCount: currentPerf.keystrokeCount,
+            missCount: currentPerf.missCount,
+            completed: true,
+          }
+          wordPerformancesRef.current.push(wordPerformance)
+        }
         
         if (gameState.currentWordIndex + 1 >= gameState.words.length) {
           endGame(true)
@@ -276,6 +402,21 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
             ? calculateWordTimeLimit(nextWord, gameScores, settings)
             : 10
           
+          // 次の単語のパフォーマンス追跡を開始
+          currentWordPerformanceRef.current = {
+            wordId: nextWord.id,
+            wordText: nextWord.text,
+            reading: nextWord.reading,
+            romaji: nextWord.romaji,
+            startTime: completionTime,
+            firstKeyExpected: null,
+            firstKeyActual: null,
+            firstKeyCorrect: null,
+            reactionTime: null,
+            keystrokeCount: 0,
+            missCount: 0,
+          }
+          
           setGameState((prev) => ({
             ...prev,
             currentWordIndex: prev.currentWordIndex + 1,
@@ -283,6 +424,7 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
             timeRemaining: nextTimeLimit,
             totalTime: nextTimeLimit,
             correctCount: prev.correctCount + 1,
+            wordStartTime: completionTime,
             currentWordMissCount: 0,  // 次の単語ではミスカウントをリセット
           }))
         }

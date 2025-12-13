@@ -16,6 +16,26 @@ export interface Word {
   }
 }
 
+// 単語ごとのパフォーマンス記録（初動計測用）
+export interface WordPerformanceRecord {
+  wordId: string              // 単語ID
+  wordText: string            // 表示テキスト
+  reading: string             // ふりがな
+  romaji: string              // ローマ字
+  
+  // 初動（ファーストキーストローク）
+  firstKeyExpected: string    // 期待された最初のキー
+  firstKeyActual: string      // 実際に押された最初のキー
+  firstKeyCorrect: boolean    // 最初のキーが正しいか
+  reactionTime: number        // 単語表示から最初のキー入力までの時間（ms）
+  
+  // 全体パフォーマンス
+  totalTime: number           // 単語完了までの総時間（ms）
+  keystrokeCount: number      // 総キーストローク数
+  missCount: number           // ミス数
+  completed: boolean          // 完了したか（タイムアウトでない）
+}
+
 export interface GameState {
   isPlaying: boolean
   currentWordIndex: number
@@ -27,6 +47,8 @@ export interface GameState {
   correctCount: number
   totalKeystrokes: number
   startTime: number | null
+  // 初動計測用
+  wordStartTime: number | null     // 現在の単語の表示開始時刻
 }
 
 export interface GameStats {
@@ -37,6 +59,10 @@ export interface GameStats {
   perfectWords: number  // ノーミスで完了したワード数
   totalWords: number    // 総ワード数
   totalTime: number     // 総時間（秒）
+  // 初動統計
+  avgReactionTime: number           // 平均初動時間（ms）
+  firstKeyAccuracy: number          // 初動正確率（%）
+  wordPerformances: WordPerformanceRecord[]  // 単語ごとの詳細
 }
 
 // キーストローク単位の詳細記録
@@ -83,7 +109,7 @@ export type WordCountPreset = number | 'all'
 export type ThemeType = 'light' | 'dark' | 'system'
 
 // 練習モード
-export type PracticeMode = 'random' | 'weakness-focus' | 'review'
+export type PracticeMode = 'random' | 'weakness-focus' | 'review' | 'balanced'
 
 // 共通難易度プリセット
 export type DifficultyPreset = 'easy' | 'normal' | 'hard' | 'expert'
