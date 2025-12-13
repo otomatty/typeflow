@@ -12,6 +12,7 @@ import { useWords } from '@/hooks/useWords'
 import { useGame, ViewType } from '@/hooks/useGame'
 import { useTypingAnalytics } from '@/hooks/useTypingAnalytics'
 import { useSettings } from '@/hooks/useSettings'
+import { shuffleArray } from '@/lib/utils'
 
 function App() {
   const { words, addWord, editWord, deleteWord, updateWordStats, loadPreset, clearAllWords } = useWords()
@@ -50,14 +51,24 @@ function App() {
     // セッション状態をリセット
     resetSessionState()
     
-    // 新しいスコアリングシステムで単語を選択
+    // スコアリングシステムで単語を選択（ソート済み）
     const sortedWords = selectWeaknessBasedWords(words, {
       practiceMode: settings.practiceMode,
       srsEnabled: settings.srsEnabled,
       warmupEnabled: settings.warmupEnabled,
     })
     const effectiveCount = getEffectiveWordCount(sortedWords.length)
-    return sortedWords.slice(0, effectiveCount)
+    
+    // 問題数分を取得
+    const selectedWords = sortedWords.slice(0, effectiveCount)
+    
+    // 弱点強化モードと復習優先モードでは、取得後にシャッフルして出題
+    // ランダムモードは既にシャッフル済み
+    if (settings.practiceMode === 'weakness-focus' || settings.practiceMode === 'review') {
+      return shuffleArray(selectedWords)
+    }
+    
+    return selectedWords
   }, [words, selectWeaknessBasedWords, getEffectiveWordCount, settings.practiceMode, settings.srsEnabled, settings.warmupEnabled, resetSessionState])
 
   const {

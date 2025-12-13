@@ -11,6 +11,7 @@ import {
   applyDuplicationPenalty,
   getWeightsForPracticeMode,
 } from '@/lib/srs-utils'
+import { shuffleArray } from '@/lib/utils'
 
 // 計算済みの弱点情報
 export interface WeaknessInfo {
@@ -349,7 +350,44 @@ export function useTypingAnalytics() {
     }
   }, [calculateWeaknessScore])
 
-  // 新しいマルチファクター・スコアリングで単語を選択
+  // 弱点強化モード用: 正確率が低い順にソート（シャッフルなし）
+  // 呼び出し側で slice 後にシャッフルを行う
+  const sortWordsByAccuracy = useCallback((words: Word[]): Word[] => {
+    return [...words].sort((a, b) => {
+      // 練習回数が少ない単語は優先度を下げる
+      const aAttempts = a.stats.correct + a.stats.miss
+      const bAttempts = b.stats.correct + b.stats.miss
+      
+      // 練習回数が0の単語は最後に
+      if (aAttempts === 0 && bAttempts > 0) return 1
+      if (bAttempts === 0 && aAttempts > 0) return -1
+      // 両方とも0の場合は順序を維持（安定ソート）
+      if (aAttempts === 0 && bAttempts === 0) return 0
+      
+      // 正確率が低い順
+      return a.stats.accuracy - b.stats.accuracy
+    })
+  }, [])
+
+  // 復習優先モード用: 復習時期でソート（シャッフルなし）
+  const sortWordsByReviewTime = useCallback((words: Word[]): Word[] => {
+    const now = Date.now()
+    return [...words].sort((a, b) => {
+      // 未練習の単語は優先度を下げる
+      if (a.stats.lastPlayed === 0 && b.stats.lastPlayed > 0) return 1
+      if (b.stats.lastPlayed === 0 && a.stats.lastPlayed > 0) return -1
+      // 両方とも未練習の場合は順序を維持
+      if (a.stats.lastPlayed === 0 && b.stats.lastPlayed === 0) return 0
+      
+      // 次回復習時刻が早い順（過ぎているものが最優先）
+      const aOverdue = now - a.stats.nextReviewAt
+      const bOverdue = now - b.stats.nextReviewAt
+      return bOverdue - aOverdue
+    })
+  }, [])
+
+  // 練習モードに応じて単語を選択
+  // 各モードでソート後、slice → シャッフルの順で処理
   const selectWordsWithScoring = useCallback((
     words: Word[],
     context: ScoringContext
@@ -358,84 +396,24 @@ export function useTypingAnalytics() {
 
     // ランダムモードの場合は単純にシャッフル
     if (context.practiceMode === 'random') {
-      return [...words].sort(() => Math.random() - 0.5)
+      return shuffleArray(words)
     }
 
-    // 弱点強化モード: 正確率が低い単語を上位から選択し、ランダム順で出題
+    // 弱点強化モード: 正確率が低い順にソート
+    // シャッフルは呼び出し側で slice 後に行う
     if (context.practiceMode === 'weakness-focus') {
-      // 正確率でソート（低い順）
-      const sortedByAccuracy = [...words].sort((a, b) => {
-        // 練習回数が少ない単語は優先度を下げる
-        const aAttempts = a.stats.correct + a.stats.miss
-        const bAttempts = b.stats.correct + b.stats.miss
-        
-        // 練習回数が0の単語は最後に
-        if (aAttempts === 0 && bAttempts > 0) return 1
-        if (bAttempts === 0 && aAttempts > 0) return -1
-        if (aAttempts === 0 && bAttempts === 0) return Math.random() - 0.5
-        
-        // 正確率が低い順
-        return a.stats.accuracy - b.stats.accuracy
-      })
-      
-      // 正確率が低い順にソートした後、全体をランダムにシャッフル
-      // ただし、正確率が低いグループを優先的に出題するため、
-      // 上位30%をランダムにシャッフルして先頭に配置
-      const topCount = Math.max(Math.ceil(sortedByAccuracy.length * 0.3), 5)
-      const topWords = sortedByAccuracy.slice(0, topCount)
-      const restWords = sortedByAccuracy.slice(topCount)
-      
-      // 両グループをそれぞれシャッフル
-      for (let i = topWords.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))
-        ;[topWords[i], topWords[j]] = [topWords[j], topWords[i]]
-      }
-      for (let i = restWords.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))
-        ;[restWords[i], restWords[j]] = [restWords[j], restWords[i]]
-      }
-      
-      return [...topWords, ...restWords]
+      return sortWordsByAccuracy(words)
     }
 
-    // 復習優先モード: SRSに基づいて復習が必要な単語を優先
+    // 復習優先モード: 復習時期でソート
+    // シャッフルは呼び出し側で slice 後に行う
     if (context.practiceMode === 'review') {
-      const now = Date.now()
-      
-      // 復習時期でソート（期限が近い/過ぎている順）
-      const sortedByReview = [...words].sort((a, b) => {
-        // 未練習の単語は優先度を下げる
-        if (a.stats.lastPlayed === 0 && b.stats.lastPlayed > 0) return 1
-        if (b.stats.lastPlayed === 0 && a.stats.lastPlayed > 0) return -1
-        if (a.stats.lastPlayed === 0 && b.stats.lastPlayed === 0) return Math.random() - 0.5
-        
-        // 次回復習時刻が早い順（過ぎているものが最優先）
-        const aOverdue = now - a.stats.nextReviewAt
-        const bOverdue = now - b.stats.nextReviewAt
-        return bOverdue - aOverdue
-      })
-      
-      // 復習が必要な単語をランダム順で出題
-      const overdueWords = sortedByReview.filter(w => w.stats.nextReviewAt <= now && w.stats.lastPlayed > 0)
-      const futureWords = sortedByReview.filter(w => w.stats.nextReviewAt > now || w.stats.lastPlayed === 0)
-      
-      // overdueをシャッフル
-      for (let i = overdueWords.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))
-        ;[overdueWords[i], overdueWords[j]] = [overdueWords[j], overdueWords[i]]
-      }
-      // futureもシャッフル
-      for (let i = futureWords.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))
-        ;[futureWords[i], futureWords[j]] = [futureWords[j], futureWords[i]]
-      }
-      
-      return [...overdueWords, ...futureWords]
+      return sortWordsByReviewTime(words)
     }
 
     // デフォルト（ランダム）
-    return [...words].sort(() => Math.random() - 0.5)
-  }, [calculateWordScore])
+    return shuffleArray(words)
+  }, [sortWordsByAccuracy, sortWordsByReviewTime])
 
   // 弱点に基づいて単語をソート（後方互換性のため維持、内部で新しいロジックを使用）
   const selectWeaknessBasedWords = useCallback((
