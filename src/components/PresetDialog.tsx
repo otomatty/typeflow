@@ -13,12 +13,23 @@ import { Download, Package, Loader2 } from 'lucide-react'
 interface PresetDialogProps {
   onLoadPreset: (words: PresetWord[], options: { clearExisting: boolean; presetName: string }) => Promise<void>
   isLoading?: boolean
+  /** 外部から制御する場合のopen状態 */
+  open?: boolean
+  /** 外部から制御する場合のonOpenChange */
+  onOpenChange?: (open: boolean) => void
+  /** トリガーボタンを表示するかどうか（デフォルト: true） */
+  showTrigger?: boolean
 }
 
-export function PresetDialog({ onLoadPreset, isLoading }: PresetDialogProps) {
+export function PresetDialog({ onLoadPreset, isLoading, open: controlledOpen, onOpenChange, showTrigger = true }: PresetDialogProps) {
   const { t } = useTranslation('words')
   
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  
+  // 制御モードかどうか
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : internalOpen
+  const setOpen = isControlled ? (onOpenChange ?? (() => {})) : setInternalOpen
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null)
   const [clearExisting, setClearExisting] = useState(false)
   const [loadingPresetId, setLoadingPresetId] = useState<string | null>(null)
@@ -56,12 +67,14 @@ export function PresetDialog({ onLoadPreset, isLoading }: PresetDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <Package className="h-4 w-4" />
-          {t('preset')}
-        </Button>
-      </DialogTrigger>
+      {showTrigger && (
+        <DialogTrigger asChild>
+          <Button variant="outline" className="gap-2">
+            <Package className="h-4 w-4" />
+            {t('preset')}
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('preset_title')}</DialogTitle>

@@ -13,12 +13,23 @@ import { toast } from 'sonner'
 
 interface CSVImportDialogProps {
   onImport: (words: PresetWord[], options: { clearExisting: boolean; presetName: string }) => Promise<void>
+  /** 外部から制御する場合のopen状態 */
+  open?: boolean
+  /** 外部から制御する場合のonOpenChange */
+  onOpenChange?: (open: boolean) => void
+  /** トリガーボタンを表示するかどうか（デフォルト: true） */
+  showTrigger?: boolean
 }
 
-export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
+export function CSVImportDialog({ onImport, open: controlledOpen, onOpenChange, showTrigger = true }: CSVImportDialogProps) {
   const { t, i18n } = useTranslation('words')
   
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  
+  // 制御モードかどうか
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : internalOpen
+  const setOpenInternal = isControlled ? (onOpenChange ?? (() => {})) : setInternalOpen
   const [isLoading, setIsLoading] = useState(false)
   const [clearExisting, setClearExisting] = useState(false)
   const [previewWords, setPreviewWords] = useState<PresetWord[]>([])
@@ -67,7 +78,7 @@ export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
         clearExisting,
         presetName: fileName.replace(/\.csv$/i, '') || (isJa ? 'CSVインポート' : 'CSV Import'),
       })
-      setOpen(false)
+      setOpenInternal(false)
       resetState()
     } finally {
       setIsLoading(false)
@@ -84,7 +95,7 @@ export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
   }
 
   const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen)
+    setOpenInternal(newOpen)
     if (!newOpen) {
       resetState()
     }
@@ -92,12 +103,14 @@ export function CSVImportDialog({ onImport }: CSVImportDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <FileUp className="h-4 w-4" />
-          {t('csv.import')}
-        </Button>
-      </DialogTrigger>
+      {showTrigger && (
+        <DialogTrigger asChild>
+          <Button variant="outline" className="gap-2">
+            <FileUp className="h-4 w-4" />
+            {t('csv.import')}
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('csv.title')}</DialogTitle>

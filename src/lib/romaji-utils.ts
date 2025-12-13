@@ -91,14 +91,14 @@ function generateAllVariations(target: string): string[] {
     // xn can be typed as: xn, nn (but nn is inefficient, so we only use xn and n when applicable)
     const nextChar = rest[0]
     
-    if (!nextChar || !VOWELS_AND_SPECIAL.has(nextChar.toLowerCase())) {
-      // Followed by consonant or end of string - both 'n' and 'xn' work
+    if (nextChar && !VOWELS_AND_SPECIAL.has(nextChar.toLowerCase())) {
+      // Followed by consonant - both 'n' and 'xn' work
       for (const restVar of restVariations) {
         result.push('n' + restVar)
         result.push('xn' + restVar)
       }
     } else {
-      // Followed by vowel/y/n/' - must use 'xn' (not nn since it's inefficient)
+      // End of string OR followed by vowel/y/n/' - must use 'xn'
       for (const restVar of restVariations) {
         result.push('xn' + restVar)
       }
@@ -144,6 +144,12 @@ function generateAllVariations(target: string): string[] {
       
       return result
     }
+  }
+
+  // Special handling for trailing 'n' (末尾の「ん」)
+  // If target is just 'n', it represents ん at the end of the word - require 'xn'
+  if (target === 'n') {
+    return ['xn']
   }
 
   // No canonical form matched - take single character and continue

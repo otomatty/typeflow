@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -87,9 +88,15 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
 
   if (words.length === 0) {
     return (
-      <Card className="p-6 text-center text-muted-foreground">
-        <p>{t('no_words')}</p>
-      </Card>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Card className="p-6 text-center text-muted-foreground">
+          <p>{t('no_words')}</p>
+        </Card>
+      </motion.div>
     )
   }
 
@@ -162,7 +169,12 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
   }
 
   return (
-    <div className="space-y-4">
+    <motion.div 
+      className="space-y-4"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       
       {showSortAndPagination && (
         <div className="flex items-center justify-between gap-4">
@@ -192,13 +204,16 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
       )}
 
       <div className="space-y-1">
-        {paginatedWords.map((word) => {
+        {paginatedWords.map((word, index) => {
           const hasStats = word.stats.correct + word.stats.miss > 0
           const accuracy = Math.round(word.stats.accuracy)
           
           return (
-            <div
+            <motion.div
               key={word.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.5) }}
               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors group"
             >
               {/* Keyword & Reading */}
@@ -253,7 +268,7 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
               >
                 <Trash className="w-4 h-4" />
               </Button>
-            </div>
+            </motion.div>
           )
         })}
       </div>
@@ -289,6 +304,6 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
           showTrigger={false}
         />
       )}
-    </div>
+    </motion.div>
   )
 }

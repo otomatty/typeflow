@@ -9,7 +9,7 @@ import { WordList } from '@/components/WordList'
 import { ScreenHeader } from '@/components/ScreenHeader'
 import { Container } from '@/components/Container'
 import { Word, PresetWord } from '@/lib/types'
-import { Trash } from '@phosphor-icons/react'
+import { Trash, DotsThreeVertical, Package, FileArrowUp } from '@phosphor-icons/react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,8 +19,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
 
 interface WordManagementScreenProps {
   words: Word[]
@@ -42,6 +48,9 @@ export function WordManagementScreen({
   const { t } = useTranslation('words')
   const { t: tc } = useTranslation('common')
   const [isClearing, setIsClearing] = useState(false)
+  const [presetDialogOpen, setPresetDialogOpen] = useState(false)
+  const [csvDialogOpen, setCsvDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const handleLoadPreset = async (
     presetWords: PresetWord[], 
@@ -67,37 +76,100 @@ export function WordManagementScreen({
           description={t('description')}
           action={
             <div className="flex gap-2">
-              {words.length > 0 && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
-                      <Trash className="w-4 h-4 mr-1" />
-                      {t('delete_all')}
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>{t('delete_all_confirm')}</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        {t('delete_all_desc', { count: words.length })}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleClearAll}
-                        disabled={isClearing}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              {/* モバイル: ドロップダウンメニュー */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="sm:hidden">
+                    <DotsThreeVertical className="w-5 h-5" weight="bold" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setPresetDialogOpen(true)}>
+                    <Package className="w-4 h-4 mr-2" />
+                    {t('preset')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setCsvDialogOpen(true)}>
+                    <FileArrowUp className="w-4 h-4 mr-2" />
+                    {t('csv.import')}
+                  </DropdownMenuItem>
+                  {words.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={() => setDeleteDialogOpen(true)}
+                        className="text-destructive focus:text-destructive"
                       >
-                        {isClearing ? t('deleting') : t('delete_confirm')}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                        <Trash className="w-4 h-4 mr-2" />
+                        {t('delete_all')}
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* デスクトップ: 通常のボタン */}
+              {words.length > 0 && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="hidden sm:flex text-destructive hover:text-destructive"
+                  onClick={() => setDeleteDialogOpen(true)}
+                >
+                  <Trash className="w-4 h-4 mr-1" />
+                  {t('delete_all')}
+                </Button>
               )}
-              <PresetDialog onLoadPreset={handleLoadPreset} />
-              <CSVImportDialog onImport={handleLoadPreset} />
+              <Button 
+                variant="outline" 
+                className="hidden sm:flex gap-2"
+                onClick={() => setPresetDialogOpen(true)}
+              >
+                <Package className="w-4 h-4" />
+                {t('preset')}
+              </Button>
+              <Button 
+                variant="outline" 
+                className="hidden sm:flex gap-2"
+                onClick={() => setCsvDialogOpen(true)}
+              >
+                <FileArrowUp className="w-4 h-4" />
+                {t('csv.import')}
+              </Button>
               <AddWordDialog onAddWord={onAddWord} />
+
+              {/* ダイアログ（制御モード） */}
+              <PresetDialog 
+                onLoadPreset={handleLoadPreset} 
+                open={presetDialogOpen}
+                onOpenChange={setPresetDialogOpen}
+                showTrigger={false}
+              />
+              <CSVImportDialog 
+                onImport={handleLoadPreset}
+                open={csvDialogOpen}
+                onOpenChange={setCsvDialogOpen}
+                showTrigger={false}
+              />
+              <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t('delete_all_confirm')}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t('delete_all_desc', { count: words.length })}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleClearAll}
+                      disabled={isClearing}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {isClearing ? t('deleting') : t('delete_confirm')}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           }
         />
