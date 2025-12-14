@@ -8,6 +8,7 @@
       "DOM",
       "DOM.Iterable"
     ],
+    "types": ["node"],
     "module": "ESNext",
     "skipLibCheck": true,
     "strictNullChecks": true,
@@ -28,6 +29,8 @@
     },
   },
   "include": [
-    "src"
+    "src",
+    "vite.config.ts",
+    "vite-env.d.ts"
   ]
 }
