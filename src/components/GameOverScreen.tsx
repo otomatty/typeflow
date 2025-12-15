@@ -5,17 +5,16 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { 
   Play, 
-  ArrowCounterClockwise, 
+  RotateCcw, 
   Timer, 
   Target,
   Check,
   X,
-  CaretUp,
-  CaretDown,
+  ChevronUp,
+  ChevronDown,
   Clock,
-} from '@phosphor-icons/react'
+} from 'lucide-react'
 import { GameStats, WordPerformanceRecord } from '@/lib/types'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface GameOverScreenProps {
   stats: GameStats
@@ -119,7 +118,7 @@ export function GameOverScreen({
     >
       {children}
       {sortKey === sortKeyValue && (
-        sortDirection === 'asc' ? <CaretUp className="w-3 h-3" /> : <CaretDown className="w-3 h-3" />
+        sortDirection === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
       )}
     </button>
   )
@@ -130,105 +129,109 @@ export function GameOverScreen({
       animate={{ opacity: 1, scale: 1 }}
       className="flex items-center justify-center min-h-screen p-4"
     >
-      <Card className="w-full max-w-2xl p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="text-center">
+      <Card className="w-full max-w-2xl p-6 sm:p-8 max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Fixed Header */}
+        <div className="text-center shrink-0 pb-6">
           <h2 className="text-2xl sm:text-3xl font-bold mb-2">{t('game_over')}</h2>
           <p className="text-muted-foreground">{t('great_session')}</p>
         </div>
 
-        {/* Main Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-4 bg-secondary rounded-lg">
-            <div className="text-3xl sm:text-4xl font-bold text-primary">{stats.kps}</div>
-            <div className="text-xs sm:text-sm text-muted-foreground uppercase mt-1">{t('keys_per_sec')}</div>
-          </div>
-          
-          <div className="text-center p-4 bg-secondary rounded-lg">
-            <div className="text-3xl sm:text-4xl font-bold text-primary">{stats.accuracy}%</div>
-            <div className="text-xs sm:text-sm text-muted-foreground uppercase mt-1">{t('accuracy')}</div>
-          </div>
-        </div>
-
-        {/* First Key Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Timer className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <div className="text-lg font-bold">{formatReactionTime(stats.avgReactionTime, isJapanese)}</div>
-              <div className="text-xs text-muted-foreground">{t('avg_reaction_time')}</div>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Target className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <div className="text-lg font-bold">{stats.firstKeyAccuracy}%</div>
-              <div className="text-xs text-muted-foreground">{t('first_key_accuracy')}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Additional Stats */}
-        <div className="space-y-2 text-sm text-center">
-          <div className="flex justify-between px-4">
-            <span className="text-muted-foreground">{t('total_keystrokes')}:</span>
-            <span className="font-bold">{stats.totalKeystrokes}</span>
-          </div>
-          <div className="flex justify-between px-4">
-            <span className="text-muted-foreground">{t('perfect_words')}:</span>
-            <span className="font-bold">{stats.perfectWords} / {stats.correctWords}</span>
-          </div>
-          <div className="flex justify-between px-4">
-            <span className="text-muted-foreground">{t('total_time')}:</span>
-            <span className="font-bold">{isJapanese ? `${Math.round(stats.totalTime)}秒` : `${Math.round(stats.totalTime)}s`}</span>
-          </div>
-        </div>
-
-        {/* Word Performance Table */}
-        {stats.wordPerformances.length > 0 && (
-          <div className="flex-1 min-h-0">
-            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              {t('word_performance')}
-            </h3>
-            <div className="border rounded-lg overflow-hidden">
-              {/* Table Header */}
-              <div className="grid grid-cols-[1fr_80px_80px_70px_60px] gap-2 px-3 py-2 bg-muted/50 border-b text-xs">
-                <SortButton sortKeyValue="order">{t('word')}</SortButton>
-                <SortButton sortKeyValue="reactionTime">{t('reaction')}</SortButton>
-                <SortButton sortKeyValue="totalTime">{t('time')}</SortButton>
-                <SortButton sortKeyValue="missCount">{t('miss')}</SortButton>
-                <span className="text-muted-foreground font-medium">{t('first_key')}</span>
+        {/* Scrollable Content */}
+        <div className="flex-1 min-h-0 overflow-y-auto pr-2">
+          <div className="space-y-6">
+            {/* Main Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-4 bg-secondary rounded-lg">
+                <div className="text-3xl sm:text-4xl font-bold text-primary">{stats.kps}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground uppercase mt-1">{t('keys_per_sec')}</div>
               </div>
               
-              {/* Table Body */}
-              <ScrollArea className="h-[180px]">
-                <div className="divide-y">
-                  {sortedPerformances.map((perf, index) => (
-                    <WordPerformanceRow key={`${perf.wordId}-${index}`} performance={perf} t={t} isJapanese={isJapanese} />
-                  ))}
-                </div>
-              </ScrollArea>
+              <div className="text-center p-4 bg-secondary rounded-lg">
+                <div className="text-3xl sm:text-4xl font-bold text-primary">{stats.accuracy}%</div>
+                <div className="text-xs sm:text-sm text-muted-foreground uppercase mt-1">{t('accuracy')}</div>
+              </div>
             </div>
-          </div>
-        )}
 
-        {/* Action Buttons */}
-        <div className="space-y-2 pt-2">
+            {/* First Key Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Timer className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <div className="text-lg font-bold">{formatReactionTime(stats.avgReactionTime, isJapanese)}</div>
+                  <div className="text-xs text-muted-foreground">{t('avg_reaction_time')}</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Target className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <div className="text-lg font-bold">{stats.firstKeyAccuracy}%</div>
+                  <div className="text-xs text-muted-foreground">{t('first_key_accuracy')}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Stats */}
+            <div className="space-y-2 text-sm text-center">
+              <div className="flex justify-between px-4">
+                <span className="text-muted-foreground">{t('total_keystrokes')}:</span>
+                <span className="font-bold">{stats.totalKeystrokes}</span>
+              </div>
+              <div className="flex justify-between px-4">
+                <span className="text-muted-foreground">{t('perfect_words')}:</span>
+                <span className="font-bold">{stats.perfectWords} / {stats.correctWords}</span>
+              </div>
+              <div className="flex justify-between px-4">
+                <span className="text-muted-foreground">{t('total_time')}:</span>
+                <span className="font-bold">{isJapanese ? `${Math.round(stats.totalTime)}秒` : `${Math.round(stats.totalTime)}s`}</span>
+              </div>
+            </div>
+
+            {/* Word Performance Table */}
+            {stats.wordPerformances.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  {t('word_performance')}
+                </h3>
+                <div className="border rounded-lg overflow-hidden">
+                  {/* Table Header */}
+                  <div className="grid grid-cols-[1fr_80px_80px_70px_60px] gap-2 px-3 py-2 bg-muted/50 border-b text-xs">
+                    <SortButton sortKeyValue="order">{t('word')}</SortButton>
+                    <SortButton sortKeyValue="reactionTime">{t('reaction')}</SortButton>
+                    <SortButton sortKeyValue="totalTime">{t('time')}</SortButton>
+                    <SortButton sortKeyValue="missCount">{t('miss')}</SortButton>
+                    <span className="text-muted-foreground font-medium">{t('first_key')}</span>
+                  </div>
+                  
+                  {/* Table Body - no longer needs internal ScrollArea */}
+                  <div className="divide-y">
+                    {sortedPerformances.map((perf, index) => (
+                      <WordPerformanceRow key={`${perf.wordId}-${index}`} performance={perf} t={t} isJapanese={isJapanese} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Fixed Footer - Action Buttons */}
+        <div className="space-y-2 pt-6 shrink-0">
           {hasMistakes && (
             <Button onClick={onRetryWeak} className="w-full gap-2">
-              <ArrowCounterClockwise weight="bold" />
+              <RotateCcw className="w-4 h-4" />
               {t('retry_weak_words')}
               <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">R</kbd>
             </Button>
           )}
           
           <Button onClick={onRestart} variant="secondary" className="w-full gap-2">
-            <Play weight="fill" />
+            <Play className="w-4 h-4" />
             {t('play_again')}
             <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">Enter</kbd>
           </Button>
@@ -294,11 +297,11 @@ function WordPerformanceRow({ performance, t, isJapanese }: WordPerformanceRowPr
         {performance.firstKeyExpected ? (
           performance.firstKeyCorrect ? (
             <div className="flex items-center gap-1">
-              <Check className="w-4 h-4 text-green-500" weight="bold" />
+              <Check className="w-4 h-4 text-green-500" />
             </div>
           ) : (
             <div className="flex items-center gap-1 text-red-500">
-              <X className="w-4 h-4" weight="bold" />
+              <X className="w-4 h-4" />
               <span className="text-xs font-mono">
                 {performance.firstKeyActual.toUpperCase()}
               </span>

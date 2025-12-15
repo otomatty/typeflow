@@ -98,9 +98,10 @@ function generateAllVariations(target: string): string[] {
         result.push('xn' + restVar)
       }
     } else {
-      // End of string OR followed by vowel/y/n/' - must use 'xn'
+      // End of string OR followed by vowel/y/n/' - both 'xn' and 'nn' work
       for (const restVar of restVariations) {
         result.push('xn' + restVar)
+        result.push('nn' + restVar)
       }
     }
     
@@ -147,9 +148,9 @@ function generateAllVariations(target: string): string[] {
   }
 
   // Special handling for trailing 'n' (末尾の「ん」)
-  // If target is just 'n', it represents ん at the end of the word - require 'xn'
+  // If target is just 'n', it represents ん at the end of the word - allow 'xn' or 'nn'
   if (target === 'n') {
-    return ['xn']
+    return ['xn', 'nn']
   }
 
   // No canonical form matched - take single character and continue

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { Keyboard } from '@phosphor-icons/react'
+import { Keyboard } from 'lucide-react'
 import { Word } from '@/lib/types'
 
 interface MenuScreenProps {

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { House, ListBullets, ChartBar, Gear } from '@phosphor-icons/react'
+import { Home, List, BarChart3, Settings } from 'lucide-react'
 
 type ViewType = 'menu' | 'words' | 'stats' | 'settings' | 'game' | 'gameover'
 
@@ -34,7 +34,7 @@ export function Header({ currentView, onNavigate }: HeaderProps) {
             onClick={() => onNavigate('menu')}
             className="gap-2"
           >
-            <House className="w-4 h-4" />
+            <Home className="w-4 h-4" />
             <span className="hidden sm:inline">{t('header.home')}</span>
           </Button>
           <Button
@@ -43,7 +43,7 @@ export function Header({ currentView, onNavigate }: HeaderProps) {
             onClick={() => onNavigate('words')}
             className="gap-2"
           >
-            <ListBullets className="w-4 h-4" />
+            <List className="w-4 h-4" />
             <span className="hidden sm:inline">{t('header.words')}</span>
           </Button>
           <Button
@@ -52,7 +52,7 @@ export function Header({ currentView, onNavigate }: HeaderProps) {
             onClick={() => onNavigate('stats')}
             className="gap-2"
           >
-            <ChartBar className="w-4 h-4" />
+            <BarChart3 className="w-4 h-4" />
             <span className="hidden sm:inline">{t('header.stats')}</span>
           </Button>
           <Button
@@ -61,7 +61,7 @@ export function Header({ currentView, onNavigate }: HeaderProps) {
             onClick={() => onNavigate('settings')}
             className="gap-2"
           >
-            <Gear className="w-4 h-4" />
+            <Settings className="w-4 h-4" />
             <span className="hidden sm:inline">{t('header.settings')}</span>
           </Button>
         </nav>

@@ -19,7 +19,7 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from '@/components/ui/pagination'
-import { Trash } from '@phosphor-icons/react'
+import { Trash2 } from 'lucide-react'
 import { Pencil } from 'lucide-react'
 import { Word } from '@/lib/types'
 import { AddWordDialog } from '@/components/AddWordDialog'
@@ -214,11 +214,6 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
               </Select>
             </div>
           </div>
-          {totalPages > 1 && (
-            <div className="text-sm text-muted-foreground">
-              {currentPage} / {totalPages}
-            </div>
-          )}
         </div>
       )}
 
@@ -291,7 +286,7 @@ export function WordList({ words, onDeleteWord, onEditWord, showSortAndPaginatio
                 onClick={() => onDeleteWord(word.id)}
                 className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
               >
-                <Trash className="w-4 h-4" />
+                <Trash2 className="w-4 h-4" />
               </Button>
             </motion.div>
           )

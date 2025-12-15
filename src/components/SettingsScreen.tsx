@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
-import { Check, Target, Shuffle, ClockCounterClockwise, Gauge, Flame, Trophy, Skull, Globe, ArrowRight, TrendUp } from '@phosphor-icons/react'
+import { Check, Target, Shuffle, History, Gauge, Flame, Trophy, Skull, Globe, ArrowRight, TrendingUp } from 'lucide-react'
 import { WordCountPreset, ThemeType, PracticeMode, DifficultyPreset } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { getKpsStatus, getTargetKpsInfo, calculateTimeLimitExample } from '@/lib/adaptive-time-utils'
@@ -96,7 +96,7 @@ export function SettingsScreen({
   }[] = [
     { value: 'random', labelKey: 'practice_mode.random', descKey: 'practice_mode.random_desc', icon: Shuffle },
     { value: 'weakness-focus', labelKey: 'practice_mode.weakness', descKey: 'practice_mode.weakness_desc', icon: Target },
-    { value: 'review', labelKey: 'practice_mode.review', descKey: 'practice_mode.review_desc', icon: ClockCounterClockwise },
+    { value: 'review', labelKey: 'practice_mode.review', descKey: 'practice_mode.review_desc', icon: History },
   ]
 
   const DIFFICULTY_OPTIONS: {
@@ -150,7 +150,7 @@ export function SettingsScreen({
             <div className="space-y-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-primary" weight="bold" />
+                  <Globe className="w-5 h-5 text-primary" />
                   <Label className="text-base font-semibold">{t('language.title')}</Label>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -174,7 +174,7 @@ export function SettingsScreen({
                     <span className="font-medium">日本語</span>
                   </div>
                   {currentLanguage === 'ja' && (
-                    <Check className="absolute top-2 right-2 w-5 h-5 text-primary" weight="bold" />
+                    <Check className="absolute top-2 right-2 w-5 h-5 text-primary" />
                   )}
                 </button>
                 <button
@@ -192,7 +192,7 @@ export function SettingsScreen({
                     <span className="font-medium">English</span>
                   </div>
                   {currentLanguage === 'en' && (
-                    <Check className="absolute top-2 right-2 w-5 h-5 text-primary" weight="bold" />
+                    <Check className="absolute top-2 right-2 w-5 h-5 text-primary" />
                   )}
                 </button>
               </div>
@@ -278,7 +278,7 @@ export function SettingsScreen({
             <div className="space-y-6">
               <div>
                 <div className="flex items-center gap-2">
-                  <Flame className="w-5 h-5 text-primary" weight="bold" />
+                  <Flame className="w-5 h-5 text-primary" />
                   <Label className="text-base font-semibold">{t('difficulty.title')}</Label>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -302,11 +302,11 @@ export function SettingsScreen({
                       )}
                     >
                       <div className="flex items-center gap-2">
-                        <Icon className={cn('w-5 h-5', option.color)} weight="bold" />
+                        <Icon className={cn('w-5 h-5', option.color)} />
                         <span className="font-medium text-sm">{t(option.labelKey)}</span>
                       </div>
                       {difficultyPreset === option.value && (
-                        <Check className="absolute top-2 right-2 w-4 h-4 text-primary" weight="bold" />
+                        <Check className="absolute top-2 right-2 w-4 h-4 text-primary" />
                       )}
                     </button>
                   )
@@ -375,7 +375,7 @@ export function SettingsScreen({
                         {t(option.descKey)}
                       </div>
                       {practiceMode === option.value && (
-                        <Check className="absolute top-2 right-2 w-5 h-5 text-primary" weight="bold" />
+                        <Check className="absolute top-2 right-2 w-5 h-5 text-primary" />
                       )}
                     </button>
                   )
@@ -395,7 +395,7 @@ export function SettingsScreen({
             <div className="space-y-6">
               <div>
                 <div className="flex items-center gap-2">
-                  <Gauge className="w-5 h-5 text-primary" weight="bold" />
+                  <Gauge className="w-5 h-5 text-primary" />
                   <Label className="text-base font-semibold">{t('time_limit.title')}</Label>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -415,10 +415,10 @@ export function SettingsScreen({
                   
                   {/* Arrow */}
                   <div className="flex flex-col items-center gap-1">
-                    <ArrowRight className="w-6 h-6 text-primary" weight="bold" />
+                    <ArrowRight className="w-6 h-6 text-primary" />
                     {targetKpsInfo.isFaster && targetKpsInfo.percentDiff > 0 && (
                       <div className="flex items-center gap-1 text-xs text-orange-500">
-                        <TrendUp className="w-3 h-3" weight="bold" />
+                        <TrendingUp className="w-3 h-3" />
                         <span>+{targetKpsInfo.percentDiff}%</span>
                       </div>
                     )}
@@ -555,7 +555,7 @@ export function SettingsScreen({
                       {t(option.descKey)}
                     </div>
                     {theme === option.value && (
-                      <Check className="absolute top-2 right-2 w-5 h-5 text-primary" weight="bold" />
+                      <Check className="absolute top-2 right-2 w-5 h-5 text-primary" />
                     )}
                   </button>
                 ))}

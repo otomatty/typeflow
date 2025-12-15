@@ -10,7 +10,7 @@ import { WordList } from '@/components/WordList'
 import { ScreenHeader } from '@/components/ScreenHeader'
 import { Container } from '@/components/Container'
 import { Word, PresetWord } from '@/lib/types'
-import { Trash, DotsThreeVertical, Package, FileArrowUp, MagnifyingGlass } from '@phosphor-icons/react'
+import { Trash2, MoreVertical, Package, FileUp, Search } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -80,7 +80,7 @@ export function WordManagementScreen({
             <div className="flex gap-2 items-center flex-1 max-w-md ml-4">
               {/* 検索バー */}
               <div className="relative flex-1">
-                <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   type="text"
                   placeholder={t('word_list.search_placeholder')}
@@ -94,7 +94,7 @@ export function WordManagementScreen({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon" className="shrink-0">
-                    <DotsThreeVertical className="w-5 h-5" weight="bold" />
+                    <MoreVertical className="w-5 h-5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -103,7 +103,7 @@ export function WordManagementScreen({
                     {t('preset')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setCsvDialogOpen(true)}>
-                    <FileArrowUp className="w-4 h-4 mr-2" />
+                    <FileUp className="w-4 h-4 mr-2" />
                     {t('csv.import')}
                   </DropdownMenuItem>
                   {words.length > 0 && (
@@ -113,7 +113,7 @@ export function WordManagementScreen({
                         onClick={() => setDeleteDialogOpen(true)}
                         className="text-destructive focus:text-destructive"
                       >
-                        <Trash className="w-4 h-4 mr-2" />
+                        <Trash2 className="w-4 h-4 mr-2" />
                         {t('delete_all')}
                       </DropdownMenuItem>
                     </>

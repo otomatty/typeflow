@@ -10,12 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Trash, Keyboard, ArrowRight, Warning, Swap, ChartLine } from '@phosphor-icons/react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Trash2, Keyboard, ArrowRight, AlertTriangle, ArrowRightLeft, TrendingUp, Calendar, Flame, Trophy } from 'lucide-react'
 import { KeyboardHeatmap } from '@/components/KeyboardHeatmap'
 import { ScreenHeader } from '@/components/ScreenHeader'
 import { Container } from '@/components/Container'
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
-import { XAxis, YAxis, CartesianGrid, ComposedChart, Area, Line, Legend } from 'recharts'
+import { XAxis, YAxis, CartesianGrid, ComposedChart, Area, Line, Legend, Bar, BarChart, ResponsiveContainer } from 'recharts'
 import type { KeyStats, KeyTransitionStats } from '@/lib/types'
 import type { GameScoreRecord } from '@/lib/db'
 
@@ -27,11 +28,155 @@ interface StatsScreenProps {
 }
 
 type ChartRangeOption = 30 | 100 | 500
+type DailyRangeOption = 7 | 14 | 30
+
+interface DailyStats {
+  date: string
+  dateLabel: string
+  games: number
+  totalKeystrokes: number
+  totalWords: number
+  correctWords: number
+  perfectWords: number
+  totalTime: number
+  avgKps: number
+  avgAccuracy: number
+}
+
+// Calculate daily statistics from game scores
+function calculateDailyStats(gameScores: GameScoreRecord[], locale: string): DailyStats[] {
+  const dailyMap = new Map<string, {
+    games: number
+    totalKeystrokes: number
+    totalWords: number
+    correctWords: number
+    perfectWords: number
+    totalTime: number
+    kpsSum: number
+    accuracySum: number
+  }>()
+
+  for (const score of gameScores) {
+    const date = new Date(score.playedAt)
+    const dateKey = date.toISOString().split('T')[0]
+    
+    const existing = dailyMap.get(dateKey) || {
+      games: 0,
+      totalKeystrokes: 0,
+      totalWords: 0,
+      correctWords: 0,
+      perfectWords: 0,
+      totalTime: 0,
+      kpsSum: 0,
+      accuracySum: 0,
+    }
+    
+    existing.games++
+    existing.totalKeystrokes += score.totalKeystrokes
+    existing.totalWords += score.totalWords
+    existing.correctWords += score.correctWords
+    existing.perfectWords += score.perfectWords
+    existing.totalTime += score.totalTime
+    existing.kpsSum += score.kps
+    existing.accuracySum += score.accuracy
+    
+    dailyMap.set(dateKey, existing)
+  }
+
+  const localeCode = locale?.startsWith('ja') ? 'ja-JP' : 'en-US'
+  
+  return Array.from(dailyMap.entries())
+    .map(([date, stats]) => ({
+      date,
+      dateLabel: new Date(date).toLocaleDateString(localeCode, {
+        month: 'short',
+        day: 'numeric',
+        weekday: 'short',
+      }),
+      games: stats.games,
+      totalKeystrokes: stats.totalKeystrokes,
+      totalWords: stats.totalWords,
+      correctWords: stats.correctWords,
+      perfectWords: stats.perfectWords,
+      totalTime: stats.totalTime,
+      avgKps: Math.round((stats.kpsSum / stats.games) * 10) / 10,
+      avgAccuracy: Math.round((stats.accuracySum / stats.games) * 10) / 10,
+    }))
+    .sort((a, b) => b.date.localeCompare(a.date))
+}
+
+// Calculate play streak
+function calculateStreak(dailyStats: DailyStats[]): { current: number; best: number } {
+  if (dailyStats.length === 0) return { current: 0, best: 0 }
+  
+  const sortedDates = dailyStats.map(d => d.date).sort((a, b) => b.localeCompare(a))
+  const today = new Date().toISOString().split('T')[0]
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+  
+  let current = 0
+  let best = 0
+  let streak = 0
+  let prevDate: string | null = null
+  
+  // Check if streak is active (played today or yesterday)
+  const isStreakActive = sortedDates[0] === today || sortedDates[0] === yesterday
+  
+  for (const date of sortedDates) {
+    if (prevDate === null) {
+      streak = 1
+    } else {
+      const prev = new Date(prevDate)
+      const curr = new Date(date)
+      const diffDays = Math.round((prev.getTime() - curr.getTime()) / 86400000)
+      
+      if (diffDays === 1) {
+        streak++
+      } else {
+        best = Math.max(best, streak)
+        streak = 1
+      }
+    }
+    prevDate = date
+  }
+  
+  best = Math.max(best, streak)
+  current = isStreakActive ? streak : 0
+  
+  // Recalculate current streak from today/yesterday
+  if (isStreakActive) {
+    current = 0
+    let checkDate = sortedDates[0] === today ? today : yesterday
+    for (const date of sortedDates) {
+      if (date === checkDate) {
+        current++
+        const d = new Date(checkDate)
+        d.setDate(d.getDate() - 1)
+        checkDate = d.toISOString().split('T')[0]
+      } else if (date < checkDate) {
+        break
+      }
+    }
+  }
+  
+  return { current, best }
+}
+
+// Format time duration
+function formatDuration(seconds: number, t: (key: string) => string): string {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.round(seconds % 60)
+  if (mins > 0) {
+    return `${mins}${t('minutes')} ${secs}${t('seconds')}`
+  }
+  return `${secs}${t('seconds')}`
+}
 
 export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: StatsScreenProps) {
   const { t, i18n } = useTranslation('stats')
   const { t: tc } = useTranslation('common')
   const [chartRange, setChartRange] = useState<ChartRangeOption>(30)
+  const [dailyRange, setDailyRange] = useState<DailyRangeOption>(14)
+  const [activeTab, setActiveTab] = useState<string>('overview')
 
   // Calculate summary statistics
   const summary = useMemo(() => {
@@ -54,6 +199,92 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
       avgLatency,
     }
   }, [keyStats])
+
+  // Calculate daily statistics
+  const dailyStats = useMemo(() => {
+    return calculateDailyStats(gameScores, i18n.language)
+  }, [gameScores, i18n.language])
+
+  // Calculate streak
+  const streak = useMemo(() => {
+    return calculateStreak(dailyStats)
+  }, [dailyStats])
+
+  // Daily summary for the selected period
+  const dailySummary = useMemo(() => {
+    const now = new Date()
+    const today = now.toISOString().split('T')[0]
+    const thisWeekStart = new Date(now)
+    thisWeekStart.setDate(now.getDate() - now.getDay())
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    
+    const todayStats = dailyStats.find(d => d.date === today)
+    const yesterdayDate = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+    const yesterdayStats = dailyStats.find(d => d.date === yesterdayDate)
+    
+    const weekStats = dailyStats.filter(d => new Date(d.date) >= thisWeekStart)
+    const monthStats = dailyStats.filter(d => new Date(d.date) >= thisMonthStart)
+    
+    const sumStats = (stats: DailyStats[]) => ({
+      games: stats.reduce((sum, d) => sum + d.games, 0),
+      totalTime: stats.reduce((sum, d) => sum + d.totalTime, 0),
+      totalWords: stats.reduce((sum, d) => sum + d.totalWords, 0),
+      avgKps: stats.length > 0 
+        ? Math.round((stats.reduce((sum, d) => sum + d.avgKps, 0) / stats.length) * 10) / 10 
+        : 0,
+      avgAccuracy: stats.length > 0 
+        ? Math.round((stats.reduce((sum, d) => sum + d.avgAccuracy, 0) / stats.length) * 10) / 10 
+        : 0,
+    })
+    
+    // Find best days
+    const bestKpsDay = dailyStats.length > 0 
+      ? dailyStats.reduce((best, d) => d.avgKps > best.avgKps ? d : best)
+      : null
+    const bestAccuracyDay = dailyStats.length > 0
+      ? dailyStats.reduce((best, d) => d.avgAccuracy > best.avgAccuracy ? d : best)
+      : null
+    
+    return {
+      today: todayStats,
+      yesterday: yesterdayStats,
+      thisWeek: sumStats(weekStats),
+      thisMonth: sumStats(monthStats),
+      bestKpsDay,
+      bestAccuracyDay,
+    }
+  }, [dailyStats])
+
+  // Prepare chart data for daily trend
+  const dailyChartData = useMemo(() => {
+    return [...dailyStats]
+      .slice(0, dailyRange)
+      .reverse()
+      .map(d => ({
+        date: d.dateLabel,
+        fullDate: d.date,
+        games: d.games,
+        avgKps: d.avgKps,
+        avgAccuracy: d.avgAccuracy,
+        totalWords: d.totalWords,
+      }))
+  }, [dailyStats, dailyRange])
+
+  // Daily chart configuration
+  const dailyChartConfig: ChartConfig = {
+    games: {
+      label: t('games_played'),
+      color: 'hsl(var(--chart-4))',
+    },
+    avgKps: {
+      label: t('avg_kps'),
+      color: 'hsl(var(--chart-1))',
+    },
+    avgAccuracy: {
+      label: t('accuracy'),
+      color: 'hsl(var(--chart-2))',
+    },
+  }
 
   // Prepare chart data (選択された件数を古い順に並べる、マイナス値は0に変換)
   const chartData = useMemo(() => {
@@ -126,6 +357,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
   }, [keyStats])
 
   const hasData = summary.totalKeystrokes > 0
+  const hasDailyData = dailyStats.length > 0
 
   return (
     <Container className="space-y-6">
@@ -134,22 +366,35 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
         description={t('description')}
       />
 
-        {!hasData ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.1 }}
-          >
-            <Card className="p-8 text-center">
-              <Keyboard className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <h2 className="text-lg font-semibold mb-2">{t('no_data')}</h2>
-              <p className="text-muted-foreground text-sm">
-                {t('no_data_desc')}
-              </p>
-            </Card>
-          </motion.div>
-        ) : (
-          <>
+      {!hasData ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Card className="p-8 text-center">
+            <Keyboard className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-lg font-semibold mb-2">{t('no_data')}</h2>
+            <p className="text-muted-foreground text-sm">
+              {t('no_data_desc')}
+            </p>
+          </Card>
+        </motion.div>
+      ) : (
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 max-w-[300px]">
+            <TabsTrigger value="overview" className="gap-2">
+              <TrendingUp className="w-4 h-4" />
+              {t('tab_overview')}
+            </TabsTrigger>
+            <TabsTrigger value="daily" className="gap-2">
+              <Calendar className="w-4 h-4" />
+              {t('tab_daily')}
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
             {/* Summary Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -196,7 +441,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                 <Card className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold flex items-center gap-2">
-                      <ChartLine className="w-5 h-5" />
+                      <TrendingUp className="w-5 h-5" />
                       {t('performance_history')}
                     </h2>
                     <Select
@@ -328,7 +573,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
               >
                 <Card className="p-4 sm:p-6">
                   <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Warning className="w-5 h-5 text-orange-500" />
+                    <AlertTriangle className="w-5 h-5 text-orange-500" />
                     {t('difficult_transitions')}
                   </h2>
                   <div className="space-y-3">
@@ -376,7 +621,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
               >
                 <Card className="p-4 sm:p-6">
                   <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Swap className="w-5 h-5 text-red-500" />
+                    <ArrowRightLeft className="w-5 h-5 text-red-500" />
                     {t('common_mistakes')}
                   </h2>
                   <div className="space-y-2">
@@ -401,35 +646,327 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                 </Card>
               </motion.div>
             )}
+          </TabsContent>
 
-            {/* Reset Button */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <Card className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">{t('reset_stats')}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {t('reset_stats_desc')}
-                    </p>
+          {/* Daily Stats Tab */}
+          <TabsContent value="daily" className="space-y-6">
+            {!hasDailyData ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                <Card className="p-8 text-center">
+                  <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <h2 className="text-lg font-semibold mb-2">{t('no_daily_data')}</h2>
+                  <p className="text-muted-foreground text-sm">
+                    {t('no_daily_data_desc')}
+                  </p>
+                </Card>
+              </motion.div>
+            ) : (
+              <>
+                {/* Streak Card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <Card className="p-4 sm:p-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <Flame className={`w-6 h-6 ${streak.current > 0 ? 'text-orange-500' : 'text-muted-foreground'}`} />
+                        </div>
+                        <div className={`text-3xl sm:text-4xl font-bold ${streak.current > 0 ? 'text-orange-500' : 'text-muted-foreground'}`}>
+                          {streak.current}
+                        </div>
+                        <div className="text-xs text-muted-foreground uppercase mt-1">
+                          {t('current_streak')} ({t('days')})
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <Trophy className="w-6 h-6 text-yellow-500" />
+                        </div>
+                        <div className="text-3xl sm:text-4xl font-bold text-yellow-500">
+                          {streak.best}
+                        </div>
+                        <div className="text-xs text-muted-foreground uppercase mt-1">
+                          {t('best_streak')} ({t('days')})
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+
+                {/* Period Summary */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                >
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Today */}
+                    <Card className="p-4">
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">{t('today')}</h3>
+                      {dailySummary.today ? (
+                        <div className="space-y-1">
+                          <div className="text-2xl font-bold">{dailySummary.today.games} {t('games_played')}</div>
+                          <div className="text-sm text-muted-foreground">
+                            KPS: {dailySummary.today.avgKps} · {t('accuracy')}: {dailySummary.today.avgAccuracy}%
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-muted-foreground text-sm">—</div>
+                      )}
+                    </Card>
+
+                    {/* Yesterday */}
+                    <Card className="p-4">
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">{t('yesterday')}</h3>
+                      {dailySummary.yesterday ? (
+                        <div className="space-y-1">
+                          <div className="text-2xl font-bold">{dailySummary.yesterday.games} {t('games_played')}</div>
+                          <div className="text-sm text-muted-foreground">
+                            KPS: {dailySummary.yesterday.avgKps} · {t('accuracy')}: {dailySummary.yesterday.avgAccuracy}%
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-muted-foreground text-sm">—</div>
+                      )}
+                    </Card>
+
+                    {/* This Week */}
+                    <Card className="p-4">
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">{t('this_week')}</h3>
+                      <div className="space-y-1">
+                        <div className="text-2xl font-bold">{dailySummary.thisWeek.games} {t('games_played')}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {dailySummary.thisWeek.totalWords} {t('total_words')} · {formatDuration(dailySummary.thisWeek.totalTime, t)}
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* This Month */}
+                    <Card className="p-4">
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">{t('this_month')}</h3>
+                      <div className="space-y-1">
+                        <div className="text-2xl font-bold">{dailySummary.thisMonth.games} {t('games_played')}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {dailySummary.thisMonth.totalWords} {t('total_words')} · {formatDuration(dailySummary.thisMonth.totalTime, t)}
+                        </div>
+                      </div>
+                    </Card>
                   </div>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={onReset}
-                    className="gap-2"
+                </motion.div>
+
+                {/* Best Records */}
+                {(dailySummary.bestKpsDay || dailySummary.bestAccuracyDay) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
                   >
-                    <Trash className="w-4 h-4" />
-                    {tc('reset')}
-                  </Button>
+                    <Card className="p-4 sm:p-6">
+                      <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <Trophy className="w-5 h-5 text-yellow-500" />
+                        Best Records
+                      </h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {dailySummary.bestKpsDay && (
+                          <div className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+                            <div>
+                              <div className="text-sm text-muted-foreground">{t('best_day_kps')}</div>
+                              <div className="font-medium">{dailySummary.bestKpsDay.dateLabel}</div>
+                            </div>
+                            <div className="text-2xl font-bold text-primary">{dailySummary.bestKpsDay.avgKps}</div>
+                          </div>
+                        )}
+                        {dailySummary.bestAccuracyDay && (
+                          <div className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+                            <div>
+                              <div className="text-sm text-muted-foreground">{t('best_day_accuracy')}</div>
+                              <div className="font-medium">{dailySummary.bestAccuracyDay.dateLabel}</div>
+                            </div>
+                            <div className="text-2xl font-bold text-primary">{dailySummary.bestAccuracyDay.avgAccuracy}%</div>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  </motion.div>
+                )}
+
+                {/* Daily Trend Chart */}
+                {dailyChartData.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25 }}
+                  >
+                    <Card className="p-4 sm:p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-semibold flex items-center gap-2">
+                          <TrendingUp className="w-5 h-5" />
+                          {t('daily_trend')}
+                        </h2>
+                        <Select
+                          value={String(dailyRange)}
+                          onValueChange={(value) => setDailyRange(Number(value) as DailyRangeOption)}
+                        >
+                          <SelectTrigger className="w-[140px]" size="sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="7">{t('last_n_days', { count: 7 })}</SelectItem>
+                            <SelectItem value="14">{t('last_n_days', { count: 14 })}</SelectItem>
+                            <SelectItem value="30">{t('last_n_days', { count: 30 })}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <ChartContainer config={dailyChartConfig} className="h-[300px] w-full">
+                        <ComposedChart data={dailyChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="gamesGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="hsl(var(--chart-4))" stopOpacity={0.3} />
+                              <stop offset="95%" stopColor="hsl(var(--chart-4))" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                          <XAxis 
+                            dataKey="date" 
+                            tickLine={false} 
+                            axisLine={false}
+                            className="text-xs"
+                          />
+                          <YAxis 
+                            yAxisId="left"
+                            tickLine={false} 
+                            axisLine={false}
+                            className="text-xs"
+                            domain={[0, 'auto']}
+                          />
+                          <YAxis 
+                            yAxisId="right"
+                            orientation="right"
+                            tickLine={false} 
+                            axisLine={false}
+                            className="text-xs"
+                            domain={[0, 100]}
+                            tickFormatter={(value) => `${value}%`}
+                          />
+                          <ChartTooltip 
+                            content={<ChartTooltipContent />}
+                          />
+                          <Legend />
+                          <Bar
+                            yAxisId="left"
+                            dataKey="games"
+                            name={t('games_played')}
+                            fill="hsl(var(--chart-4))"
+                            radius={[4, 4, 0, 0]}
+                            opacity={0.7}
+                          />
+                          <Line
+                            yAxisId="left"
+                            type="monotone"
+                            dataKey="avgKps"
+                            name={t('avg_kps')}
+                            stroke="hsl(var(--chart-1))"
+                            strokeWidth={2}
+                            dot={{ fill: 'hsl(var(--chart-1))', strokeWidth: 0, r: 3 }}
+                          />
+                          <Line
+                            yAxisId="right"
+                            type="monotone"
+                            dataKey="avgAccuracy"
+                            name={t('accuracy')}
+                            stroke="hsl(var(--chart-2))"
+                            strokeWidth={2}
+                            dot={{ fill: 'hsl(var(--chart-2))', strokeWidth: 0, r: 3 }}
+                          />
+                        </ComposedChart>
+                      </ChartContainer>
+                    </Card>
+                  </motion.div>
+                )}
+
+                {/* Daily Stats Table */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Card className="p-4 sm:p-6">
+                    <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <Calendar className="w-5 h-5" />
+                      {t('daily_stats_title')}
+                    </h2>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-border">
+                            <th className="text-left py-2 px-2 font-medium text-muted-foreground">{t('date')}</th>
+                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">{t('games_played')}</th>
+                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">{t('total_words')}</th>
+                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">{t('avg_kps')}</th>
+                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">{t('accuracy')}</th>
+                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">{t('total_time')}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dailyStats.slice(0, 14).map((day, index) => (
+                            <tr 
+                              key={day.date} 
+                              className={`border-b border-border/50 ${index === 0 ? 'bg-primary/5' : ''}`}
+                            >
+                              <td className="py-2 px-2 font-medium">{day.dateLabel}</td>
+                              <td className="text-right py-2 px-2">{day.games}</td>
+                              <td className="text-right py-2 px-2">{day.totalWords}</td>
+                              <td className="text-right py-2 px-2 font-semibold text-primary">{day.avgKps}</td>
+                              <td className="text-right py-2 px-2">{day.avgAccuracy}%</td>
+                              <td className="text-right py-2 px-2 text-muted-foreground">
+                                {formatDuration(day.totalTime, t)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </Card>
+                </motion.div>
+              </>
+            )}
+          </TabsContent>
+
+          {/* Reset Button (shown in both tabs) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Card className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">{t('reset_stats')}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t('reset_stats_desc')}
+                  </p>
                 </div>
-              </Card>
-            </motion.div>
-          </>
-        )}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={onReset}
+                  className="gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {tc('reset')}
+                </Button>
+              </div>
+            </Card>
+          </motion.div>
+        </Tabs>
+      )}
     </Container>
   )
 }

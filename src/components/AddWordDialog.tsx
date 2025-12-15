@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Plus, Warning } from '@phosphor-icons/react'
+import { Plus, AlertTriangle } from 'lucide-react'
 import { processTextForTyping, containsKanji } from '@/lib/japanese-utils'
 import { Word } from '@/lib/types'
 
@@ -143,7 +143,7 @@ export function AddWordDialog({
       {showTrigger && (
         <DialogTrigger asChild>
           <Button className="gap-2">
-            <Plus weight="bold" />
+            <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">{t('add_word')}</span>
           </Button>
         </DialogTrigger>
@@ -169,7 +169,7 @@ export function AddWordDialog({
               {t('dialog.reading')}
               {needsManualReading && (
                 <span className="text-xs text-amber-500 flex items-center gap-1">
-                  <Warning className="w-3 h-3" />
+                  <AlertTriangle className="w-3 h-3" />
                   {t('dialog.reading_required')}
                 </span>
               )}
