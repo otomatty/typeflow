@@ -290,10 +290,12 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
       if (gameState.currentInput === '' && currentWordPerformanceRef.current) {
         const wordStartTime = gameState.wordStartTime || now
         const reactionTime = now - wordStartTime
+        const actualKey = e.key.toLowerCase()
         currentWordPerformanceRef.current.reactionTime = reactionTime
         currentWordPerformanceRef.current.firstKeyExpected = expectedKey
-        currentWordPerformanceRef.current.firstKeyActual = e.key.toLowerCase()
-        currentWordPerformanceRef.current.firstKeyCorrect = isCorrectInput
+        currentWordPerformanceRef.current.firstKeyActual = actualKey
+        // 最初のキーは期待されるキーと実際のキーを直接比較
+        currentWordPerformanceRef.current.firstKeyCorrect = expectedKey.toLowerCase() === actualKey
       }
 
       // キーストロークを記録

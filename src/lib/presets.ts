@@ -79,7 +79,7 @@ const sushidaCSV = `ワード,読み,入力例
 映画館で昼寝,えいがかんでひるね,eigakandehirune
 エイリアンがやってきた,えいりあんがやってきた,eiriangayattekita
 液晶ディスプレイ,えきしょうでぃすぷれい,ekishoudhisupurei
-エサを与えないで下さい,えさをあたえないでください,eswoataenaidekudasai
+エサを与えないで下さい,えさをあたえないでください,esawoataenaidekudasai
 枝毛が増えて気になります,えだげがふえてきになります,edagegafuetekininarimasu
 エネルギー節約,えねるぎーせつやく,enerugi-setuyaku
 エビフライ定食,えびふらいていしょく,ebifuraiteishoku

@@ -1,13 +1,31 @@
 {
-    "name": "spark-template",
-    "private": true,
-    "version": "0.0.0",
+    "name": "typeflow",
+    "version": "0.1.0",
+    "description": "Developer Typing Trainer - A lightweight, widget-first typing practice application for developers",
     "type": "module",
+    "private": true,
+    "license": "AGPL-3.0",
+    "author": "Akimasa Sugai",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/otomatty/typeflow.git"
+    },
+    "bugs": {
+        "url": "https://github.com/otomatty/typeflow/issues"
+    },
+    "homepage": "https://github.com/otomatty/typeflow#readme",
+    "keywords": [
+        "typing",
+        "typing-practice",
+        "typing-trainer",
+        "japanese",
+        "romaji",
+        "developer-tools",
+        "react",
+        "typescript"
+    ],
     "scripts": {
-        "dev": "bun run dev:server & bun run dev:client",
-        "dev:client": "vite",
-        "dev:server": "bun run --watch server/index.ts",
-        "kill": "fuser -k 5000/tcp 3456/tcp",
+        "dev": "vite",
         "build": "vite build",
         "typecheck": "tsc -b",
         "lint": "eslint .",
@@ -54,8 +72,6 @@
         "cmdk": "^1.1.1",
         "d3": "^7.9.0",
         "date-fns": "^3.6.0",
-        "dexie": "^4.2.1",
-        "dexie-react-hooks": "^4.2.0",
         "embla-carousel-react": "^8.5.2",
         "framer-motion": "^12.6.2",
         "i18next": "^25.7.2",
