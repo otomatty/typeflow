@@ -1,0 +1,33 @@
+name = "typeflow-api"
+main = "src/server/index.ts"
+compatibility_date = "2024-11-06"
+dev = { port = 3456 }
+
+# ローカル開発用のD1データベース設定
+[[d1_databases]]
+binding = "DB"
+database_name = "typeflow-db-dev"
+database_id = "adaebe97-c7fe-4ea6-b02b-2c36c8de151f"
+
+[env.production]
+name = "typeflow-api"
+
+[env.production.vars]
+ALLOWED_ORIGINS = "https://your-app.vercel.app,https://your-app.netlify.app"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "typeflow-db"
+database_id = ""  # デプロイ時に自動生成されるか、手動で設定
+
+[env.development]
+name = "typeflow-api-dev"
+
+[env.development.vars]
+ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:3000"
+
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "typeflow-db-dev"
+database_id = "adaebe97-c7fe-4ea6-b02b-2c36c8de151f"
+

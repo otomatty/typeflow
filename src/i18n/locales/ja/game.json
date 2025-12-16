@@ -23,6 +23,11 @@
   "time": "時間",
   "miss": "ミス",
   "first_key": "初動キー",
-  "timeout": "時間切れ"
+  "timeout": "時間切れ",
+  "skill_check_complete": "スキルチェック完了！",
+  "recommended_difficulty": "推奨難易度",
+  "apply_recommended": "推奨設定を適用",
+  "continue_practicing": "練習を続ける",
+  "select_preset": "プリセットを選択"
 }
 

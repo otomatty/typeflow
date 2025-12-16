@@ -3,6 +3,12 @@
   "press_to_start": "スペースキーでスタート",
   "no_words_yet": "単語がまだありません。練習を始めるには単語を追加してください！",
   "go_to_words": "メニューの「単語」から単語を追加してください",
-  "press_esc_to_exit": "ゲーム中は Esc で終了"
+  "press_esc_to_exit": "ゲーム中は Esc で終了",
+  "quick_start_title": "クイックスタート",
+  "quick_start_description": "最短でゲームを開始して、あなたのタイピングスキルを確認できます。基本的な単語で5問の短いテストを行います。",
+  "start_skill_check": "スキルチェックを開始",
+  "quick_start_note": "初回ユーザー向けの機能です。自動的に基本単語が読み込まれます。",
+  "recommended_presets_title": "おすすめプリセット",
+  "recommended_presets_description": "練習を始めるために、おすすめのプリセットから選択してください。"
 }
 

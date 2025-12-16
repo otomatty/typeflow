@@ -141,6 +141,17 @@ export function useSettings() {
     return Math.min(settings.wordCount, totalWords)
   }, [settings.wordCount])
 
+  // Reset all settings to default
+  const resetSettings = useCallback(async () => {
+    try {
+      await saveSettings(DEFAULT_SETTINGS)
+      setSettings(DEFAULT_SETTINGS)
+    } catch (error) {
+      console.error('Failed to reset settings:', error)
+      throw error
+    }
+  }, [])
+
   return {
     settings,
     isLoading,
@@ -155,5 +166,7 @@ export function useSettings() {
     // 制限時間設定
     updateMinTimeLimit,
     updateMaxTimeLimit,
+    // 設定リセット
+    resetSettings,
   }
 }

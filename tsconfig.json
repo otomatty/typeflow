@@ -8,7 +8,7 @@
       "DOM",
       "DOM.Iterable"
     ],
-    "types": ["node"],
+    "types": ["node", "@cloudflare/workers-types"],
     "module": "ESNext",
     "skipLibCheck": true,
     "strictNullChecks": true,

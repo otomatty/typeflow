@@ -14,6 +14,7 @@
   "preset_clear_existing": "既存の単語を削除してから読み込む",
   "preset_load": "読み込む",
   "preset_hint": "💡 ヒント: 寿司打など外部サイトの単語リストをインポートする機能は近日追加予定です",
+  "preset_after_quickstart": "スキルチェックで使用した一時的な単語は自動的に削除されます。使用したいプリセットを選択してください。",
   "difficulty_beginner": "初級",
   "difficulty_intermediate": "中級",
   "difficulty_advanced": "上級",

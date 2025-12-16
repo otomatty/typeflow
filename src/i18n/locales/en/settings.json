@@ -71,6 +71,16 @@
   "language": {
     "title": "Language",
     "description": "Select the app display language"
+  },
+  "reset_all": {
+    "title": "Reset All Data",
+    "description": "Delete all data (words, stats, scores, settings) and start over from the quick start. This action cannot be undone.",
+    "button": "Reset All Data",
+    "confirm": "Reset",
+    "cancel": "Cancel",
+    "resetting": "Resetting...",
+    "success": "All data has been reset. You can start from the quick start.",
+    "error": "Failed to reset data"
   }
 }
 

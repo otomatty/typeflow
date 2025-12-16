@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: typeflow-api
+    env: bun
+    buildCommand: bun install
+    startCommand: bun run server/index.ts
+    envVars:
+      - key: PORT
+        value: 3456
+      - key: NODE_ENV
+        value: production
+

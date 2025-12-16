@@ -13,8 +13,11 @@ import {
   ChevronUp,
   ChevronDown,
   Clock,
+  Sparkles,
 } from 'lucide-react'
-import { GameStats, WordPerformanceRecord } from '@/lib/types'
+import { GameStats, WordPerformanceRecord, DifficultyPreset } from '@/lib/types'
+import { recommendDifficulty, getSkillCheckDescription } from '@/lib/skill-check-utils'
+import { getDifficultyLabel } from '@/lib/difficulty-presets'
 
 interface GameOverScreenProps {
   stats: GameStats
@@ -22,6 +25,8 @@ interface GameOverScreenProps {
   onRestart: () => void
   onRetryWeak: () => void
   onExit: () => void
+  isQuickStartMode?: boolean
+  onApplyRecommendedDifficulty?: (difficulty: DifficultyPreset) => void
 }
 
 type SortKey = 'order' | 'reactionTime' | 'missCount' | 'totalTime'
@@ -65,7 +70,9 @@ export function GameOverScreen({
   hasMistakes, 
   onRestart, 
   onRetryWeak,
-  onExit 
+  onExit,
+  isQuickStartMode = false,
+  onApplyRecommendedDifficulty,
 }: GameOverScreenProps) {
   const { t, i18n } = useTranslation('game')
   const [sortKey, setSortKey] = useState<SortKey>('order')
@@ -73,6 +80,19 @@ export function GameOverScreen({
   
   // 日本語かどうかを判定
   const isJapanese = i18n.language?.startsWith('ja') ?? false
+
+  // スキルチェックモードの場合、難易度を提案
+  const recommendedDifficulty = isQuickStartMode ? recommendDifficulty(stats) : null
+  const skillCheckDescription = recommendedDifficulty 
+    ? getSkillCheckDescription(stats, recommendedDifficulty, isJapanese)
+    : null
+
+  const handleApplyRecommended = () => {
+    if (recommendedDifficulty && onApplyRecommendedDifficulty) {
+      onApplyRecommendedDifficulty(recommendedDifficulty)
+      onExit()
+    }
+  }
 
   // ソートされた単語パフォーマンスリスト
   const sortedPerformances = useMemo(() => {
@@ -132,7 +152,9 @@ export function GameOverScreen({
       <Card className="w-full max-w-2xl p-6 sm:p-8 max-h-[90vh] overflow-hidden flex flex-col">
         {/* Fixed Header */}
         <div className="text-center shrink-0 pb-6">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-2">{t('game_over')}</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2">
+            {isQuickStartMode ? t('skill_check_complete') : t('game_over')}
+          </h2>
           <p className="text-muted-foreground">{t('great_session')}</p>
         </div>
 
@@ -220,24 +242,58 @@ export function GameOverScreen({
           </div>
         </div>
 
+        {/* Skill Check Recommendation */}
+        {isQuickStartMode && recommendedDifficulty && (
+          <div className="mb-6">
+            <Card className="p-4 bg-primary/5 border-primary/20">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  <h3 className="font-semibold">{t('recommended_difficulty')}</h3>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{t('recommended_difficulty')}:</span>
+                    <span className="text-sm font-bold text-primary">
+                      {recommendedDifficulty ? getDifficultyLabel(recommendedDifficulty) : ''}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground whitespace-pre-line">
+                    {skillCheckDescription}
+                  </p>
+                </div>
+                <Button
+                  onClick={handleApplyRecommended}
+                  className="w-full gap-2"
+                  size="sm"
+                >
+                  {t('apply_recommended')}
+                </Button>
+              </div>
+            </Card>
+          </div>
+        )}
+
         {/* Fixed Footer - Action Buttons */}
         <div className="space-y-2 pt-6 shrink-0">
-          {hasMistakes && (
+          {hasMistakes && !isQuickStartMode ? (
+            // 間違った問題がある時は復習するボタンのみ表示
             <Button onClick={onRetryWeak} className="w-full gap-2">
               <RotateCcw className="w-4 h-4" />
               {t('retry_weak_words')}
-              <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">R</kbd>
+              <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">Space</kbd>
             </Button>
-          )}
-          
-          <Button onClick={onRestart} variant="secondary" className="w-full gap-2">
-            <Play className="w-4 h-4" />
-            {t('play_again')}
-            <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">Enter</kbd>
-          </Button>
+          ) : !isQuickStartMode ? (
+            // ミスなくタイピングできたら新しい問題に挑戦するボタンのみ表示
+            <Button onClick={onRestart} variant="secondary" className="w-full gap-2">
+              <Play className="w-4 h-4" />
+              {t('play_again')}
+              <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">Space</kbd>
+            </Button>
+          ) : null}
           
           <Button onClick={onExit} variant="outline" className="w-full gap-2">
-            {t('back_to_menu')}
+            {isQuickStartMode ? t('select_preset') : t('back_to_menu')}
             <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">Esc</kbd>
           </Button>
         </div>

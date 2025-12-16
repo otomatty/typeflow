@@ -23,6 +23,11 @@
   "time": "Time",
   "miss": "Miss",
   "first_key": "1st Key",
-  "timeout": "Timeout"
+  "timeout": "Timeout",
+  "skill_check_complete": "Skill Check Complete!",
+  "recommended_difficulty": "Recommended Difficulty",
+  "apply_recommended": "Apply Recommended Settings",
+  "continue_practicing": "Continue Practicing",
+  "select_preset": "Select Preset"
 }
 

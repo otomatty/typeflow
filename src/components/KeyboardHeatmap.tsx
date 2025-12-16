@@ -108,3 +108,4 @@ export function KeyboardHeatmap({ keyStats }: KeyboardHeatmapProps) {
   )
 }
 
+

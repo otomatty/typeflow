@@ -19,9 +19,11 @@ interface PresetDialogProps {
   onOpenChange?: (open: boolean) => void
   /** トリガーボタンを表示するかどうか（デフォルト: true） */
   showTrigger?: boolean
+  /** クイックスタート後の選択かどうか */
+  isAfterQuickStart?: boolean
 }
 
-export function PresetDialog({ onLoadPreset, isLoading, open: controlledOpen, onOpenChange, showTrigger = true }: PresetDialogProps) {
+export function PresetDialog({ onLoadPreset, isLoading, open: controlledOpen, onOpenChange, showTrigger = true, isAfterQuickStart = false }: PresetDialogProps) {
   const { t } = useTranslation('words')
   
   const [internalOpen, setInternalOpen] = useState(false)
@@ -55,7 +57,7 @@ export function PresetDialog({ onLoadPreset, isLoading, open: controlledOpen, on
     setLoadingPresetId(presetId)
     try {
       await onLoadPreset(preset.words, {
-        clearExisting,
+        clearExisting: isAfterQuickStart ? true : clearExisting, // クイックスタート後は常に既存を削除
         presetName: preset.name,
       })
       setOpen(false)
@@ -82,17 +84,28 @@ export function PresetDialog({ onLoadPreset, isLoading, open: controlledOpen, on
             {t('preset_desc')}
           </DialogDescription>
         </DialogHeader>
+        
+        {/* クイックスタート後の説明 */}
+        {isAfterQuickStart && (
+          <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg mb-4">
+            <p className="text-sm text-muted-foreground">
+              {t('preset_after_quickstart')}
+            </p>
+          </div>
+        )}
 
-        <div className="flex items-center space-x-2 py-4 border-b">
-          <Switch
-            id="clear-existing"
-            checked={clearExisting}
-            onCheckedChange={setClearExisting}
-          />
-          <Label htmlFor="clear-existing" className="text-sm text-muted-foreground">
-            {t('preset_clear_existing')}
-          </Label>
-        </div>
+        {!isAfterQuickStart && (
+          <div className="flex items-center space-x-2 py-4 border-b">
+            <Switch
+              id="clear-existing"
+              checked={clearExisting}
+              onCheckedChange={setClearExisting}
+            />
+            <Label htmlFor="clear-existing" className="text-sm text-muted-foreground">
+              {t('preset_clear_existing')}
+            </Label>
+          </div>
+        )}
 
         <div className="grid gap-4 py-4">
           {allPresets.map((preset) => (

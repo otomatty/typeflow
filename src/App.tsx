@@ -8,15 +8,22 @@ import { WordManagementScreen } from '@/components/WordManagementScreen'
 import { StatsScreen } from '@/components/StatsScreen'
 import { SettingsScreen } from '@/components/SettingsScreen'
 import { AddWordDialog } from '@/components/AddWordDialog'
+import { PresetDialog } from '@/components/PresetDialog'
 import { useWords } from '@/hooks/useWords'
 import { useGame, ViewType } from '@/hooks/useGame'
 import { useTypingAnalytics } from '@/hooks/useTypingAnalytics'
 import { useSettings } from '@/hooks/useSettings'
 import { shuffleArray } from '@/lib/utils'
+import { basicJapanesePreset } from '@/lib/presets'
+import { toast } from 'sonner'
+import type { PresetWord } from '@/lib/types'
 
 function App() {
-  const { words, addWord, editWord, deleteWord, updateWordStats, loadPreset, clearAllWords } = useWords()
+  const { words, addWord, editWord, deleteWord, updateWordStats, loadPreset, clearAllWords, refetch: refetchWords } = useWords()
   const [isAddWordDialogOpen, setIsAddWordDialogOpen] = useState(false)
+  const [isQuickStartMode, setIsQuickStartMode] = useState(false)
+  const [quickStartWordIds, setQuickStartWordIds] = useState<Set<string>>(new Set())
+  const [presetDialogOpen, setPresetDialogOpen] = useState(false)
   const { 
     updateStats, 
     selectWeaknessBasedWords, 
@@ -36,7 +43,12 @@ function App() {
     getEffectiveWordCount,
     // 難易度プリセット
     updateDifficultyPreset,
+    // 設定リセット
+    resetSettings,
   } = useSettings()
+
+  // 初回ユーザー判定（単語が0件、ゲームスコアが0件、統計データがない）
+  const isFirstTime = words.length === 0 && gameScores.length === 0 && (!aggregatedStats || Object.keys(aggregatedStats.keyStats).length === 0)
 
   // セッション終了時にキーストローク統計を更新
   const handleSessionEnd = useCallback(
@@ -51,13 +63,18 @@ function App() {
     // セッション状態をリセット
     resetSessionState()
     
+    // クイックスタートモードの場合は5問に制限
+    const wordLimit = isQuickStartMode ? 5 : undefined
+    
     // スコアリングシステムで単語を選択（ソート済み）
     const sortedWords = selectWeaknessBasedWords(words, {
       practiceMode: settings.practiceMode,
       srsEnabled: settings.srsEnabled,
       warmupEnabled: settings.warmupEnabled,
     })
-    const effectiveCount = getEffectiveWordCount(sortedWords.length)
+    
+    // クイックスタートモードの場合は5問、通常モードの場合は設定に従う
+    const effectiveCount = wordLimit || getEffectiveWordCount(sortedWords.length)
     
     // 問題数分を取得
     const selectedWords = sortedWords.slice(0, effectiveCount)
@@ -69,7 +86,7 @@ function App() {
     }
     
     return selectedWords
-  }, [words, selectWeaknessBasedWords, getEffectiveWordCount, settings.practiceMode, settings.srsEnabled, settings.warmupEnabled, resetSessionState])
+  }, [words, selectWeaknessBasedWords, getEffectiveWordCount, settings.practiceMode, settings.srsEnabled, settings.warmupEnabled, resetSessionState, isQuickStartMode])
 
   const {
     view,
@@ -120,8 +137,94 @@ function App() {
 
   // 弱点ベースでソートされた単語でゲームを開始（設定の単語数を適用）
   const handleStartGame = useCallback(() => {
+    setIsQuickStartMode(false)
     startGame()  // Uses getGameWords callback to apply settings
   }, [startGame])
+
+  // クイックスタート: 基本単語を自動読み込みして短いゲームを開始
+  const handleQuickStart = useCallback(async () => {
+    try {
+      // 読み込み前の単語数を記録
+      const wordsBeforeLoad = words.length
+      
+      // 基本日本語プリセットを読み込む
+      await loadPreset(basicJapanesePreset.words, {
+        clearExisting: false,
+        presetName: '基本日本語',
+      })
+      
+      // クイックスタートモードを有効化
+      setIsQuickStartMode(true)
+      
+      // ゲームを開始（getGameWordsで5問に制限される）
+      startGame()
+    } catch (error) {
+      console.error('Failed to start quick start:', error)
+      toast.error('クイックスタートの開始に失敗しました')
+    }
+  }, [loadPreset, startGame, words.length])
+
+  // クイックスタートで読み込んだ単語のIDを記録
+  useEffect(() => {
+    if (isQuickStartMode && quickStartWordIds.size === 0) {
+      // 基本日本語プリセットと一致する単語を探す
+      const loadedWords = words.filter(w => 
+        basicJapanesePreset.words.some(pw => 
+          pw.text === w.text && pw.reading === w.reading && pw.romaji === w.romaji
+        )
+      )
+      if (loadedWords.length > 0) {
+        setQuickStartWordIds(new Set(loadedWords.map(w => w.id)))
+      }
+    }
+  }, [isQuickStartMode, words, quickStartWordIds.size])
+
+  // クイックスタートで使用した単語を削除
+  const cleanupQuickStartWords = useCallback(async () => {
+    if (quickStartWordIds.size === 0) return
+    
+    try {
+      // クイックスタートで使用した単語を削除
+      for (const wordId of quickStartWordIds) {
+        await deleteWord(wordId)
+      }
+      setQuickStartWordIds(new Set())
+    } catch (error) {
+      console.error('Failed to cleanup quick start words:', error)
+    }
+  }, [quickStartWordIds, deleteWord])
+
+  // プリセット選択後の処理
+  const handlePresetSelected = useCallback(async (
+    presetWords: PresetWord[],
+    options: { clearExisting: boolean; presetName: string }
+  ) => {
+    try {
+      // クイックスタートで使用した単語を削除
+      await cleanupQuickStartWords()
+      
+      // 選択されたプリセットを読み込む
+      await loadPreset(presetWords, {
+        clearExisting: true, // クイックスタートの単語を削除したので、既存をクリア
+        presetName: options.presetName,
+      })
+      
+      // クイックスタートモードをリセット
+      setIsQuickStartMode(false)
+      setQuickStartWordIds(new Set())
+      
+      // プリセット選択ダイアログを閉じる
+      setPresetDialogOpen(false)
+      
+      // メニューに戻る
+      setView('menu')
+      
+      toast.success(`${options.presetName}を読み込みました`)
+    } catch (error) {
+      console.error('Failed to load preset:', error)
+      toast.error('プリセットの読み込みに失敗しました')
+    }
+  }, [cleanupQuickStartWords, loadPreset, setView])
 
   const handleNavigate = (newView: ViewType) => {
     setView(newView)
@@ -137,12 +240,29 @@ function App() {
           onOpenChange={setIsAddWordDialogOpen}
           showTrigger={false}
         />
+        <PresetDialog
+          onLoadPreset={handlePresetSelected}
+          open={presetDialogOpen}
+          onOpenChange={setPresetDialogOpen}
+          showTrigger={false}
+          isAfterQuickStart={isQuickStartMode}
+        />
         <GameOverScreen
           stats={gameStats}
-          hasMistakes={gameState.mistakeWords.length > 0}
+          hasMistakes={gameStats.wordPerformances.some(p => p.missCount > 0 || !p.completed)}
           onRestart={handleStartGame}
           onRetryWeak={retryWeakWords}
-          onExit={() => setView('menu')}
+          onExit={() => {
+            if (isQuickStartMode) {
+              // クイックスタートモードの場合、プリセット選択画面を表示
+              setPresetDialogOpen(true)
+            } else {
+              setIsQuickStartMode(false)
+              setView('menu')
+            }
+          }}
+          isQuickStartMode={isQuickStartMode}
+          onApplyRecommendedDifficulty={updateDifficultyPreset}
         />
       </>
     )
@@ -239,6 +359,24 @@ function App() {
           onWarmupEnabledChange={updateWarmupEnabled}
           // 難易度設定のコールバック
           onDifficultyPresetChange={updateDifficultyPreset}
+          // 全データリセット
+          onResetAll={async () => {
+            try {
+              // 全てのデータをリセット
+              await Promise.all([
+                clearAllWords(),
+                resetStats(),
+                resetSettings(),
+              ])
+              // 単語リストを再取得
+              await refetchWords()
+              // メニューに戻る（クイックスタートが表示されるように）
+              setView('menu')
+            } catch (error) {
+              console.error('Failed to reset all data:', error)
+              throw error
+            }
+          }}
         />
       </>
     )
@@ -257,6 +395,10 @@ function App() {
       <MenuScreen
         words={words}
         onStartGame={handleStartGame}
+        onQuickStart={handleQuickStart}
+        isFirstTime={isFirstTime}
+        gameScoresCount={gameScores.length}
+        onLoadPreset={loadPreset}
       />
     </>
   )

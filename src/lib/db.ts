@@ -1,7 +1,7 @@
 import type { KeyStats, KeyTransitionStats, AppSettings, WordCountPreset, ThemeType, PresetWord, GameStats, PracticeMode, DifficultyPreset } from './types'
 
-// APIベースURL
-const API_BASE = 'http://localhost:3456/api'
+// APIベースURL（環境変数から取得、デフォルトはローカル）
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3456/api'
 
 // Word interface for database
 export interface WordRecord {
@@ -185,7 +185,7 @@ export async function resetAggregatedStats(): Promise<void> {
 
 // Default settings
 export const DEFAULT_SETTINGS: AppSettings = {
-  wordCount: 'all',
+  wordCount: 20,
   theme: 'dark',
   practiceMode: 'random',
   srsEnabled: true,
@@ -193,16 +193,16 @@ export const DEFAULT_SETTINGS: AppSettings = {
   // 難易度設定（デフォルトは「ふつう」）
   difficultyPreset: 'normal',
   // 制限時間設定（難易度に応じて自動計算）
-  targetKpsMultiplier: 1.05,           // normalプリセット相当（5%速い目標）
-  comfortZoneRatio: 1.0,               // 1.0 = 目標KPSぴったりの制限時間
+  targetKpsMultiplier: 1.40,           // normalプリセット相当（40%速い目標）
+  comfortZoneRatio: 0.90,              // 0.90 = 10%厳しい制限時間
   minTimeLimit: 1.5,                   // 最小1.5秒（あまりに短すぎないように）
   maxTimeLimit: 15,                    // 最大15秒（長すぎないように）
   // ミスペナルティのデフォルト設定（normalプリセット相当）
   missPenaltyEnabled: true,            // デフォルトで有効
-  basePenaltyPercent: 5,               // 基本5%減少
-  penaltyEscalationFactor: 1.5,        // ミスごとに1.5倍
-  maxPenaltyPercent: 30,               // 最大30%
-  minTimeAfterPenalty: 0.5,            // 最低0.5秒は残す
+  basePenaltyPercent: 12,              // 基本12%減少
+  penaltyEscalationFactor: 2.2,        // ミスごとに2.2倍
+  maxPenaltyPercent: 55,               // 最大55%
+  minTimeAfterPenalty: 0.15,           // 最低0.15秒は残す
 }
 
 // Settings helper functions

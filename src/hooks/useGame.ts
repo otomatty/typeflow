@@ -71,6 +71,13 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
   // 単語ごとのパフォーマンス記録用
   const wordPerformancesRef = useRef<WordPerformanceRecord[]>([])
   const currentWordPerformanceRef = useRef<CurrentWordPerformance | null>(null)
+  
+  // やり直しモード中かどうかを追跡
+  const isRetryModeRef = useRef<boolean>(false)
+  // やり直し開始時の mistakeWords を保存
+  const retryStartMistakeWordsRef = useRef<string[]>([])
+  // やり直しモード中に全ての単語を正解した場合、新しいゲームを開始するフラグ
+  const shouldAutoStartNewGameRef = useRef<boolean>(false)
 
   const endGame = useCallback((completed: boolean = false) => {
     const endTime = Date.now()
@@ -98,13 +105,23 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
       wordPerformancesRef.current.push(wordPerformance)
     }
     
+    // やり直しモード中にタイムアウトした場合、mistakeWords をやり直し開始時の状態に復元
+    // 完了時は、既に正解した単語が削除されている gameState.mistakeWords を使用
+    let finalMistakeWords = gameState.mistakeWords
+    if (!completed && isRetryModeRef.current) {
+      finalMistakeWords = [...retryStartMistakeWordsRef.current]
+    }
+    
+    // やり直しモード中に全ての単語を正解した場合（mistakeWords が空になった場合）、新しいゲームを自動的に開始
+    const shouldStartNewGame = completed && isRetryModeRef.current && finalMistakeWords.length === 0
+    
     // KPS = 総打鍵数 / 総時間（秒）
     const kps = totalSeconds > 0 
       ? Math.round((gameState.totalKeystrokes / totalSeconds) * 10) / 10 
       : 0
     
     // ノーミスで完了したワード数 = 完了ワード数 - ミスがあったワード数
-    const perfectWords = wordsCompleted - gameState.mistakeWords.length
+    const perfectWords = wordsCompleted - finalMistakeWords.length
     
     // 正確率 = ノーミスワード数 / 完了ワード数 * 100
     const accuracy = wordsCompleted > 0
@@ -142,7 +159,22 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
       onSessionEnd(keystrokesRef.current)
     }
 
-    setGameState((prev) => ({ ...prev, isPlaying: false }))
+    setGameState((prev) => ({ 
+      ...prev, 
+      isPlaying: false,
+      mistakeWords: finalMistakeWords,  // 復元した mistakeWords を設定
+    }))
+    
+    // やり直しモード中に全ての単語を正解した場合、新しいゲームを自動的に開始するフラグを設定
+    if (shouldStartNewGame) {
+      shouldAutoStartNewGameRef.current = true
+      // やり直しモードをリセット
+      isRetryModeRef.current = false
+      retryStartMistakeWordsRef.current = []
+    } else {
+      shouldAutoStartNewGameRef.current = false
+    }
+    
     setView('gameover')
   }, [gameState, onSessionEnd])
 
@@ -150,6 +182,19 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
     if (words.length === 0) {
       toast.error('Add some words first!')
       return
+    }
+
+    // 間違った問題がある時は、復習モード（wordsToPlayが提供されている場合）以外では新しいゲームを開始できない
+    // ただし、復習モード中に全ての単語を正解した場合は例外（shouldAutoStartNewGameRefがtrueの場合）
+    // メニュー画面から呼び出された場合は、前のゲームのmistakeWordsを無視して新しいゲームを開始できる
+    if (!wordsToPlay && view === 'gameover' && gameState.mistakeWords.length > 0 && !shouldAutoStartNewGameRef.current) {
+      // 新しいゲームを開始できない（復習が必要）
+      return
+    }
+
+    // 復習モード中に全ての単語を正解した場合のフラグをリセット
+    if (shouldAutoStartNewGameRef.current) {
+      shouldAutoStartNewGameRef.current = false
     }
 
     // Use provided words, or get words from callback (with settings applied), or fallback to shuffled words
@@ -162,6 +207,19 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
     
     // 単語パフォーマンス記録をリセット
     wordPerformancesRef.current = []
+    
+    // やり直しモードかどうかを判定（wordsToPlay が提供されている場合はやり直しモード）
+    const isRetryMode = wordsToPlay !== undefined
+    isRetryModeRef.current = isRetryMode
+    
+    // やり直しモードの場合、現在の mistakeWords を保存
+    if (isRetryMode) {
+      retryStartMistakeWordsRef.current = [...gameState.mistakeWords]
+    } else {
+      // 通常モードの場合はやり直しフラグをリセット
+      isRetryModeRef.current = false
+      retryStartMistakeWordsRef.current = []
+    }
     
     const now = Date.now()
     
@@ -195,7 +253,7 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
       timeRemaining: initialTimeLimit,
       totalTime: initialTimeLimit,
       words: gameWords,
-      mistakeWords: [],
+      mistakeWords: isRetryMode ? [...retryStartMistakeWordsRef.current] : [],
       correctCount: 0,
       totalKeystrokes: 0,
       startTime: now,
@@ -203,7 +261,7 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
       currentWordMissCount: 0,
     })
     setView('game')
-  }, [words, getGameWords, gameScores, settings])
+  }, [words, getGameWords, gameScores, settings, gameState.mistakeWords, view])
 
   const retryWeakWords = useCallback(() => {
     const weakWords = words.filter((w) => gameState.mistakeWords.includes(w.id))
@@ -237,12 +295,14 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
 
     // Game over screen shortcuts
     if (view === 'gameover') {
-      if (e.key === 'Enter') {
+      if (e.key === ' ') {
         e.preventDefault()
-        startGame()  // Uses getGameWords callback if provided to apply settings
-      } else if (e.key === 'r' || e.key === 'R') {
-        e.preventDefault()
-        retryWeakWords()
+        // 間違った問題がある時は復習、ない時は新しいゲームを開始
+        if (gameState.mistakeWords.length > 0) {
+          retryWeakWords()
+        } else {
+          startGame()  // Uses getGameWords callback if provided to apply settings
+        }
       } else if (e.key === 'Escape') {
         e.preventDefault()
         setView('menu')
@@ -394,7 +454,18 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
           wordPerformancesRef.current.push(wordPerformance)
         }
         
+        // やり直しモード中で、ミスなく正しく入力できた単語は mistakeWords から削除
+        const shouldRemoveFromMistakes = isRetryModeRef.current && 
+                                         currentWordPerformanceRef.current?.missCount === 0
+        
         if (gameState.currentWordIndex + 1 >= gameState.words.length) {
+          // 最後の単語が完了した場合も、mistakeWords から削除
+          if (shouldRemoveFromMistakes) {
+            setGameState((prev) => ({
+              ...prev,
+              mistakeWords: prev.mistakeWords.filter(id => id !== currentWord.id),
+            }))
+          }
           endGame(true)
         } else {
           const nextWord = gameState.words[gameState.currentWordIndex + 1]
@@ -428,6 +499,10 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
             correctCount: prev.correctCount + 1,
             wordStartTime: completionTime,
             currentWordMissCount: 0,  // 次の単語ではミスカウントをリセット
+            // やり直しモード中でミスなく正しく入力できた単語を mistakeWords から削除
+            mistakeWords: shouldRemoveFromMistakes
+              ? prev.mistakeWords.filter(id => id !== currentWord.id)
+              : prev.mistakeWords,
           }))
         }
       }
@@ -478,6 +553,18 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [handleKeyPress])
+
+  // やり直しモード中に全ての単語を正解した場合、新しいゲームを自動的に開始
+  useEffect(() => {
+    if (view === 'gameover' && shouldAutoStartNewGameRef.current && gameState.mistakeWords.length === 0) {
+      shouldAutoStartNewGameRef.current = false
+      // 少し遅延を入れてから新しいゲームを開始（統計表示を一瞬見せるため）
+      const timer = setTimeout(() => {
+        startGame()
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [view, gameState.mistakeWords.length, startGame])
 
   return {
     view,

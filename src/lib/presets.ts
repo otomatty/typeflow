@@ -104,7 +104,7 @@ const sushidaCSV = `ワード,読み,入力例
 男ばっかり三兄弟,おとこばっかりさんきょうだい,otokobakkarisankyoudai
 お年玉ちょうだい,おとしだまちょうだい,otosidamatyoudai
 鬼の居ぬ間に洗濯,おにのいぬまにせんたく,oninoinumanisentaku
-鬼は外、福は内,おにはそと、ふくはうち,onihasotofukuhauti
+鬼は外、福は内,おにはそと、ふくはうち,onihasoto,fukuhauti
 おばあさんは川へ洗濯に,おばあさんはかわへせんたくに,obaasanhakawahesentakuni
 主な登場人物,おもなとうじょうじんぶつ,omonatoujoujinbutu
 おやつは戸棚に入っています,おやつはとだなにはいっています,oyatuhatodananihaitteimasu
