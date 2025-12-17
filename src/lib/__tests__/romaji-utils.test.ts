@@ -6,6 +6,8 @@ import {
   normalizeRomaji,
   getMatchingVariation,
   validateRomajiInput,
+  getDisplayParts,
+  toKunreiDisplay,
 } from '../romaji-utils'
 
 describe('romaji-utils', () => {
@@ -113,6 +115,84 @@ describe('romaji-utils', () => {
     it('should return expected next characters', () => {
       const result = validateRomajiInput('shiken', 'shi')
       expect(result.expectedNext.length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('getDisplayParts', () => {
+    it('should handle Hepburn input against Kunrei display (Bug 1 fix)', () => {
+      // Word: "chuugoku" (中国) - Kunrei display is "tyuugoku"
+      const wordRomaji = 'chuugoku'
+      const initialDisplay = toKunreiDisplay(normalizeRomaji(wordRomaji)) // "tyuugoku"
+
+      // User types "chu" in Hepburn style
+      const result = getDisplayParts(wordRomaji, 'chu', initialDisplay)
+
+      // inputPart should be "tyu" (Kunrei), not "chu" (Hepburn)
+      expect(result.inputPart).toBe('tyu')
+      // remainingPart should be "ugoku"
+      expect(result.remainingPart).toBe('ugoku')
+      // Combined should equal initialDisplay
+      expect(result.inputPart + result.remainingPart).toBe(initialDisplay)
+    })
+
+    it('should return consistent Kunrei format for both parts (Bug 2 fix)', () => {
+      // Word: "sushi" (寿司) - Kunrei display is "susi"
+      const wordRomaji = 'sushi'
+      const initialDisplay = toKunreiDisplay(normalizeRomaji(wordRomaji)) // "susi"
+
+      // User types "su" (complete syllable)
+      const result = getDisplayParts(wordRomaji, 'su', initialDisplay)
+
+      // Both parts should be in Kunrei format
+      expect(result.inputPart).toBe('su')
+      expect(result.remainingPart).toBe('si') // Not "shi"
+      expect(result.inputPart + result.remainingPart).toBe(initialDisplay)
+    })
+
+    it('should handle complete Hepburn input correctly', () => {
+      // Word: "chikyuu" (地球) - Kunrei display is "tikyuu"
+      const wordRomaji = 'chikyuu'
+      const initialDisplay = toKunreiDisplay(normalizeRomaji(wordRomaji)) // "tikyuu"
+
+      // User types "chi" in Hepburn
+      const result = getDisplayParts(wordRomaji, 'chi', initialDisplay)
+
+      expect(result.inputPart).toBe('ti')
+      expect(result.remainingPart).toBe('kyuu')
+      expect(result.inputPart + result.remainingPart).toBe(initialDisplay)
+    })
+
+    it('should handle empty input', () => {
+      const wordRomaji = 'sushi'
+      const initialDisplay = toKunreiDisplay(normalizeRomaji(wordRomaji))
+
+      const result = getDisplayParts(wordRomaji, '', initialDisplay)
+
+      expect(result.inputPart).toBe('')
+      expect(result.remainingPart).toBe(initialDisplay)
+    })
+
+    it('should handle Kunrei input matching Kunrei display directly', () => {
+      // User types in Kunrei style, should work directly
+      const wordRomaji = 'sushi'
+      const initialDisplay = toKunreiDisplay(normalizeRomaji(wordRomaji)) // "susi"
+
+      // User types "susi" (complete word in Kunrei)
+      const result = getDisplayParts(wordRomaji, 'susi', initialDisplay)
+
+      expect(result.inputPart).toBe('susi')
+      expect(result.remainingPart).toBe('')
+    })
+
+    it('should handle fu/hu conversion', () => {
+      const wordRomaji = 'fuji'
+      const initialDisplay = toKunreiDisplay(normalizeRomaji(wordRomaji)) // "huji"
+
+      const result = getDisplayParts(wordRomaji, 'fu', initialDisplay)
+
+      expect(result.inputPart).toBe('hu')
+      expect(result.remainingPart).toBe('ji')
+      expect(result.inputPart + result.remainingPart).toBe(initialDisplay)
     })
   })
 })
