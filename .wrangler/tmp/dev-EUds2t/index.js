@@ -2295,6 +2295,7 @@ async function getSettings(db) {
     comfortZoneRatio: result.comfort_zone_ratio,
     minTimeLimit: result.min_time_limit,
     maxTimeLimit: result.max_time_limit,
+    minTimeLimitByDifficulty: result.min_time_limit_by_difficulty ?? 1.5,
     missPenaltyEnabled: Boolean(result.miss_penalty_enabled),
     basePenaltyPercent: result.base_penalty_percent,
     penaltyEscalationFactor: result.penalty_escalation_factor,
@@ -2353,6 +2354,10 @@ async function upsertSettings(db, input) {
       updates.push("max_time_limit = ?");
       values.push(input.maxTimeLimit);
     }
+    if (input.minTimeLimitByDifficulty !== void 0) {
+      updates.push("min_time_limit_by_difficulty = ?");
+      values.push(input.minTimeLimitByDifficulty);
+    }
     if (input.missPenaltyEnabled !== void 0) {
       updates.push("miss_penalty_enabled = ?");
       values.push(input.missPenaltyEnabled ? 1 : 0);
@@ -2380,8 +2385,8 @@ async function upsertSettings(db, input) {
     }
   } else {
     await db.prepare(
-      `INSERT INTO settings (id, word_count, theme, practice_mode, srs_enabled, warmup_enabled, difficulty_preset, time_limit_mode, fixed_time_limit, comfort_zone_ratio, min_time_limit, max_time_limit, miss_penalty_enabled, base_penalty_percent, penalty_escalation_factor, max_penalty_percent, min_time_after_penalty, updated_at)
-         VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO settings (id, word_count, theme, practice_mode, srs_enabled, warmup_enabled, difficulty_preset, time_limit_mode, fixed_time_limit, comfort_zone_ratio, min_time_limit, max_time_limit, min_time_limit_by_difficulty, miss_penalty_enabled, base_penalty_percent, penalty_escalation_factor, max_penalty_percent, min_time_after_penalty, updated_at)
+         VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       input.wordCount ?? "all",
       input.theme ?? "dark",
@@ -2394,6 +2399,7 @@ async function upsertSettings(db, input) {
       input.comfortZoneRatio ?? 0.85,
       input.minTimeLimit ?? 1.5,
       input.maxTimeLimit ?? 15,
+      input.minTimeLimitByDifficulty ?? 1.5,
       input.missPenaltyEnabled !== void 0 ? input.missPenaltyEnabled ? 1 : 0 : 1,
       input.basePenaltyPercent ?? 5,
       input.penaltyEscalationFactor ?? 1.5,

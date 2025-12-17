@@ -43,6 +43,7 @@ export interface SettingsRecord {
   comfortZoneRatio: number
   minTimeLimit: number
   maxTimeLimit: number
+  minTimeLimitByDifficulty: number
   // ミスペナルティ設定
   missPenaltyEnabled: boolean
   basePenaltyPercent: number
@@ -197,6 +198,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   comfortZoneRatio: 0.90,              // 0.90 = 10%厳しい制限時間
   minTimeLimit: 1.5,                   // 最小1.5秒（あまりに短すぎないように）
   maxTimeLimit: 15,                    // 最大15秒（長すぎないように）
+  minTimeLimitByDifficulty: 1.5,       // 難易度ごとの最低制限時間（normalプリセット相当）
   // ミスペナルティのデフォルト設定（normalプリセット相当）
   missPenaltyEnabled: true,            // デフォルトで有効
   basePenaltyPercent: 12,              // 基本12%減少

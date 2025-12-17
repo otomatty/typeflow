@@ -83,7 +83,6 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
     const endTime = Date.now()
     const startTime = gameState.startTime || endTime
     const totalSeconds = (endTime - startTime) / 1000
-    const wordsCompleted = completed ? gameState.words.length : gameState.correctCount
     
     // タイムアウト時: 現在の単語のパフォーマンスを記録（未完了として）
     if (!completed && currentWordPerformanceRef.current) {
@@ -105,31 +104,52 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
       wordPerformancesRef.current.push(wordPerformance)
     }
     
+    // wordPerformancesから実際の統計を計算
+    const performances = wordPerformancesRef.current
+    // 実際にやった問題数 = wordPerformancesの数（タイムアウトした問題も含む）
+    const wordsCompleted = performances.length
+    // 完璧な単語数 = ミスがなく、完了した単語数
+    const perfectWords = performances.filter(p => p.missCount === 0 && p.completed).length
+    // ミスがあった単語のIDを抽出（ミスがあった、または未完了の単語）
+    const mistakeWordIds = performances
+      .filter(p => p.missCount > 0 || !p.completed)
+      .map(p => p.wordId)
+    
     // やり直しモード中にタイムアウトした場合、mistakeWords をやり直し開始時の状態に復元
-    // 完了時は、既に正解した単語が削除されている gameState.mistakeWords を使用
-    let finalMistakeWords = gameState.mistakeWords
-    if (!completed && isRetryModeRef.current) {
-      finalMistakeWords = [...retryStartMistakeWordsRef.current]
+    // 完了時は、wordPerformancesから抽出したmistakeWordIdsを使用
+    let finalMistakeWords: string[] = []
+    if (isRetryModeRef.current) {
+      if (completed) {
+        // 完了時は、wordPerformancesから抽出したmistakeWordIdsを使用
+        finalMistakeWords = mistakeWordIds
+      } else {
+        // タイムアウトした場合は、やり直し開始時の状態に復元
+        finalMistakeWords = [...retryStartMistakeWordsRef.current]
+      }
+    } else {
+      // 通常モードの場合は、wordPerformancesから抽出したmistakeWordIdsを使用
+      finalMistakeWords = mistakeWordIds
     }
     
-    // やり直しモード中に全ての単語を正解した場合（mistakeWords が空になった場合）、新しいゲームを自動的に開始
-    const shouldStartNewGame = completed && isRetryModeRef.current && finalMistakeWords.length === 0
+    // 復習モード中に全ての単語を正解したかどうかをwordPerformancesで判定
+    const allWordsPerfect = isRetryModeRef.current && completed && 
+      performances.length > 0 && 
+      performances.every(p => p.missCount === 0 && p.completed)
+    
+    // やり直しモード中に全ての単語を正解した場合、新しいゲームを自動的に開始
+    const shouldStartNewGame = completed && isRetryModeRef.current && allWordsPerfect
     
     // KPS = 総打鍵数 / 総時間（秒）
     const kps = totalSeconds > 0 
       ? Math.round((gameState.totalKeystrokes / totalSeconds) * 10) / 10 
       : 0
     
-    // ノーミスで完了したワード数 = 完了ワード数 - ミスがあったワード数
-    const perfectWords = wordsCompleted - finalMistakeWords.length
-    
     // 正確率 = ノーミスワード数 / 完了ワード数 * 100
     const accuracy = wordsCompleted > 0
       ? Math.round((perfectWords / wordsCompleted) * 100)
       : 100
     
-    // 初動統計を計算
-    const performances = wordPerformancesRef.current
+    // 初動統計を計算（performancesは既に上で取得済み）
     const performancesWithReaction = performances.filter(p => p.reactionTime > 0)
     const avgReactionTime = performancesWithReaction.length > 0
       ? Math.round(performancesWithReaction.reduce((sum, p) => sum + p.reactionTime, 0) / performancesWithReaction.length)
@@ -298,7 +318,9 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
       if (e.key === ' ') {
         e.preventDefault()
         // 間違った問題がある時は復習、ない時は新しいゲームを開始
-        if (gameState.mistakeWords.length > 0) {
+        // gameStats.wordPerformancesを使って実際のミスを判定
+        const hasMistakes = gameStats.wordPerformances.some(p => p.missCount > 0 || !p.completed)
+        if (hasMistakes) {
           retryWeakWords()
         } else {
           startGame()  // Uses getGameWords callback if provided to apply settings
@@ -395,6 +417,7 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
           const difficultyParams: DifficultyParams = {
             targetKpsMultiplier: settings.targetKpsMultiplier,
             comfortZoneRatio: settings.comfortZoneRatio,
+            minTimeLimitByDifficulty: settings.minTimeLimitByDifficulty,
             missPenaltyEnabled: settings.missPenaltyEnabled,
             basePenaltyPercent: settings.basePenaltyPercent,
             penaltyEscalationFactor: settings.penaltyEscalationFactor,
@@ -507,7 +530,7 @@ export function useGame({ words, updateWordStats, onSessionEnd, getGameWords, ga
         }
       }
     }
-  }, [view, gameState, updateWordStats, words, startGame, retryWeakWords, exitToMenu, endGame, gameScores, settings])
+  }, [view, gameState, gameStats, updateWordStats, words, startGame, retryWeakWords, exitToMenu, endGame, gameScores, settings])
 
   const calculateLiveStats = useCallback(() => {
     if (!gameState.startTime) return { kps: 0, accuracy: 100 }

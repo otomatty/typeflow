@@ -8,7 +8,7 @@ const sushidaCSV = `ワード,読み,入力例
 愛に国境はない,あいにこっきょうはない,ainikokkyouhanai
 青い空、白い雲,あおいそら、しろいくも,aoisora,siroikumo
 赤いチューリップ,あかいちゅーりっぷ,akaityu-rippu
-赤ちゃんから目が離せない,あかちゃんからめがはなせない,akathankaramegahanasenai
+赤ちゃんから目が離せない,あかちゃんからめがはなせない,akatyankaramegahanasenai
 アカデミー賞受賞,あかでみーしょうじゅしょう,akademi-shoujushou
 あけましておめでとう,あけましておめでとう,akemasiteomedetou
 あこがれのセーラー服,あこがれのせーらーふく,akogarenose-ra-fuku

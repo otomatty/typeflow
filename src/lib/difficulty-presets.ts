@@ -14,6 +14,8 @@ export const DIFFICULTY_PRESETS: Record<DifficultyPreset, DifficultyParams> = {
     targetKpsMultiplier: 1.30,
     // 制限時間: 5%厳しい（旧expertレベル）
     comfortZoneRatio: 0.95,
+    // 難易度ごとの最低制限時間: 2.0秒
+    minTimeLimitByDifficulty: 2.0,
     // ミスペナルティ: 非常に厳しい（旧expertレベル）
     missPenaltyEnabled: true,
     basePenaltyPercent: 10,
@@ -26,6 +28,8 @@ export const DIFFICULTY_PRESETS: Record<DifficultyPreset, DifficultyParams> = {
     targetKpsMultiplier: 1.40,
     // 制限時間: 10%厳しい
     comfortZoneRatio: 0.90,
+    // 難易度ごとの最低制限時間: 1.5秒
+    minTimeLimitByDifficulty: 1.5,
     // ミスペナルティ: より厳しい
     missPenaltyEnabled: true,
     basePenaltyPercent: 12,
@@ -38,6 +42,8 @@ export const DIFFICULTY_PRESETS: Record<DifficultyPreset, DifficultyParams> = {
     targetKpsMultiplier: 1.50,
     // 制限時間: 15%厳しい
     comfortZoneRatio: 0.85,
+    // 難易度ごとの最低制限時間: 1.2秒
+    minTimeLimitByDifficulty: 1.2,
     // ミスペナルティ: 非常に厳しい
     missPenaltyEnabled: true,
     basePenaltyPercent: 15,
@@ -50,6 +56,8 @@ export const DIFFICULTY_PRESETS: Record<DifficultyPreset, DifficultyParams> = {
     targetKpsMultiplier: 1.65,
     // 制限時間: 20%厳しい（極限レベル）
     comfortZoneRatio: 0.80,
+    // 難易度ごとの最低制限時間: 1.0秒
+    minTimeLimitByDifficulty: 1.0,
     // ミスペナルティ: 極限レベル
     missPenaltyEnabled: true,
     basePenaltyPercent: 18,

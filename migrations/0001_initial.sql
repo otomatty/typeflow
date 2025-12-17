@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS settings (
   comfort_zone_ratio REAL NOT NULL DEFAULT 0.85,
   min_time_limit REAL NOT NULL DEFAULT 1.5,
   max_time_limit REAL NOT NULL DEFAULT 15,
+  min_time_limit_by_difficulty REAL NOT NULL DEFAULT 1.5,
   miss_penalty_enabled INTEGER NOT NULL DEFAULT 1,
   base_penalty_percent REAL NOT NULL DEFAULT 5,
   penalty_escalation_factor REAL NOT NULL DEFAULT 1.5,

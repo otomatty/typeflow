@@ -105,6 +105,7 @@ export interface SettingsRow {
   comfort_zone_ratio: number
   min_time_limit: number
   max_time_limit: number
+  min_time_limit_by_difficulty: number
   miss_penalty_enabled: number
   base_penalty_percent: number
   penalty_escalation_factor: number
@@ -126,6 +127,7 @@ export interface SettingsRecord {
   comfortZoneRatio: number
   minTimeLimit: number
   maxTimeLimit: number
+  minTimeLimitByDifficulty: number
   missPenaltyEnabled: boolean
   basePenaltyPercent: number
   penaltyEscalationFactor: number
@@ -146,6 +148,7 @@ export interface UpdateSettingsInput {
   comfortZoneRatio?: number
   minTimeLimit?: number
   maxTimeLimit?: number
+  minTimeLimitByDifficulty?: number
   missPenaltyEnabled?: boolean
   basePenaltyPercent?: number
   penaltyEscalationFactor?: number

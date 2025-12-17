@@ -112,18 +112,25 @@ export function calculateTargetKpsTimeLimit(
 export function calculateWordTimeLimit(
   word: Word,
   gameScores: GameScoreRecord[],
-  settings: Pick<AppSettings, 'targetKpsMultiplier' | 'comfortZoneRatio' | 'minTimeLimit' | 'maxTimeLimit'>
+  settings: Pick<AppSettings, 'targetKpsMultiplier' | 'comfortZoneRatio' | 'minTimeLimit' | 'maxTimeLimit' | 'minTimeLimitByDifficulty'>
 ): number {
   const averageKps = calculateAverageKps(gameScores)
   const targetKps = calculateTargetKps(averageKps, settings.targetKpsMultiplier)
   
-  return calculateTargetKpsTimeLimit(
+  // まず通常の計算を行う
+  const calculatedTime = calculateTargetKpsTimeLimit(
     word,
     targetKps,
     settings.comfortZoneRatio,
     settings.minTimeLimit,
     settings.maxTimeLimit
   )
+  
+  // 難易度ごとの最低制限時間と比較して、大きい方を採用
+  const finalTime = Math.max(calculatedTime, settings.minTimeLimitByDifficulty)
+  
+  // 最大制限時間も考慮
+  return Math.min(finalTime, settings.maxTimeLimit)
 }
 
 /**
@@ -190,12 +197,15 @@ export function calculateTimeLimitExample(
   targetKpsMultiplier: number,
   comfortZoneRatio: number,
   minTimeLimit: number,
-  maxTimeLimit: number
+  maxTimeLimit: number,
+  minTimeLimitByDifficulty: number
 ): number {
   const targetKps = calculateTargetKps(averageKps, targetKpsMultiplier)
   const theoreticalTime = keystrokeCount / targetKps
   let adjustedTime = theoreticalTime * comfortZoneRatio
   adjustedTime = Math.max(minTimeLimit, Math.min(maxTimeLimit, adjustedTime))
+  // 難易度ごとの最低制限時間と比較して、大きい方を採用
+  adjustedTime = Math.max(adjustedTime, minTimeLimitByDifficulty)
   return Math.round(adjustedTime * 10) / 10
 }
 

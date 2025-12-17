@@ -25,6 +25,7 @@ export function useSettings() {
           comfortZoneRatio: savedSettings.comfortZoneRatio ?? DEFAULT_SETTINGS.comfortZoneRatio,
           minTimeLimit: savedSettings.minTimeLimit ?? DEFAULT_SETTINGS.minTimeLimit,
           maxTimeLimit: savedSettings.maxTimeLimit ?? DEFAULT_SETTINGS.maxTimeLimit,
+          minTimeLimitByDifficulty: savedSettings.minTimeLimitByDifficulty ?? DEFAULT_SETTINGS.minTimeLimitByDifficulty,
           // ミスペナルティ設定
           missPenaltyEnabled: savedSettings.missPenaltyEnabled ?? DEFAULT_SETTINGS.missPenaltyEnabled,
           basePenaltyPercent: savedSettings.basePenaltyPercent ?? DEFAULT_SETTINGS.basePenaltyPercent,
@@ -100,6 +101,7 @@ export function useSettings() {
         difficultyPreset,
         targetKpsMultiplier: presetParams.targetKpsMultiplier,
         comfortZoneRatio: presetParams.comfortZoneRatio,
+        minTimeLimitByDifficulty: presetParams.minTimeLimitByDifficulty,
         missPenaltyEnabled: presetParams.missPenaltyEnabled,
         basePenaltyPercent: presetParams.basePenaltyPercent,
         penaltyEscalationFactor: presetParams.penaltyEscalationFactor,

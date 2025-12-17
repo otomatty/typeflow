@@ -53,7 +53,8 @@ export function SettingsScreen({
     currentDifficultyParams.targetKpsMultiplier,
     currentDifficultyParams.comfortZoneRatio,
     minTimeLimit,
-    maxTimeLimit
+    maxTimeLimit,
+    currentDifficultyParams.minTimeLimitByDifficulty
   )
   
   // ペナルティプレビュー

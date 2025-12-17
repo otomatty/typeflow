@@ -120,6 +120,8 @@ export interface DifficultyParams {
   targetKpsMultiplier: number       // 1.0 = 現在と同じ、1.1 = 10%速い目標
   // 制限時間の余裕
   comfortZoneRatio: number          // 1.0 = ぴったり、>1.0 = 余裕あり
+  // 難易度ごとの最低制限時間
+  minTimeLimitByDifficulty: number  // 難易度ごとの最低制限時間（秒）
   // ミスペナルティ
   missPenaltyEnabled: boolean       // ミスペナルティ有効化
   basePenaltyPercent: number        // 基本ペナルティ割合 (%)
@@ -142,6 +144,7 @@ export interface AppSettings {
   comfortZoneRatio: number          // 制限時間の余裕（1.0 = ぴったり）
   minTimeLimit: number              // 最小制限時間（秒）
   maxTimeLimit: number              // 最大制限時間（秒）
+  minTimeLimitByDifficulty: number // 難易度ごとの最低制限時間（秒）
   // ミスペナルティ設定
   missPenaltyEnabled: boolean       // ミスペナルティ有効化
   basePenaltyPercent: number        // 基本ペナルティ割合 (%)
