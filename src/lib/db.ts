@@ -204,10 +204,10 @@ export const DEFAULT_SETTINGS: AppSettings = {
   difficultyPreset: 'normal',
   // 制限時間設定（難易度に応じて自動計算）
   targetKpsMultiplier: 1.4, // normalプリセット相当（40%速い目標）
-  comfortZoneRatio: 0.9, // 0.90 = 10%厳しい制限時間
-  minTimeLimit: 1.5, // 最小1.5秒（あまりに短すぎないように）
+  comfortZoneRatio: 0.95, // 0.95 = 5%厳しい制限時間（緩めに調整）
+  minTimeLimit: 2.0, // 最小2.0秒（緩めに調整）
   maxTimeLimit: 15, // 最大15秒（長すぎないように）
-  minTimeLimitByDifficulty: 1.5, // 難易度ごとの最低制限時間（normalプリセット相当）
+  minTimeLimitByDifficulty: 2.0, // 難易度ごとの最低制限時間（normalプリセット相当、緩めに調整）
   // ミスペナルティのデフォルト設定（normalプリセット相当）
   missPenaltyEnabled: true, // デフォルトで有効
   basePenaltyPercent: 12, // 基本12%減少

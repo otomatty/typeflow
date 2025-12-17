@@ -47,8 +47,8 @@ const ROMAJI_VARIANTS: Record<string, string[]> = {
   di: ['di', 'ji'],
   du: ['du', 'zu'],
 
-  // を (wo)
-  wo: ['wo', 'o'],
+  // を (wo) - only 'wo' is valid, 'o' is for お
+  wo: ['wo'],
 
   // 小文字 (small characters)
   xtu: ['xtu', 'ltu', 'xtsu', 'ltsu'],
@@ -64,6 +64,17 @@ const ROMAJI_VARIANTS: Record<string, string[]> = {
 
 // Sort by length (longest first) for proper matching
 const SORTED_CANONICAL_FORMS = Object.keys(ROMAJI_VARIANTS).sort((a, b) => b.length - a.length)
+
+// Create reverse mapping: variant -> canonical form
+// This allows us to normalize variant forms (tya, cya) to canonical forms (cha)
+const VARIANT_TO_CANONICAL: Record<string, string> = {}
+for (const [canonical, variants] of Object.entries(ROMAJI_VARIANTS)) {
+  for (const variant of variants) {
+    if (variant !== canonical) {
+      VARIANT_TO_CANONICAL[variant] = canonical
+    }
+  }
+}
 
 // Characters that require xn before them (vowels, y, n')
 // When 'n' is followed by these characters, it needs to be distinguished from 'na', 'ni', etc.
@@ -125,6 +136,26 @@ function generateAllVariations(target: string): string[] {
     }
   }
 
+  // Try to match variant forms and convert them to canonical forms
+  // This handles cases where the target romaji uses variant forms (e.g., "tya" instead of "cha")
+  for (const variant of Object.keys(VARIANT_TO_CANONICAL)) {
+    if (target.startsWith(variant)) {
+      const canonical = VARIANT_TO_CANONICAL[variant]
+      const rest = target.substring(variant.length)
+      const restVariations = generateAllVariations(rest)
+      const result: string[] = []
+
+      // Generate all variations for the canonical form
+      for (const variantForm of ROMAJI_VARIANTS[canonical]) {
+        for (const restVar of restVariations) {
+          result.push(variantForm + restVar)
+        }
+      }
+
+      return result
+    }
+  }
+
   // Special handling for 'n' that might represent ん
   // This handles cases where the romaji data uses 'n' before consonants (e.g., 'anshoubangou')
   if (target[0] === 'n' && target.length >= 2) {
@@ -178,15 +209,22 @@ function getCachedVariations(target: string): string[] {
 /**
  * Get the variation that matches the current input.
  * Returns the matching variation string or null if no match.
+ * When input is empty, returns the shortest variation for display.
  */
 export function getMatchingVariation(target: string, input: string): string | null {
   const normalizedTarget = normalizeRomaji(target)
   const normalizedInput = normalizeRomaji(input)
 
   if (normalizedInput.length === 0) {
-    // Return the first (canonical) variation
+    // Return the shortest variation for display (to minimize character count)
     const variations = getCachedVariations(normalizedTarget)
-    return variations.length > 0 ? variations[0] : normalizedTarget
+    if (variations.length === 0) {
+      return normalizedTarget
+    }
+    // Find the shortest variation
+    return variations.reduce((shortest, current) =>
+      current.length < shortest.length ? current : shortest
+    )
   }
 
   const variations = getCachedVariations(normalizedTarget)
@@ -214,7 +252,14 @@ export function validateRomajiInput(
   // Empty input is valid (no progress yet)
   if (normalizedInput.length === 0) {
     const variations = getCachedVariations(normalizedTarget)
-    const expectedNext = variations.length > 0 ? [variations[0][0]] : []
+    if (variations.length === 0) {
+      return { isCorrect: false, progress: 0, expectedNext: [] }
+    }
+    // Use the shortest variation for expected next character
+    const shortestVariation = variations.reduce((shortest, current) =>
+      current.length < shortest.length ? current : shortest
+    )
+    const expectedNext = shortestVariation.length > 0 ? [shortestVariation[0]] : []
     return { isCorrect: false, progress: 0, expectedNext }
   }
 

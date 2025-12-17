@@ -54,9 +54,10 @@ describe('romaji-utils', () => {
   })
 
   describe('getMatchingVariation', () => {
-    it('should return canonical form for empty input', () => {
+    it('should return shortest variation for empty input', () => {
       const result = getMatchingVariation('shi', '')
-      expect(result).toBe('shi')
+      // 'si' is shorter than 'shi', so it should be returned
+      expect(result).toBe('si')
     })
 
     it('should match valid prefix', () => {
