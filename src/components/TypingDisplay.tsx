@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { Word } from '@/lib/types'
-import { normalizeRomaji, getMatchingVariation } from '@/lib/romaji-utils'
+import { normalizeRomaji, toKunreiDisplay, getDisplayParts } from '@/lib/romaji-utils'
 
 interface TypingDisplayProps {
   word: Word
@@ -11,30 +11,32 @@ interface TypingDisplayProps {
 
 export function TypingDisplay({ word, currentInput, showError }: TypingDisplayProps) {
   const { t } = useTranslation('game')
-  const normalizedInput = normalizeRomaji(currentInput)
+  // 訓令式に変換したローマ字を基準表示として使用
+  const initialDisplay = toKunreiDisplay(normalizeRomaji(word.romaji))
 
-  // Get the variation that matches the current input
-  const matchingVariation = getMatchingVariation(word.romaji, currentInput)
-  const displayTarget = matchingVariation || normalizeRomaji(word.romaji)
+  // 入力済み部分と未入力部分を分離
+  const { inputPart, remainingPart } = getDisplayParts(word.romaji, currentInput, initialDisplay)
 
   // 練習回数を計算
   const practiceCount = word.stats.correct + word.stats.miss
 
   const renderRomaji = () => {
-    return displayTarget.split('').map((char, index) => {
-      let className = 'text-muted-foreground'
-
-      if (index < normalizedInput.length) {
-        // Since we're showing the matching variation, all typed characters should match
-        className = normalizedInput[index] === char ? 'text-primary' : 'text-accent'
-      }
-
-      return (
-        <span key={index} className={className}>
-          {char}
-        </span>
-      )
-    })
+    return (
+      <>
+        {/* 入力済み部分 */}
+        {inputPart.split('').map((char, index) => (
+          <span key={`input-${index}`} className="text-primary">
+            {char}
+          </span>
+        ))}
+        {/* 未入力部分（初期表示のまま） */}
+        {remainingPart.split('').map((char, index) => (
+          <span key={`remaining-${index}`} className="text-muted-foreground">
+            {char}
+          </span>
+        ))}
+      </>
+    )
   }
 
   return (

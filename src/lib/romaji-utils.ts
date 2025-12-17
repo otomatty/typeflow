@@ -16,6 +16,95 @@ export function normalizeRomaji(input: string): string {
   return input.toLowerCase().replace(/\s+/g, '')
 }
 
+// ヘボン式 → 訓令式への変換マッピング（表示用）
+// 長いものから順にマッチさせる必要があるため、長さ順にソート
+const KUNREI_DISPLAY_MAPPINGS: [string, string][] = [
+  // ち行拗音
+  ['cha', 'tya'],
+  ['chi', 'ti'],
+  ['chu', 'tyu'],
+  ['cho', 'tyo'],
+  // し行拗音
+  ['sha', 'sya'],
+  ['shi', 'si'],
+  ['shu', 'syu'],
+  ['sho', 'syo'],
+  // じ行はヘボン式（ja, ji, ju, jo）のまま
+  // つ・ふ
+  ['tsu', 'tu'],
+  ['fu', 'hu'],
+]
+
+/**
+ * ヘボン式ローマ字を訓令式に変換して表示用に使用する
+ * 例: "chuugoku" → "tyuugoku"
+ */
+export function toKunreiDisplay(romaji: string): string {
+  let result = romaji.toLowerCase()
+  for (const [hepburn, kunrei] of KUNREI_DISPLAY_MAPPINGS) {
+    result = result.split(hepburn).join(kunrei)
+  }
+  return result
+}
+
+/**
+ * 入力済み部分と未入力部分を分離して返す
+ * 入力済み部分はユーザーの入力をそのまま使用
+ * 未入力部分は初期表示（訓令式）から取得
+ */
+export function getDisplayParts(
+  wordRomaji: string,
+  currentInput: string,
+  initialDisplay: string
+): { inputPart: string; remainingPart: string } {
+  const normalizedInput = normalizeRomaji(currentInput)
+
+  if (normalizedInput.length === 0) {
+    return { inputPart: '', remainingPart: initialDisplay }
+  }
+
+  // 入力が初期表示のプレフィックスの場合、そのまま初期表示を使用
+  if (initialDisplay.startsWith(normalizedInput)) {
+    return {
+      inputPart: normalizedInput,
+      remainingPart: initialDisplay.substring(normalizedInput.length),
+    }
+  }
+
+  // 入力にマッチするバリエーションを取得
+  const matchingVariation = getMatchingVariation(wordRomaji, currentInput)
+  if (!matchingVariation) {
+    return {
+      inputPart: normalizedInput,
+      remainingPart: initialDisplay.substring(normalizedInput.length),
+    }
+  }
+
+  // 入力が母音で終わっている場合（完成した音節）
+  const lastChar = normalizedInput[normalizedInput.length - 1]
+  if ('aiueon'.includes(lastChar)) {
+    // マッチするバリエーションの残りを訓令式に変換
+    const remainingFromVariation = matchingVariation.substring(normalizedInput.length)
+    const remainingKunrei = toKunreiDisplay(remainingFromVariation)
+
+    // 初期表示の末尾から同じ長さの部分を取得
+    const startIndex = initialDisplay.length - remainingKunrei.length
+    if (startIndex >= 0) {
+      const remainingFromInitial = initialDisplay.substring(startIndex)
+      // 訓令式に変換した残りと一致するか確認
+      if (remainingFromInitial === remainingKunrei) {
+        return { inputPart: normalizedInput, remainingPart: remainingFromInitial }
+      }
+    }
+  }
+
+  // 入力が音節の途中の場合、またはマッチしない場合はマッチするバリエーションを使用
+  return {
+    inputPart: normalizedInput,
+    remainingPart: matchingVariation.substring(normalizedInput.length),
+  }
+}
+
 // Canonical form -> all valid input variations
 // The first element should be the canonical (standard) form
 const ROMAJI_VARIANTS: Record<string, string[]> = {
