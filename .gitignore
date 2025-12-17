@@ -29,6 +29,10 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 
+# Testing
+coverage/
+.nyc_output/
+
 # Database (optional - uncomment if you want to ignore the db)
 # data/*.db
 

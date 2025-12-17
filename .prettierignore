@@ -1,0 +1,10 @@
+node_modules
+dist
+build
+coverage
+*.lock
+*.log
+.DS_Store
+bun.lock
+public/dict
+
