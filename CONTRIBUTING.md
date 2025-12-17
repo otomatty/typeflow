@@ -55,12 +55,14 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 ### Development Setup
 
 1. **Clone your fork**:
+
    ```bash
    git clone https://github.com/your-username/typeflow.git
    cd typeflow
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    # or
@@ -68,6 +70,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
    ```
 
 3. **Start development server**:
+
    ```bash
    npm run dev
    # or
@@ -75,6 +78,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
    ```
 
 4. **Run type checking**:
+
    ```bash
    npm run typecheck
    # or
@@ -105,6 +109,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 - Reference issues and pull requests liberally after the first line
 
 Example:
+
 ```
 Add keyboard shortcut for word management
 
@@ -148,9 +153,9 @@ TypeFlow supports English and Japanese. When adding new strings:
 ### Questions?
 
 If you have questions, feel free to:
+
 - Open a GitHub Discussion
 - Create an issue with the "question" label
 - Contact the maintainer
 
 Thank you for contributing to TypeFlow! 🎉
-

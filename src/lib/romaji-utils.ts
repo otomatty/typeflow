@@ -20,46 +20,46 @@ export function normalizeRomaji(input: string): string {
 // The first element should be the canonical (standard) form
 const ROMAJI_VARIANTS: Record<string, string[]> = {
   // し行 (shi-row)
-  'shi': ['shi', 'si'],
-  'sha': ['sha', 'sya'],
-  'shu': ['shu', 'syu'],
-  'sho': ['sho', 'syo'],
-  
+  shi: ['shi', 'si'],
+  sha: ['sha', 'sya'],
+  shu: ['shu', 'syu'],
+  sho: ['sho', 'syo'],
+
   // ち行 (chi-row)
-  'chi': ['chi', 'ti'],
-  'cha': ['cha', 'tya', 'cya'],
-  'chu': ['chu', 'tyu', 'cyu'],
-  'cho': ['cho', 'tyo', 'cyo'],
-  
+  chi: ['chi', 'ti'],
+  cha: ['cha', 'tya', 'cya'],
+  chu: ['chu', 'tyu', 'cyu'],
+  cho: ['cho', 'tyo', 'cyo'],
+
   // つ (tsu)
-  'tsu': ['tsu', 'tu'],
-  
+  tsu: ['tsu', 'tu'],
+
   // ふ (fu)
-  'fu': ['fu', 'hu'],
-  
+  fu: ['fu', 'hu'],
+
   // じ行 (ji-row)
-  'ji': ['ji', 'zi'],
-  'ja': ['ja', 'zya', 'jya'],
-  'ju': ['ju', 'zyu', 'jyu'],
-  'jo': ['jo', 'zyo', 'jyo'],
-  
+  ji: ['ji', 'zi'],
+  ja: ['ja', 'zya', 'jya'],
+  ju: ['ju', 'zyu', 'jyu'],
+  jo: ['jo', 'zyo', 'jyo'],
+
   // ぢ行 (di-row) - less common
-  'di': ['di', 'ji'],
-  'du': ['du', 'zu'],
-  
+  di: ['di', 'ji'],
+  du: ['du', 'zu'],
+
   // を (wo)
-  'wo': ['wo', 'o'],
-  
+  wo: ['wo', 'o'],
+
   // 小文字 (small characters)
-  'xtu': ['xtu', 'ltu', 'xtsu', 'ltsu'],
-  'xya': ['xya', 'lya'],
-  'xyu': ['xyu', 'lyu'],
-  'xyo': ['xyo', 'lyo'],
-  'xa': ['xa', 'la'],
-  'xi': ['xi', 'li'],
-  'xu': ['xu', 'lu'],
-  'xe': ['xe', 'le'],
-  'xo': ['xo', 'lo'],
+  xtu: ['xtu', 'ltu', 'xtsu', 'ltsu'],
+  xya: ['xya', 'lya'],
+  xyu: ['xyu', 'lyu'],
+  xyo: ['xyo', 'lyo'],
+  xa: ['xa', 'la'],
+  xi: ['xi', 'li'],
+  xu: ['xu', 'lu'],
+  xe: ['xe', 'le'],
+  xo: ['xo', 'lo'],
 }
 
 // Sort by length (longest first) for proper matching
@@ -72,7 +72,7 @@ const VOWELS_AND_SPECIAL = new Set(['a', 'i', 'u', 'e', 'o', 'y', 'n', "'"])
 /**
  * Generate all valid input variations for a target romaji string.
  * For example: "shiken" -> ["shiken", "siken"]
- * 
+ *
  * Special handling for 'n' (ん):
  * - If followed by consonant or at end: 'n' alone is acceptable
  * - If followed by vowel, y, n, or ': use 'xn' (nn is inefficient so excluded)
@@ -87,10 +87,10 @@ function generateAllVariations(target: string): string[] {
     const rest = target.substring(2)
     const restVariations = generateAllVariations(rest)
     const result: string[] = []
-    
+
     // xn can be typed as: xn, nn (but nn is inefficient, so we only use xn and n when applicable)
     const nextChar = rest[0]
-    
+
     if (nextChar && !VOWELS_AND_SPECIAL.has(nextChar.toLowerCase())) {
       // Followed by consonant - both 'n' and 'xn' work
       for (const restVar of restVariations) {
@@ -104,7 +104,7 @@ function generateAllVariations(target: string): string[] {
         result.push('nn' + restVar)
       }
     }
-    
+
     return result
   }
 
@@ -114,13 +114,13 @@ function generateAllVariations(target: string): string[] {
       const rest = target.substring(canonical.length)
       const restVariations = generateAllVariations(rest)
       const result: string[] = []
-      
+
       for (const variant of ROMAJI_VARIANTS[canonical]) {
         for (const restVar of restVariations) {
           result.push(variant + restVar)
         }
       }
-      
+
       return result
     }
   }
@@ -129,7 +129,7 @@ function generateAllVariations(target: string): string[] {
   // This handles cases where the romaji data uses 'n' before consonants (e.g., 'anshoubangou')
   if (target[0] === 'n' && target.length >= 2) {
     const nextChar = target[1]
-    
+
     // Check if this 'n' could be ん (followed by consonant, not vowel/y/n/')
     // Note: 'na', 'ni', 'nu', 'ne', 'no' are regular n+vowel, not ん
     if (!VOWELS_AND_SPECIAL.has(nextChar.toLowerCase())) {
@@ -137,12 +137,12 @@ function generateAllVariations(target: string): string[] {
       const rest = target.substring(1)
       const restVariations = generateAllVariations(rest)
       const result: string[] = []
-      
+
       for (const restVar of restVariations) {
-        result.push('n' + restVar)  // n alone is acceptable before consonant
+        result.push('n' + restVar) // n alone is acceptable before consonant
         result.push('xn' + restVar) // xn is also acceptable
       }
-      
+
       return result
     }
   }
@@ -157,7 +157,7 @@ function generateAllVariations(target: string): string[] {
   const firstChar = target[0]
   const rest = target.substring(1)
   const restVariations = generateAllVariations(rest)
-  
+
   return restVariations.map(restVar => firstChar + restVar)
 }
 
@@ -169,7 +169,7 @@ function getCachedVariations(target: string): string[] {
   if (cached) {
     return cached
   }
-  
+
   const variations = generateAllVariations(target)
   variationCache.set(target, variations)
   return variations
@@ -200,7 +200,10 @@ export function getMatchingVariation(target: string, input: string): string | nu
   return null
 }
 
-export function validateRomajiInput(target: string, input: string): {
+export function validateRomajiInput(
+  target: string,
+  input: string
+): {
   isCorrect: boolean
   progress: number
   expectedNext: string[]
@@ -226,16 +229,16 @@ export function validateRomajiInput(target: string, input: string): {
       // Exact prefix match
       const progress = normalizedInput.length / variation.length
       const isCorrect = normalizedInput === variation
-      
+
       // Get next expected character(s)
       const expectedNext: string[] = []
       if (!isCorrect && normalizedInput.length < variation.length) {
         expectedNext.push(variation[normalizedInput.length])
       }
-      
+
       return { isCorrect, progress, expectedNext }
     }
-    
+
     // Track partial matches for progress calculation
     // Find how many characters match from the start
     let matchLen = 0
@@ -246,8 +249,11 @@ export function validateRomajiInput(target: string, input: string): {
         break
       }
     }
-    
-    if (matchLen > 0 && (!bestMatch || matchLen > bestMatch.progress * bestMatch.variation.length)) {
+
+    if (
+      matchLen > 0 &&
+      (!bestMatch || matchLen > bestMatch.progress * bestMatch.variation.length)
+    ) {
       bestMatch = { variation, progress: matchLen / variation.length }
     }
   }
@@ -256,7 +262,7 @@ export function validateRomajiInput(target: string, input: string): {
   // Return progress based on best partial match (if any)
   const progress = bestMatch ? bestMatch.progress : 0
   const expectedNext: string[] = []
-  
+
   if (bestMatch && bestMatch.progress * bestMatch.variation.length < bestMatch.variation.length) {
     const matchedLen = Math.floor(bestMatch.progress * bestMatch.variation.length)
     if (matchedLen < bestMatch.variation.length) {

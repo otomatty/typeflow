@@ -34,12 +34,15 @@ interface WordManagementScreenProps {
   onAddWord: (wordData: Omit<Word, 'id' | 'stats'>) => void
   onEditWord: (id: string, word: { text: string; reading: string; romaji: string }) => void
   onDeleteWord: (id: string) => void
-  onLoadPreset: (words: PresetWord[], options: { clearExisting?: boolean; presetName?: string }) => Promise<unknown>
+  onLoadPreset: (
+    words: PresetWord[],
+    options: { clearExisting?: boolean; presetName?: string }
+  ) => Promise<unknown>
   onClearAllWords: () => Promise<void>
 }
 
-export function WordManagementScreen({ 
-  words, 
+export function WordManagementScreen({
+  words,
   onAddWord,
   onEditWord,
   onDeleteWord,
@@ -55,7 +58,7 @@ export function WordManagementScreen({
   const [searchQuery, setSearchQuery] = useState('')
 
   const handleLoadPreset = async (
-    presetWords: PresetWord[], 
+    presetWords: PresetWord[],
     options: { clearExisting: boolean; presetName: string }
   ) => {
     await onLoadPreset(presetWords, options)
@@ -85,7 +88,7 @@ export function WordManagementScreen({
                   type="text"
                   placeholder={t('word_list.search_placeholder')}
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="pl-9 h-9"
                 />
               </div>
@@ -109,7 +112,7 @@ export function WordManagementScreen({
                   {words.length > 0 && (
                     <>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => setDeleteDialogOpen(true)}
                         className="text-destructive focus:text-destructive"
                       >
@@ -124,13 +127,13 @@ export function WordManagementScreen({
               <AddWordDialog onAddWord={onAddWord} />
 
               {/* ダイアログ（制御モード） */}
-              <PresetDialog 
-                onLoadPreset={handleLoadPreset} 
+              <PresetDialog
+                onLoadPreset={handleLoadPreset}
                 open={presetDialogOpen}
                 onOpenChange={setPresetDialogOpen}
                 showTrigger={false}
               />
-              <CSVImportDialog 
+              <CSVImportDialog
                 onImport={handleLoadPreset}
                 open={csvDialogOpen}
                 onOpenChange={setCsvDialogOpen}
@@ -163,9 +166,7 @@ export function WordManagementScreen({
 
       {words.length === 0 ? (
         <Card className="p-8 text-center space-y-4">
-          <p className="text-muted-foreground">
-            {t('no_words')}
-          </p>
+          <p className="text-muted-foreground">{t('no_words')}</p>
           <div className="flex justify-center gap-2 flex-wrap">
             <PresetDialog onLoadPreset={handleLoadPreset} />
             <CSVImportDialog onImport={handleLoadPreset} />
@@ -174,7 +175,12 @@ export function WordManagementScreen({
         </Card>
       ) : (
         <>
-          <WordList words={words} onDeleteWord={onDeleteWord} onEditWord={onEditWord} searchQuery={searchQuery} />
+          <WordList
+            words={words}
+            onDeleteWord={onDeleteWord}
+            onEditWord={onEditWord}
+            searchQuery={searchQuery}
+          />
         </>
       )}
     </Container>

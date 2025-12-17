@@ -1,4 +1,11 @@
-import type { KeyStats, KeyTransitionStats, AppSettings, WordCountPreset, ThemeType, PracticeMode, DifficultyPreset } from '../lib/types'
+import type {
+  KeyStats,
+  KeyTransitionStats,
+  WordCountPreset,
+  ThemeType,
+  PracticeMode,
+  DifficultyPreset,
+} from '../lib/types'
 
 // D1データベースの生のレコード型（snake_case）
 export interface WordRow {
@@ -211,4 +218,3 @@ export interface Env {
   DB: D1Database
   ALLOWED_ORIGINS?: string
 }
-

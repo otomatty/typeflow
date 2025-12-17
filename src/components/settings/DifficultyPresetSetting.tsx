@@ -24,13 +24,11 @@ export function DifficultyPresetSetting({
               <Flame className="w-5 h-5 text-primary" />
               <Label className="text-base font-semibold">{t('difficulty.title')}</Label>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t('difficulty.description')}
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">{t('difficulty.description')}</p>
           </div>
-          
+
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {DIFFICULTY_OPTIONS.map((option) => {
+            {DIFFICULTY_OPTIONS.map(option => {
               const Icon = option.icon
               return (
                 <button
@@ -62,23 +60,27 @@ export function DifficultyPresetSetting({
               <p className="text-sm font-medium mb-2">{t('penalty.title')}</p>
               <div className="flex items-center gap-2 text-xs">
                 {penaltyPreview.map((percent, index) => (
-                  <span key={index} className={cn(
-                    'px-2 py-1 rounded',
-                    index === 0 ? 'bg-yellow-500/20 text-yellow-600' :
-                    index === 1 ? 'bg-orange-500/20 text-orange-600' :
-                    index === 2 ? 'bg-red-500/20 text-red-600' :
-                    'bg-red-600/20 text-red-700'
-                  )}>
+                  <span
+                    key={index}
+                    className={cn(
+                      'px-2 py-1 rounded',
+                      index === 0
+                        ? 'bg-yellow-500/20 text-yellow-600'
+                        : index === 1
+                          ? 'bg-orange-500/20 text-orange-600'
+                          : index === 2
+                            ? 'bg-red-500/20 text-red-600'
+                            : 'bg-red-600/20 text-red-700'
+                    )}
+                  >
                     {t('penalty.time_nth', { n: index + 1, percent })}
                   </span>
                 ))}
               </div>
             </div>
           )}
-
         </div>
       </Card>
     </SettingSection>
   )
 }
-

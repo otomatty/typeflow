@@ -9,4 +9,3 @@ export { TimeLimitSetting } from './TimeLimitSetting'
 export { AdvancedSettings } from './AdvancedSettings'
 export { ThemeSetting } from './ThemeSetting'
 export { ResetAllSetting } from './ResetAllSetting'
-

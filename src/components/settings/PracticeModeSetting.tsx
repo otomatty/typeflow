@@ -7,7 +7,10 @@ import { SettingSection } from './SettingSection'
 import { PRACTICE_MODE_OPTIONS } from './settings-options'
 import type { PracticeModeSettingProps } from './types'
 
-export function PracticeModeSetting({ practiceMode, onPracticeModeChange }: PracticeModeSettingProps) {
+export function PracticeModeSetting({
+  practiceMode,
+  onPracticeModeChange,
+}: PracticeModeSettingProps) {
   const { t } = useTranslation('settings')
 
   return (
@@ -16,13 +19,11 @@ export function PracticeModeSetting({ practiceMode, onPracticeModeChange }: Prac
         <div className="space-y-4">
           <div>
             <Label className="text-base font-semibold">{t('practice_mode.title')}</Label>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t('practice_mode.description')}
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">{t('practice_mode.description')}</p>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {PRACTICE_MODE_OPTIONS.map((option) => {
+            {PRACTICE_MODE_OPTIONS.map(option => {
               const Icon = option.icon
               return (
                 <button
@@ -40,9 +41,7 @@ export function PracticeModeSetting({ practiceMode, onPracticeModeChange }: Prac
                     <Icon className="w-5 h-5 text-muted-foreground" />
                     <span className="font-medium">{t(option.labelKey)}</span>
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {t(option.descKey)}
-                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">{t(option.descKey)}</div>
                   {practiceMode === option.value && (
                     <Check className="absolute top-2 right-2 w-5 h-5 text-primary" />
                   )}
@@ -55,4 +54,3 @@ export function PracticeModeSetting({ practiceMode, onPracticeModeChange }: Prac
     </SettingSection>
   )
 }
-

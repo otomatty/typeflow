@@ -18,11 +18,9 @@ export function LanguageSetting({ currentLanguage, onLanguageChange }: LanguageS
               <Globe className="w-5 h-5 text-primary" />
               <Label className="text-base font-semibold">{t('language.title')}</Label>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t('language.description')}
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">{t('language.description')}</p>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => onLanguageChange('ja')}
@@ -66,4 +64,3 @@ export function LanguageSetting({ currentLanguage, onLanguageChange }: LanguageS
     </SettingSection>
   )
 }
-

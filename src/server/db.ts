@@ -68,7 +68,11 @@ export async function createWord(db: D1Database, input: CreateWordInput): Promis
   return result.meta.last_row_id ?? 0
 }
 
-export async function updateWord(db: D1Database, id: number, input: UpdateWordInput): Promise<void> {
+export async function updateWord(
+  db: D1Database,
+  id: number,
+  input: UpdateWordInput
+): Promise<void> {
   const updates: string[] = []
   const values: unknown[] = []
 
@@ -103,7 +107,10 @@ export async function updateWord(db: D1Database, id: number, input: UpdateWordIn
 
   if (updates.length > 0) {
     values.push(id)
-    await db.prepare(`UPDATE words SET ${updates.join(', ')} WHERE id = ?`).bind(...values).run()
+    await db
+      .prepare(`UPDATE words SET ${updates.join(', ')} WHERE id = ?`)
+      .bind(...values)
+      .run()
   }
 }
 
@@ -133,7 +140,7 @@ export async function bulkInsertWords(
   let insertedCount = 0
 
   // バッチ処理で挿入
-  const batch = words.map((word) => stmt.bind(word.text, word.reading, word.romaji, now))
+  const batch = words.map(word => stmt.bind(word.text, word.reading, word.romaji, now))
   const results = await db.batch(batch)
 
   for (const result of results) {
@@ -294,7 +301,10 @@ export async function upsertSettings(db: D1Database, input: UpdateSettingsInput)
     values.push(Date.now())
 
     if (updates.length > 0) {
-      await db.prepare(`UPDATE settings SET ${updates.join(', ')} WHERE id = 1`).bind(...values).run()
+      await db
+        .prepare(`UPDATE settings SET ${updates.join(', ')} WHERE id = 1`)
+        .bind(...values)
+        .run()
     }
   } else {
     await db
@@ -332,7 +342,7 @@ export async function getAllGameScores(db: D1Database): Promise<GameScoreRecord[
     .prepare('SELECT * FROM game_scores ORDER BY played_at DESC')
     .all<GameScoreRow>()
 
-  return result.results.map((row) => ({
+  return result.results.map(row => ({
     id: row.id,
     kps: row.kps,
     totalKeystrokes: row.total_keystrokes,
@@ -345,7 +355,10 @@ export async function getAllGameScores(db: D1Database): Promise<GameScoreRecord[
   }))
 }
 
-export async function createGameScore(db: D1Database, input: CreateGameScoreInput): Promise<number> {
+export async function createGameScore(
+  db: D1Database,
+  input: CreateGameScoreInput
+): Promise<number> {
   const result = await db
     .prepare(
       `INSERT INTO game_scores (kps, total_keystrokes, accuracy, correct_words, perfect_words, total_words, total_time, played_at)
@@ -369,4 +382,3 @@ export async function createGameScore(db: D1Database, input: CreateGameScoreInpu
 export async function deleteAllGameScores(db: D1Database): Promise<void> {
   await db.prepare('DELETE FROM game_scores').run()
 }
-

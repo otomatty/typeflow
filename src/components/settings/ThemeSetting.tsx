@@ -16,13 +16,11 @@ export function ThemeSetting({ theme, onThemeChange }: ThemeSettingProps) {
         <div className="space-y-4">
           <div>
             <Label className="text-base font-semibold">{t('theme.title')}</Label>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t('theme.description')}
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">{t('theme.description')}</p>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {THEME_OPTIONS.map((option) => (
+            {THEME_OPTIONS.map(option => (
               <button
                 key={option.value}
                 onClick={() => onThemeChange(option.value)}
@@ -35,22 +33,17 @@ export function ThemeSetting({ theme, onThemeChange }: ThemeSettingProps) {
                 )}
               >
                 <div className="font-medium">{t(option.labelKey)}</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {t(option.descKey)}
-                </div>
+                <div className="text-xs text-muted-foreground mt-1">{t(option.descKey)}</div>
                 {theme === option.value && (
                   <Check className="absolute top-2 right-2 w-5 h-5 text-primary" />
                 )}
               </button>
             ))}
           </div>
-          
-          <p className="text-xs text-muted-foreground">
-            {t('theme.note')}
-          </p>
+
+          <p className="text-xs text-muted-foreground">{t('theme.note')}</p>
         </div>
       </Card>
     </SettingSection>
   )
 }
-

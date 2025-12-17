@@ -9,7 +9,10 @@ import { allPresets, getPresetById } from '@/lib/presets'
 import type { PresetWord } from '@/lib/types'
 
 interface RecommendedPresetsProps {
-  onLoadPreset: (words: PresetWord[], options: { clearExisting: boolean; presetName: string }) => Promise<void>
+  onLoadPreset: (
+    words: PresetWord[],
+    options: { clearExisting: boolean; presetName: string }
+  ) => Promise<void>
   isLoading?: boolean
 }
 
@@ -19,8 +22,8 @@ export function RecommendedPresets({ onLoadPreset, isLoading }: RecommendedPrese
   const [loadingPresetId, setLoadingPresetId] = useState<string | null>(null)
 
   // おすすめプリセット（基本日本語、プログラミング用語、寿司打）
-  const recommendedPresets = allPresets.filter(p => 
-    p.id === 'basic-japanese' || p.id === 'programming' || p.id === 'sushida-10000'
+  const recommendedPresets = allPresets.filter(
+    p => p.id === 'basic-japanese' || p.id === 'programming' || p.id === 'sushida-10000'
   )
 
   const difficultyColors: Record<string, string> = {
@@ -31,10 +34,14 @@ export function RecommendedPresets({ onLoadPreset, isLoading }: RecommendedPrese
 
   const getDifficultyLabel = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return tWords('difficulty_beginner')
-      case 'normal': return tWords('difficulty_intermediate')
-      case 'hard': return tWords('difficulty_advanced')
-      default: return difficulty
+      case 'easy':
+        return tWords('difficulty_beginner')
+      case 'normal':
+        return tWords('difficulty_intermediate')
+      case 'hard':
+        return tWords('difficulty_advanced')
+      default:
+        return difficulty
     }
   }
 
@@ -69,13 +76,10 @@ export function RecommendedPresets({ onLoadPreset, isLoading }: RecommendedPrese
           <p className="text-sm text-muted-foreground">
             {tMenu('recommended_presets_description')}
           </p>
-          
+
           <div className="grid gap-3">
-            {recommendedPresets.map((preset) => (
-              <Card
-                key={preset.id}
-                className="p-4 hover:border-primary/50 transition-all"
-              >
+            {recommendedPresets.map(preset => (
+              <Card key={preset.id} className="p-4 hover:border-primary/50 transition-all">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -83,17 +87,16 @@ export function RecommendedPresets({ onLoadPreset, isLoading }: RecommendedPrese
                       <Badge variant="outline" className={difficultyColors[preset.difficulty]}>
                         {getDifficultyLabel(preset.difficulty)}
                       </Badge>
-                      <Badge variant="secondary">{tWords('n_words', { count: preset.wordCount })}</Badge>
+                      <Badge variant="secondary">
+                        {tWords('n_words', { count: preset.wordCount })}
+                      </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{preset.description}</p>
-                    
+
                     {/* サンプル単語プレビュー */}
                     <div className="mt-2 flex flex-wrap gap-1">
                       {preset.words.slice(0, 5).map((word, i) => (
-                        <span
-                          key={i}
-                          className="text-xs px-2 py-0.5 bg-muted rounded"
-                        >
+                        <span key={i} className="text-xs px-2 py-0.5 bg-muted rounded">
                           {word.text}
                         </span>
                       ))}
@@ -129,4 +132,3 @@ export function RecommendedPresets({ onLoadPreset, isLoading }: RecommendedPrese
     </motion.div>
   )
 }
-

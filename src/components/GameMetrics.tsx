@@ -16,19 +16,17 @@ export function GameMetrics({ gameState, kps, accuracy }: GameMetricsProps) {
         <span className="text-muted-foreground uppercase tracking-wide">{t('kps')}</span>
         <span className="text-primary font-bold tabular-nums">{kps}</span>
       </div>
-      
+
       <div className="flex items-center gap-1.5">
         <span className="text-muted-foreground uppercase tracking-wide">ACC</span>
         <span className="text-primary font-bold tabular-nums">{accuracy}%</span>
       </div>
-      
+
       <div className="flex items-center gap-1.5">
         <span className="text-muted-foreground uppercase tracking-wide">{t('keys')}</span>
-        <span className="text-primary font-bold tabular-nums">
-          {gameState.totalKeystrokes}
-        </span>
+        <span className="text-primary font-bold tabular-nums">{gameState.totalKeystrokes}</span>
       </div>
-      
+
       <div className="flex items-center gap-1.5">
         <span className="text-muted-foreground uppercase tracking-wide">{t('words')}</span>
         <span className="text-primary font-bold tabular-nums">
@@ -37,7 +35,9 @@ export function GameMetrics({ gameState, kps, accuracy }: GameMetricsProps) {
       </div>
 
       <div className="hidden sm:flex items-center gap-1.5 text-muted-foreground/60">
-        <kbd className="px-1.5 py-0.5 text-xs bg-secondary/50 rounded border border-border/30">Esc</kbd>
+        <kbd className="px-1.5 py-0.5 text-xs bg-secondary/50 rounded border border-border/30">
+          Esc
+        </kbd>
         <span className="text-xs">{t('exit')}</span>
       </div>
     </div>

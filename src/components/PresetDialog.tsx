@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
@@ -11,7 +18,10 @@ import type { WordPreset, PresetWord } from '@/lib/types'
 import { Download, Package, Loader2 } from 'lucide-react'
 
 interface PresetDialogProps {
-  onLoadPreset: (words: PresetWord[], options: { clearExisting: boolean; presetName: string }) => Promise<void>
+  onLoadPreset: (
+    words: PresetWord[],
+    options: { clearExisting: boolean; presetName: string }
+  ) => Promise<void>
   isLoading?: boolean
   /** 外部から制御する場合のopen状態 */
   open?: boolean
@@ -23,11 +33,18 @@ interface PresetDialogProps {
   isAfterQuickStart?: boolean
 }
 
-export function PresetDialog({ onLoadPreset, isLoading, open: controlledOpen, onOpenChange, showTrigger = true, isAfterQuickStart = false }: PresetDialogProps) {
+export function PresetDialog({
+  onLoadPreset,
+  isLoading,
+  open: controlledOpen,
+  onOpenChange,
+  showTrigger = true,
+  isAfterQuickStart = false,
+}: PresetDialogProps) {
   const { t } = useTranslation('words')
-  
+
   const [internalOpen, setInternalOpen] = useState(false)
-  
+
   // 制御モードかどうか
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
@@ -44,9 +61,12 @@ export function PresetDialog({ onLoadPreset, isLoading, open: controlledOpen, on
 
   const getDifficultyLabel = (difficulty: WordPreset['difficulty']) => {
     switch (difficulty) {
-      case 'easy': return t('difficulty_beginner')
-      case 'normal': return t('difficulty_intermediate')
-      case 'hard': return t('difficulty_advanced')
+      case 'easy':
+        return t('difficulty_beginner')
+      case 'normal':
+        return t('difficulty_intermediate')
+      case 'hard':
+        return t('difficulty_advanced')
     }
   }
 
@@ -80,17 +100,13 @@ export function PresetDialog({ onLoadPreset, isLoading, open: controlledOpen, on
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('preset_title')}</DialogTitle>
-          <DialogDescription>
-            {t('preset_desc')}
-          </DialogDescription>
+          <DialogDescription>{t('preset_desc')}</DialogDescription>
         </DialogHeader>
-        
+
         {/* クイックスタート後の説明 */}
         {isAfterQuickStart && (
           <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg mb-4">
-            <p className="text-sm text-muted-foreground">
-              {t('preset_after_quickstart')}
-            </p>
+            <p className="text-sm text-muted-foreground">{t('preset_after_quickstart')}</p>
           </div>
         )}
 
@@ -108,7 +124,7 @@ export function PresetDialog({ onLoadPreset, isLoading, open: controlledOpen, on
         )}
 
         <div className="grid gap-4 py-4">
-          {allPresets.map((preset) => (
+          {allPresets.map(preset => (
             <Card
               key={preset.id}
               className={`p-4 cursor-pointer transition-all hover:border-primary/50 ${
@@ -126,14 +142,11 @@ export function PresetDialog({ onLoadPreset, isLoading, open: controlledOpen, on
                     <Badge variant="secondary">{t('n_words', { count: preset.wordCount })}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">{preset.description}</p>
-                  
+
                   {/* サンプル単語プレビュー */}
                   <div className="mt-2 flex flex-wrap gap-1">
                     {preset.words.slice(0, 5).map((word, i) => (
-                      <span
-                        key={i}
-                        className="text-xs px-2 py-0.5 bg-muted rounded"
-                      >
+                      <span key={i} className="text-xs px-2 py-0.5 bg-muted rounded">
                         {word.text}
                       </span>
                     ))}
@@ -147,7 +160,7 @@ export function PresetDialog({ onLoadPreset, isLoading, open: controlledOpen, on
 
                 <Button
                   size="sm"
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation()
                     handleLoadPreset(preset.id)
                   }}
@@ -169,9 +182,7 @@ export function PresetDialog({ onLoadPreset, isLoading, open: controlledOpen, on
         </div>
 
         <div className="border-t pt-4">
-          <p className="text-xs text-muted-foreground">
-            {t('preset_hint')}
-          </p>
+          <p className="text-xs text-muted-foreground">{t('preset_hint')}</p>
         </div>
       </DialogContent>
     </Dialog>

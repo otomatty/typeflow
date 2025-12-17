@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
-import { AppSettings, WordCountPreset, ThemeType, PracticeMode, DifficultyPreset } from '@/lib/types'
-import { getSettings, saveSettings, initializeSettings, DEFAULT_SETTINGS } from '@/lib/db'
+import {
+  AppSettings,
+  WordCountPreset,
+  ThemeType,
+  PracticeMode,
+  DifficultyPreset,
+} from '@/lib/types'
+import { saveSettings, initializeSettings, DEFAULT_SETTINGS } from '@/lib/db'
 import { DIFFICULTY_PRESETS } from '@/lib/difficulty-presets'
 
 export function useSettings() {
@@ -21,17 +27,23 @@ export function useSettings() {
           // 難易度設定
           difficultyPreset: savedSettings.difficultyPreset ?? DEFAULT_SETTINGS.difficultyPreset,
           // 制限時間設定（難易度に応じて自動計算）
-          targetKpsMultiplier: savedSettings.targetKpsMultiplier ?? DEFAULT_SETTINGS.targetKpsMultiplier,
+          targetKpsMultiplier:
+            savedSettings.targetKpsMultiplier ?? DEFAULT_SETTINGS.targetKpsMultiplier,
           comfortZoneRatio: savedSettings.comfortZoneRatio ?? DEFAULT_SETTINGS.comfortZoneRatio,
           minTimeLimit: savedSettings.minTimeLimit ?? DEFAULT_SETTINGS.minTimeLimit,
           maxTimeLimit: savedSettings.maxTimeLimit ?? DEFAULT_SETTINGS.maxTimeLimit,
-          minTimeLimitByDifficulty: savedSettings.minTimeLimitByDifficulty ?? DEFAULT_SETTINGS.minTimeLimitByDifficulty,
+          minTimeLimitByDifficulty:
+            savedSettings.minTimeLimitByDifficulty ?? DEFAULT_SETTINGS.minTimeLimitByDifficulty,
           // ミスペナルティ設定
-          missPenaltyEnabled: savedSettings.missPenaltyEnabled ?? DEFAULT_SETTINGS.missPenaltyEnabled,
-          basePenaltyPercent: savedSettings.basePenaltyPercent ?? DEFAULT_SETTINGS.basePenaltyPercent,
-          penaltyEscalationFactor: savedSettings.penaltyEscalationFactor ?? DEFAULT_SETTINGS.penaltyEscalationFactor,
+          missPenaltyEnabled:
+            savedSettings.missPenaltyEnabled ?? DEFAULT_SETTINGS.missPenaltyEnabled,
+          basePenaltyPercent:
+            savedSettings.basePenaltyPercent ?? DEFAULT_SETTINGS.basePenaltyPercent,
+          penaltyEscalationFactor:
+            savedSettings.penaltyEscalationFactor ?? DEFAULT_SETTINGS.penaltyEscalationFactor,
           maxPenaltyPercent: savedSettings.maxPenaltyPercent ?? DEFAULT_SETTINGS.maxPenaltyPercent,
-          minTimeAfterPenalty: savedSettings.minTimeAfterPenalty ?? DEFAULT_SETTINGS.minTimeAfterPenalty,
+          minTimeAfterPenalty:
+            savedSettings.minTimeAfterPenalty ?? DEFAULT_SETTINGS.minTimeAfterPenalty,
         })
       } catch (error) {
         console.error('Failed to load settings:', error)
@@ -47,7 +59,7 @@ export function useSettings() {
   const updateWordCount = useCallback(async (wordCount: WordCountPreset) => {
     try {
       await saveSettings({ wordCount })
-      setSettings((prev) => ({ ...prev, wordCount }))
+      setSettings(prev => ({ ...prev, wordCount }))
     } catch (error) {
       console.error('Failed to save word count setting:', error)
     }
@@ -57,7 +69,7 @@ export function useSettings() {
   const updateTheme = useCallback(async (theme: ThemeType) => {
     try {
       await saveSettings({ theme })
-      setSettings((prev) => ({ ...prev, theme }))
+      setSettings(prev => ({ ...prev, theme }))
     } catch (error) {
       console.error('Failed to save theme setting:', error)
     }
@@ -67,7 +79,7 @@ export function useSettings() {
   const updatePracticeMode = useCallback(async (practiceMode: PracticeMode) => {
     try {
       await saveSettings({ practiceMode })
-      setSettings((prev) => ({ ...prev, practiceMode }))
+      setSettings(prev => ({ ...prev, practiceMode }))
     } catch (error) {
       console.error('Failed to save practice mode setting:', error)
     }
@@ -77,7 +89,7 @@ export function useSettings() {
   const updateSrsEnabled = useCallback(async (srsEnabled: boolean) => {
     try {
       await saveSettings({ srsEnabled })
-      setSettings((prev) => ({ ...prev, srsEnabled }))
+      setSettings(prev => ({ ...prev, srsEnabled }))
     } catch (error) {
       console.error('Failed to save SRS setting:', error)
     }
@@ -87,7 +99,7 @@ export function useSettings() {
   const updateWarmupEnabled = useCallback(async (warmupEnabled: boolean) => {
     try {
       await saveSettings({ warmupEnabled })
-      setSettings((prev) => ({ ...prev, warmupEnabled }))
+      setSettings(prev => ({ ...prev, warmupEnabled }))
     } catch (error) {
       console.error('Failed to save warmup setting:', error)
     }
@@ -109,7 +121,7 @@ export function useSettings() {
         minTimeAfterPenalty: presetParams.minTimeAfterPenalty,
       }
       await saveSettings(updates)
-      setSettings((prev) => ({ ...prev, ...updates }))
+      setSettings(prev => ({ ...prev, ...updates }))
     } catch (error) {
       console.error('Failed to save difficulty preset:', error)
     }
@@ -119,7 +131,7 @@ export function useSettings() {
   const updateMinTimeLimit = useCallback(async (minTimeLimit: number) => {
     try {
       await saveSettings({ minTimeLimit })
-      setSettings((prev) => ({ ...prev, minTimeLimit }))
+      setSettings(prev => ({ ...prev, minTimeLimit }))
     } catch (error) {
       console.error('Failed to save min time limit setting:', error)
     }
@@ -129,19 +141,22 @@ export function useSettings() {
   const updateMaxTimeLimit = useCallback(async (maxTimeLimit: number) => {
     try {
       await saveSettings({ maxTimeLimit })
-      setSettings((prev) => ({ ...prev, maxTimeLimit }))
+      setSettings(prev => ({ ...prev, maxTimeLimit }))
     } catch (error) {
       console.error('Failed to save max time limit setting:', error)
     }
   }, [])
 
   // Get the actual word count to use (considering available words)
-  const getEffectiveWordCount = useCallback((totalWords: number): number => {
-    if (settings.wordCount === 'all') {
-      return totalWords
-    }
-    return Math.min(settings.wordCount, totalWords)
-  }, [settings.wordCount])
+  const getEffectiveWordCount = useCallback(
+    (totalWords: number): number => {
+      if (settings.wordCount === 'all') {
+        return totalWords
+      }
+      return Math.min(settings.wordCount, totalWords)
+    },
+    [settings.wordCount]
+  )
 
   // Reset all settings to default
   const resetSettings = useCallback(async () => {

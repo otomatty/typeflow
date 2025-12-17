@@ -18,14 +18,18 @@ export const MIN_SAMPLE_COUNT = 3
  */
 export function calculateNextInterval(masteryLevel: number): number {
   const level = Math.max(0, Math.min(masteryLevel, MAX_MASTERY_LEVEL))
-  const hours = BASE_INTERVALS_HOURS[level + 1] || BASE_INTERVALS_HOURS[BASE_INTERVALS_HOURS.length - 1]
-  return hours * 60 * 60 * 1000  // ミリ秒に変換
+  const hours =
+    BASE_INTERVALS_HOURS[level + 1] || BASE_INTERVALS_HOURS[BASE_INTERVALS_HOURS.length - 1]
+  return hours * 60 * 60 * 1000 // ミリ秒に変換
 }
 
 /**
  * 次回復習時刻を計算
  */
-export function calculateNextReviewAt(masteryLevel: number, currentTime: number = Date.now()): number {
+export function calculateNextReviewAt(
+  masteryLevel: number,
+  currentTime: number = Date.now()
+): number {
   return currentTime + calculateNextInterval(masteryLevel)
 }
 
@@ -41,10 +45,8 @@ export function updateMasteryLevel(
     const newConsecutiveCorrect = consecutiveCorrect + 1
     // 連続正解数が一定以上でレベルアップ（急激なレベルアップを防止）
     const shouldLevelUp = newConsecutiveCorrect >= 2 || currentLevel === 0
-    const newLevel = shouldLevelUp 
-      ? Math.min(currentLevel + 1, MAX_MASTERY_LEVEL)
-      : currentLevel
-    
+    const newLevel = shouldLevelUp ? Math.min(currentLevel + 1, MAX_MASTERY_LEVEL) : currentLevel
+
     return {
       newLevel,
       newConsecutiveCorrect: shouldLevelUp ? 0 : newConsecutiveCorrect,
@@ -81,7 +83,7 @@ export function calculateTimeDecayScore(
     return 0.1 + ratio * 0.2
   } else if (ratio < 1.0) {
     // 復習タイミングが近づいている
-    return 0.3 + (ratio - 0.5) * 1.4  // 0.3 → 1.0
+    return 0.3 + (ratio - 0.5) * 1.4 // 0.3 → 1.0
   } else if (ratio < 2.0) {
     // 復習タイミング（最適）
     return 1.0
@@ -101,12 +103,12 @@ export function calculateNoveltyScore(totalAttempts: number): number {
     return 1.0
   } else if (totalAttempts < 3) {
     // 練習回数が少ない単語も優先
-    return 0.8 - (totalAttempts * 0.15)
+    return 0.8 - totalAttempts * 0.15
   } else if (totalAttempts < 10) {
     // まだ十分な練習量ではない
-    return 0.4 - (totalAttempts * 0.03)
+    return 0.4 - totalAttempts * 0.03
   }
-  
+
   return 0.1
 }
 
@@ -156,7 +158,7 @@ export function applyWarmupBoost(
   totalWords: number,
   wordDifficulty: number
 ): number {
-  const warmupRatio = 0.15  // 最初の15%はウォームアップ
+  const warmupRatio = 0.15 // 最初の15%はウォームアップ
   const warmupEnd = Math.ceil(totalWords * warmupRatio)
 
   if (wordIndex < warmupEnd) {
@@ -165,7 +167,7 @@ export function applyWarmupBoost(
     return wordDifficulty < 0.4 ? 1.0 - progress * 0.5 : 0.3
   }
 
-  return 0.5  // 通常
+  return 0.5 // 通常
 }
 
 /**
@@ -226,20 +228,20 @@ export function getWeightsForPracticeMode(mode: string): PracticeModeWeights {
       // 弱点強化: 正確率が低い単語を優先し、ランダム順で出題
       // 正確率（accuracy）ベースで選択し、順序はランダム
       return {
-        weakness: 0.85,  // 正確率ベースの弱点スコアを最重視
+        weakness: 0.85, // 正確率ベースの弱点スコアを最重視
         timeDecay: 0.0,
         novelty: 0.0,
         difficultyAdjust: 0.0,
-        random: 0.15,    // ランダム性を追加して順序をシャッフル
+        random: 0.15, // ランダム性を追加して順序をシャッフル
       }
     case 'review':
       // 復習優先: SRSに基づいて復習が必要な単語を優先
       return {
         weakness: 0.0,
-        timeDecay: 0.90,  // SRSのタイムディケイを最重視
+        timeDecay: 0.9, // SRSのタイムディケイを最重視
         novelty: 0.0,
         difficultyAdjust: 0.0,
-        random: 0.10,
+        random: 0.1,
       }
     case 'random':
     default:
@@ -253,4 +255,3 @@ export function getWeightsForPracticeMode(mode: string): PracticeModeWeights {
       }
   }
 }
-

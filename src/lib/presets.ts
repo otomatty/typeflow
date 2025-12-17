@@ -646,18 +646,30 @@ export const advancedSentencesPreset: WordPreset = {
   difficulty: 'hard',
   wordCount: 15,
   words: [
-    { text: '本日は晴天なり', reading: 'ほんじつはせいてんなり', romaji: 'honjitsuhaseiten\'nari' },
+    { text: '本日は晴天なり', reading: 'ほんじつはせいてんなり', romaji: "honjitsuhaseiten'nari" },
     { text: '継続は力なり', reading: 'けいぞくはちからなり', romaji: 'keizokuhachikaranari' },
     { text: '急がば回れ', reading: 'いそがばまわれ', romaji: 'isogabamaware' },
-    { text: '塵も積もれば山となる', reading: 'ちりもつもればやまとなる', romaji: 'chirimotsumorebayamatonaru' },
+    {
+      text: '塵も積もれば山となる',
+      reading: 'ちりもつもればやまとなる',
+      romaji: 'chirimotsumorebayamatonaru',
+    },
     { text: '石の上にも三年', reading: 'いしのうえにもさんねん', romaji: 'ishinouenimosannen' },
     { text: '七転び八起き', reading: 'ななころびやおき', romaji: 'nanakorobiyaoki' },
     { text: '一期一会', reading: 'いちごいちえ', romaji: 'ichigoichie' },
     { text: '温故知新', reading: 'おんこちしん', romaji: 'onkochishin' },
     { text: '切磋琢磨', reading: 'せっさたくま', romaji: 'sessatakuma' },
     { text: '日進月歩', reading: 'にっしんげっぽ', romaji: 'nisshingeppo' },
-    { text: '百聞は一見にしかず', reading: 'ひゃくぶんはいっけんにしかず', romaji: 'hyakubunhaikkennnishikazu' },
-    { text: '失敗は成功のもと', reading: 'しっぱいはせいこうのもと', romaji: 'shippaihaseikounomoto' },
+    {
+      text: '百聞は一見にしかず',
+      reading: 'ひゃくぶんはいっけんにしかず',
+      romaji: 'hyakubunhaikkennnishikazu',
+    },
+    {
+      text: '失敗は成功のもと',
+      reading: 'しっぱいはせいこうのもと',
+      romaji: 'shippaihaseikounomoto',
+    },
     { text: '時は金なり', reading: 'ときはかねなり', romaji: 'tokihakanenari' },
     { text: '習うより慣れろ', reading: 'ならうよりなれろ', romaji: 'narauyorinarero' },
     { text: '論より証拠', reading: 'ろんよりしょうこ', romaji: 'ronnyorishouko' },
@@ -689,6 +701,5 @@ export function getPresetById(id: string): WordPreset | undefined {
 
 // プリセット一覧を取得（単語データなしの軽量版）
 export function getPresetList(): Omit<WordPreset, 'words'>[] {
-  return allPresets.map(({ words, ...rest }) => rest)
+  return allPresets.map(({ words: _words, ...rest }) => rest)
 }
-

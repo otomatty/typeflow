@@ -27,7 +27,7 @@ export function containsKatakana(text: string): boolean {
  * Convert katakana to hiragana.
  */
 export function katakanaToHiragana(text: string): string {
-  return text.replace(/[\u30A0-\u30FF]/g, (char) => {
+  return text.replace(/[\u30A0-\u30FF]/g, char => {
     return String.fromCharCode(char.charCodeAt(0) - 0x60)
   })
 }
@@ -45,20 +45,21 @@ export function hiraganaToRomaji(text: string): string {
  * - If text contains hiragana/katakana: converts to romaji
  * - If text contains kanji: user needs to provide reading manually
  */
-export function processTextForTyping(text: string, manualReading?: string): {
+export function processTextForTyping(
+  text: string,
+  manualReading?: string
+): {
   reading: string
   romaji: string
   needsManualReading: boolean
 } {
   const trimmedText = text.trim()
-  
+
   // If manual reading is provided, use it
   if (manualReading && manualReading.trim()) {
     const reading = manualReading.trim()
     // Convert katakana to hiragana if present
-    const hiraganaReading = containsKatakana(reading) 
-      ? katakanaToHiragana(reading) 
-      : reading
+    const hiraganaReading = containsKatakana(reading) ? katakanaToHiragana(reading) : reading
     const romaji = hiraganaToRomaji(hiraganaReading)
     return {
       reading: hiraganaReading,
@@ -66,7 +67,7 @@ export function processTextForTyping(text: string, manualReading?: string): {
       needsManualReading: false,
     }
   }
-  
+
   // Check if text contains kanji
   if (containsKanji(trimmedText)) {
     return {
@@ -75,11 +76,11 @@ export function processTextForTyping(text: string, manualReading?: string): {
       needsManualReading: true,
     }
   }
-  
+
   // Check if text is hiragana or katakana
   if (containsHiragana(trimmedText) || containsKatakana(trimmedText)) {
-    const hiraganaText = containsKatakana(trimmedText) 
-      ? katakanaToHiragana(trimmedText) 
+    const hiraganaText = containsKatakana(trimmedText)
+      ? katakanaToHiragana(trimmedText)
       : trimmedText
     const romaji = hiraganaToRomaji(hiraganaText)
     return {
@@ -88,7 +89,7 @@ export function processTextForTyping(text: string, manualReading?: string): {
       needsManualReading: false,
     }
   }
-  
+
   // Text is likely romaji/English
   return {
     reading: trimmedText,

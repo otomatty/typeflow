@@ -37,11 +37,11 @@ export function calculateAverageKps(gameScores: GameScoreRecord[]): number {
  */
 export function calculateKpsConfidence(gameScores: GameScoreRecord[]): number {
   const validScores = gameScores.filter(score => score.kps > 0 && score.totalTime > 0)
-  
+
   if (validScores.length === 0) {
     return 0
   }
-  
+
   // 10ゲームで100%の信頼度
   return Math.min(validScores.length / RECENT_SCORES_FOR_KPS, 1.0)
 }
@@ -55,23 +55,20 @@ export function getWordKeystrokeCount(word: Word): number {
 
 /**
  * 目標KPSを計算（現在の平均KPS × 倍率）
- * 
+ *
  * @param averageKps - 現在の平均KPS
  * @param targetKpsMultiplier - 目標KPSの倍率
  * @returns 目標KPS
  */
-export function calculateTargetKps(
-  averageKps: number,
-  targetKpsMultiplier: number
-): number {
+export function calculateTargetKps(averageKps: number, targetKpsMultiplier: number): number {
   return Math.round(averageKps * targetKpsMultiplier * 10) / 10
 }
 
 /**
  * 目標KPSベースの制限時間を計算
- * 
+ *
  * 計算式: 制限時間 = (打鍵数 / 目標KPS) × comfortZoneRatio
- * 
+ *
  * @param word - 対象の単語
  * @param targetKps - 目標KPS
  * @param comfortZoneRatio - 難易度に応じた時間倍率（1.0 = 目標ぴったり）
@@ -87,23 +84,23 @@ export function calculateTargetKpsTimeLimit(
   maxTimeLimit: number
 ): number {
   const keystrokeCount = getWordKeystrokeCount(word)
-  
+
   // 理論時間 = 打鍵数 / 目標KPS
   const theoreticalTime = keystrokeCount / targetKps
-  
+
   // 難易度調整後の時間
   let adjustedTime = theoreticalTime * comfortZoneRatio
-  
+
   // 最小・最大制限を適用
   adjustedTime = Math.max(minTimeLimit, Math.min(maxTimeLimit, adjustedTime))
-  
+
   // 小数点第1位まで丸める
   return Math.round(adjustedTime * 10) / 10
 }
 
 /**
  * 単語の制限時間を計算（設定と過去のスコアに基づく）
- * 
+ *
  * @param word - 対象の単語
  * @param gameScores - 過去のゲームスコア（平均KPS計算用）
  * @param settings - アプリ設定
@@ -112,11 +109,18 @@ export function calculateTargetKpsTimeLimit(
 export function calculateWordTimeLimit(
   word: Word,
   gameScores: GameScoreRecord[],
-  settings: Pick<AppSettings, 'targetKpsMultiplier' | 'comfortZoneRatio' | 'minTimeLimit' | 'maxTimeLimit' | 'minTimeLimitByDifficulty'>
+  settings: Pick<
+    AppSettings,
+    | 'targetKpsMultiplier'
+    | 'comfortZoneRatio'
+    | 'minTimeLimit'
+    | 'maxTimeLimit'
+    | 'minTimeLimitByDifficulty'
+  >
 ): number {
   const averageKps = calculateAverageKps(gameScores)
   const targetKps = calculateTargetKps(averageKps, settings.targetKpsMultiplier)
-  
+
   // まず通常の計算を行う
   const calculatedTime = calculateTargetKpsTimeLimit(
     word,
@@ -125,10 +129,10 @@ export function calculateWordTimeLimit(
     settings.minTimeLimit,
     settings.maxTimeLimit
   )
-  
+
   // 難易度ごとの最低制限時間と比較して、大きい方を採用
   const finalTime = Math.max(calculatedTime, settings.minTimeLimitByDifficulty)
-  
+
   // 最大制限時間も考慮
   return Math.min(finalTime, settings.maxTimeLimit)
 }
@@ -145,7 +149,7 @@ export function getKpsStatus(gameScores: GameScoreRecord[]): {
   const averageKps = calculateAverageKps(gameScores)
   const confidence = calculateKpsConfidence(gameScores)
   const gamesPlayed = gameScores.filter(s => s.kps > 0).length
-  
+
   let label: string
   if (confidence < 0.3) {
     label = 'データ収集中...'
@@ -154,7 +158,7 @@ export function getKpsStatus(gameScores: GameScoreRecord[]): {
   } else {
     label = '安定'
   }
-  
+
   return {
     averageKps: Math.round(averageKps * 10) / 10,
     confidence: Math.round(confidence * 100),
@@ -179,7 +183,7 @@ export function getTargetKpsInfo(
   const targetKps = calculateTargetKps(averageKps, targetKpsMultiplier)
   const percentDiff = Math.round((targetKpsMultiplier - 1) * 100)
   const isFaster = percentDiff > 0
-  
+
   return {
     averageKps: Math.round(averageKps * 10) / 10,
     targetKps,
@@ -208,4 +212,3 @@ export function calculateTimeLimitExample(
   adjustedTime = Math.max(adjustedTime, minTimeLimitByDifficulty)
   return Math.round(adjustedTime * 10) / 10
 }
-

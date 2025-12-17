@@ -11,12 +11,27 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Trash2, Keyboard, ArrowRight, AlertTriangle, ArrowRightLeft, TrendingUp, Calendar, Flame, Trophy } from 'lucide-react'
+import {
+  Trash2,
+  Keyboard,
+  ArrowRight,
+  AlertTriangle,
+  ArrowRightLeft,
+  TrendingUp,
+  Calendar,
+  Flame,
+  Trophy,
+} from 'lucide-react'
 import { KeyboardHeatmap } from '@/components/KeyboardHeatmap'
 import { ScreenHeader } from '@/components/ScreenHeader'
 import { Container } from '@/components/Container'
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
-import { XAxis, YAxis, CartesianGrid, ComposedChart, Area, Line, Legend, Bar, BarChart, ResponsiveContainer } from 'recharts'
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@/components/ui/chart'
+import { XAxis, YAxis, CartesianGrid, ComposedChart, Area, Line, Legend, Bar } from 'recharts'
 import type { KeyStats, KeyTransitionStats } from '@/lib/types'
 import type { GameScoreRecord } from '@/lib/db'
 
@@ -45,21 +60,24 @@ interface DailyStats {
 
 // Calculate daily statistics from game scores
 function calculateDailyStats(gameScores: GameScoreRecord[], locale: string): DailyStats[] {
-  const dailyMap = new Map<string, {
-    games: number
-    totalKeystrokes: number
-    totalWords: number
-    correctWords: number
-    perfectWords: number
-    totalTime: number
-    kpsSum: number
-    accuracySum: number
-  }>()
+  const dailyMap = new Map<
+    string,
+    {
+      games: number
+      totalKeystrokes: number
+      totalWords: number
+      correctWords: number
+      perfectWords: number
+      totalTime: number
+      kpsSum: number
+      accuracySum: number
+    }
+  >()
 
   for (const score of gameScores) {
     const date = new Date(score.playedAt)
     const dateKey = date.toISOString().split('T')[0]
-    
+
     const existing = dailyMap.get(dateKey) || {
       games: 0,
       totalKeystrokes: 0,
@@ -70,7 +88,7 @@ function calculateDailyStats(gameScores: GameScoreRecord[], locale: string): Dai
       kpsSum: 0,
       accuracySum: 0,
     }
-    
+
     existing.games++
     existing.totalKeystrokes += score.totalKeystrokes
     existing.totalWords += score.totalWords
@@ -79,12 +97,12 @@ function calculateDailyStats(gameScores: GameScoreRecord[], locale: string): Dai
     existing.totalTime += score.totalTime
     existing.kpsSum += score.kps
     existing.accuracySum += score.accuracy
-    
+
     dailyMap.set(dateKey, existing)
   }
 
   const localeCode = locale?.startsWith('ja') ? 'ja-JP' : 'en-US'
-  
+
   return Array.from(dailyMap.entries())
     .map(([date, stats]) => ({
       date,
@@ -108,19 +126,19 @@ function calculateDailyStats(gameScores: GameScoreRecord[], locale: string): Dai
 // Calculate play streak
 function calculateStreak(dailyStats: DailyStats[]): { current: number; best: number } {
   if (dailyStats.length === 0) return { current: 0, best: 0 }
-  
+
   const sortedDates = dailyStats.map(d => d.date).sort((a, b) => b.localeCompare(a))
   const today = new Date().toISOString().split('T')[0]
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
-  
+
   let current = 0
   let best = 0
   let streak = 0
   let prevDate: string | null = null
-  
+
   // Check if streak is active (played today or yesterday)
   const isStreakActive = sortedDates[0] === today || sortedDates[0] === yesterday
-  
+
   for (const date of sortedDates) {
     if (prevDate === null) {
       streak = 1
@@ -128,7 +146,7 @@ function calculateStreak(dailyStats: DailyStats[]): { current: number; best: num
       const prev = new Date(prevDate)
       const curr = new Date(date)
       const diffDays = Math.round((prev.getTime() - curr.getTime()) / 86400000)
-      
+
       if (diffDays === 1) {
         streak++
       } else {
@@ -138,10 +156,10 @@ function calculateStreak(dailyStats: DailyStats[]): { current: number; best: num
     }
     prevDate = date
   }
-  
+
   best = Math.max(best, streak)
   current = isStreakActive ? streak : 0
-  
+
   // Recalculate current streak from today/yesterday
   if (isStreakActive) {
     current = 0
@@ -157,7 +175,7 @@ function calculateStreak(dailyStats: DailyStats[]): { current: number; best: num
       }
     }
   }
-  
+
   return { current, best }
 }
 
@@ -184,13 +202,10 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
     const totalKeystrokes = allKeys.reduce((sum, k) => sum + k.totalCount, 0)
     const totalErrors = allKeys.reduce((sum, k) => sum + k.errorCount, 0)
     const totalLatency = allKeys.reduce((sum, k) => sum + k.totalLatency, 0)
-    
-    const accuracy = totalKeystrokes > 0 
-      ? Math.round((1 - totalErrors / totalKeystrokes) * 1000) / 10 
-      : 100
-    const avgLatency = totalKeystrokes > 0 
-      ? Math.round(totalLatency / totalKeystrokes) 
-      : 0
+
+    const accuracy =
+      totalKeystrokes > 0 ? Math.round((1 - totalErrors / totalKeystrokes) * 1000) / 10 : 100
+    const avgLatency = totalKeystrokes > 0 ? Math.round(totalLatency / totalKeystrokes) : 0
 
     return {
       totalKeystrokes,
@@ -217,34 +232,38 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
     const thisWeekStart = new Date(now)
     thisWeekStart.setDate(now.getDate() - now.getDay())
     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-    
+
     const todayStats = dailyStats.find(d => d.date === today)
     const yesterdayDate = new Date(Date.now() - 86400000).toISOString().split('T')[0]
     const yesterdayStats = dailyStats.find(d => d.date === yesterdayDate)
-    
+
     const weekStats = dailyStats.filter(d => new Date(d.date) >= thisWeekStart)
     const monthStats = dailyStats.filter(d => new Date(d.date) >= thisMonthStart)
-    
+
     const sumStats = (stats: DailyStats[]) => ({
       games: stats.reduce((sum, d) => sum + d.games, 0),
       totalTime: stats.reduce((sum, d) => sum + d.totalTime, 0),
       totalWords: stats.reduce((sum, d) => sum + d.totalWords, 0),
-      avgKps: stats.length > 0 
-        ? Math.round((stats.reduce((sum, d) => sum + d.avgKps, 0) / stats.length) * 10) / 10 
-        : 0,
-      avgAccuracy: stats.length > 0 
-        ? Math.round((stats.reduce((sum, d) => sum + d.avgAccuracy, 0) / stats.length) * 10) / 10 
-        : 0,
+      avgKps:
+        stats.length > 0
+          ? Math.round((stats.reduce((sum, d) => sum + d.avgKps, 0) / stats.length) * 10) / 10
+          : 0,
+      avgAccuracy:
+        stats.length > 0
+          ? Math.round((stats.reduce((sum, d) => sum + d.avgAccuracy, 0) / stats.length) * 10) / 10
+          : 0,
     })
-    
+
     // Find best days
-    const bestKpsDay = dailyStats.length > 0 
-      ? dailyStats.reduce((best, d) => d.avgKps > best.avgKps ? d : best)
-      : null
-    const bestAccuracyDay = dailyStats.length > 0
-      ? dailyStats.reduce((best, d) => d.avgAccuracy > best.avgAccuracy ? d : best)
-      : null
-    
+    const bestKpsDay =
+      dailyStats.length > 0
+        ? dailyStats.reduce((best, d) => (d.avgKps > best.avgKps ? d : best))
+        : null
+    const bestAccuracyDay =
+      dailyStats.length > 0
+        ? dailyStats.reduce((best, d) => (d.avgAccuracy > best.avgAccuracy ? d : best))
+        : null
+
     return {
       today: todayStats,
       yesterday: yesterdayStats,
@@ -295,11 +314,11 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
       kps: Math.max(0, score.kps),
       accuracy: Math.max(0, score.accuracy),
       correctWords: Math.max(0, score.correctWords),
-      date: new Date(score.playedAt).toLocaleDateString(locale, { 
-        month: 'short', 
+      date: new Date(score.playedAt).toLocaleDateString(locale, {
+        month: 'short',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       }),
     }))
   }, [gameScores, i18n.language, chartRange])
@@ -340,7 +359,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
   // Commonly confused key pairs Top 5
   const confusionPairs = useMemo(() => {
     const pairs: Array<{ expected: string; actual: string; count: number }> = []
-    
+
     for (const stats of Object.values(keyStats)) {
       for (const [actualKey, count] of Object.entries(stats.confusedWith)) {
         pairs.push({
@@ -350,10 +369,8 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
         })
       }
     }
-    
-    return pairs
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5)
+
+    return pairs.sort((a, b) => b.count - a.count).slice(0, 5)
   }, [keyStats])
 
   const hasData = summary.totalKeystrokes > 0
@@ -361,23 +378,14 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
 
   return (
     <Container className="space-y-6">
-      <ScreenHeader
-        title={t('title')}
-        description={t('description')}
-      />
+      <ScreenHeader title={t('title')} description={t('description')} />
 
       {!hasData ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
           <Card className="p-8 text-center">
             <Keyboard className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <h2 className="text-lg font-semibold mb-2">{t('no_data')}</h2>
-            <p className="text-muted-foreground text-sm">
-              {t('no_data_desc')}
-            </p>
+            <p className="text-muted-foreground text-sm">{t('no_data_desc')}</p>
           </Card>
         </motion.div>
       ) : (
@@ -407,25 +415,33 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                     <div className="text-2xl sm:text-3xl font-bold text-primary">
                       {summary.totalKeystrokes.toLocaleString()}
                     </div>
-                    <div className="text-xs text-muted-foreground uppercase mt-1">{t('keystrokes')}</div>
+                    <div className="text-xs text-muted-foreground uppercase mt-1">
+                      {t('keystrokes')}
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl sm:text-3xl font-bold text-primary">
                       {summary.accuracy}%
                     </div>
-                    <div className="text-xs text-muted-foreground uppercase mt-1">{t('accuracy')}</div>
+                    <div className="text-xs text-muted-foreground uppercase mt-1">
+                      {t('accuracy')}
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl sm:text-3xl font-bold text-primary">
                       {summary.totalErrors.toLocaleString()}
                     </div>
-                    <div className="text-xs text-muted-foreground uppercase mt-1">{t('errors')}</div>
+                    <div className="text-xs text-muted-foreground uppercase mt-1">
+                      {t('errors')}
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl sm:text-3xl font-bold text-primary">
                       {summary.avgLatency}ms
                     </div>
-                    <div className="text-xs text-muted-foreground uppercase mt-1">{t('avg_latency')}</div>
+                    <div className="text-xs text-muted-foreground uppercase mt-1">
+                      {t('avg_latency')}
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -446,7 +462,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                     </h2>
                     <Select
                       value={String(chartRange)}
-                      onValueChange={(value) => setChartRange(Number(value) as ChartRangeOption)}
+                      onValueChange={value => setChartRange(Number(value) as ChartRangeOption)}
                     >
                       <SelectTrigger className="w-[140px]" size="sm">
                         <SelectValue />
@@ -459,7 +475,10 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                     </Select>
                   </div>
                   <ChartContainer config={combinedChartConfig} className="h-[300px] w-full">
-                    <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <ComposedChart
+                      data={chartData}
+                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                    >
                       <defs>
                         <linearGradient id="kpsGradient" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.3} />
@@ -475,34 +494,29 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-                      <XAxis 
-                        dataKey="game" 
-                        tickLine={false} 
-                        axisLine={false}
-                        className="text-xs"
-                      />
+                      <XAxis dataKey="game" tickLine={false} axisLine={false} className="text-xs" />
                       {/* Left Y-axis for KPS */}
-                      <YAxis 
+                      <YAxis
                         yAxisId="left"
-                        tickLine={false} 
+                        tickLine={false}
                         axisLine={false}
                         className="text-xs"
                         domain={[0, 'auto']}
                         allowDataOverflow={false}
-                        tickFormatter={(value) => value >= 0 ? value : 0}
+                        tickFormatter={value => (value >= 0 ? value : 0)}
                       />
                       {/* Right Y-axis for Accuracy (%) */}
-                      <YAxis 
+                      <YAxis
                         yAxisId="right"
                         orientation="right"
-                        tickLine={false} 
+                        tickLine={false}
                         axisLine={false}
                         className="text-xs"
                         domain={[0, 100]}
                         allowDataOverflow={false}
-                        tickFormatter={(value) => `${value >= 0 ? value : 0}%`}
+                        tickFormatter={value => `${value >= 0 ? value : 0}%`}
                       />
-                      <ChartTooltip 
+                      <ChartTooltip
                         content={<ChartTooltipContent />}
                         labelFormatter={(_, payload) => payload[0]?.payload?.date || ''}
                       />
@@ -601,9 +615,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                           <span className="font-semibold text-orange-500">
                             {Math.round(tr.errorRate * 100)}%
                           </span>
-                          <span className="text-muted-foreground ml-2">
-                            {tr.avgLatency}ms
-                          </span>
+                          <span className="text-muted-foreground ml-2">{tr.avgLatency}ms</span>
                         </div>
                       </div>
                     ))}
@@ -639,7 +651,9 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                           {pair.actual.toUpperCase()}
                         </span>
                         <span className="text-muted-foreground">:</span>
-                        <span className="font-semibold">{pair.count} {t('times')}</span>
+                        <span className="font-semibold">
+                          {pair.count} {t('times')}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -659,9 +673,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                 <Card className="p-8 text-center">
                   <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                   <h2 className="text-lg font-semibold mb-2">{t('no_daily_data')}</h2>
-                  <p className="text-muted-foreground text-sm">
-                    {t('no_daily_data_desc')}
-                  </p>
+                  <p className="text-muted-foreground text-sm">{t('no_daily_data_desc')}</p>
                 </Card>
               </motion.div>
             ) : (
@@ -676,9 +688,13 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center">
                         <div className="flex items-center justify-center gap-2 mb-2">
-                          <Flame className={`w-6 h-6 ${streak.current > 0 ? 'text-orange-500' : 'text-muted-foreground'}`} />
+                          <Flame
+                            className={`w-6 h-6 ${streak.current > 0 ? 'text-orange-500' : 'text-muted-foreground'}`}
+                          />
                         </div>
-                        <div className={`text-3xl sm:text-4xl font-bold ${streak.current > 0 ? 'text-orange-500' : 'text-muted-foreground'}`}>
+                        <div
+                          className={`text-3xl sm:text-4xl font-bold ${streak.current > 0 ? 'text-orange-500' : 'text-muted-foreground'}`}
+                        >
                           {streak.current}
                         </div>
                         <div className="text-xs text-muted-foreground uppercase mt-1">
@@ -709,12 +725,17 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                   <div className="grid grid-cols-2 gap-4">
                     {/* Today */}
                     <Card className="p-4">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">{t('today')}</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                        {t('today')}
+                      </h3>
                       {dailySummary.today ? (
                         <div className="space-y-1">
-                          <div className="text-2xl font-bold">{dailySummary.today.games} {t('games_played')}</div>
+                          <div className="text-2xl font-bold">
+                            {dailySummary.today.games} {t('games_played')}
+                          </div>
                           <div className="text-sm text-muted-foreground">
-                            KPS: {dailySummary.today.avgKps} · {t('accuracy')}: {dailySummary.today.avgAccuracy}%
+                            KPS: {dailySummary.today.avgKps} · {t('accuracy')}:{' '}
+                            {dailySummary.today.avgAccuracy}%
                           </div>
                         </div>
                       ) : (
@@ -724,12 +745,17 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
 
                     {/* Yesterday */}
                     <Card className="p-4">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">{t('yesterday')}</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                        {t('yesterday')}
+                      </h3>
                       {dailySummary.yesterday ? (
                         <div className="space-y-1">
-                          <div className="text-2xl font-bold">{dailySummary.yesterday.games} {t('games_played')}</div>
+                          <div className="text-2xl font-bold">
+                            {dailySummary.yesterday.games} {t('games_played')}
+                          </div>
                           <div className="text-sm text-muted-foreground">
-                            KPS: {dailySummary.yesterday.avgKps} · {t('accuracy')}: {dailySummary.yesterday.avgAccuracy}%
+                            KPS: {dailySummary.yesterday.avgKps} · {t('accuracy')}:{' '}
+                            {dailySummary.yesterday.avgAccuracy}%
                           </div>
                         </div>
                       ) : (
@@ -739,22 +765,32 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
 
                     {/* This Week */}
                     <Card className="p-4">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">{t('this_week')}</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                        {t('this_week')}
+                      </h3>
                       <div className="space-y-1">
-                        <div className="text-2xl font-bold">{dailySummary.thisWeek.games} {t('games_played')}</div>
+                        <div className="text-2xl font-bold">
+                          {dailySummary.thisWeek.games} {t('games_played')}
+                        </div>
                         <div className="text-sm text-muted-foreground">
-                          {dailySummary.thisWeek.totalWords} {t('total_words')} · {formatDuration(dailySummary.thisWeek.totalTime, t)}
+                          {dailySummary.thisWeek.totalWords} {t('total_words')} ·{' '}
+                          {formatDuration(dailySummary.thisWeek.totalTime, t)}
                         </div>
                       </div>
                     </Card>
 
                     {/* This Month */}
                     <Card className="p-4">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">{t('this_month')}</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                        {t('this_month')}
+                      </h3>
                       <div className="space-y-1">
-                        <div className="text-2xl font-bold">{dailySummary.thisMonth.games} {t('games_played')}</div>
+                        <div className="text-2xl font-bold">
+                          {dailySummary.thisMonth.games} {t('games_played')}
+                        </div>
                         <div className="text-sm text-muted-foreground">
-                          {dailySummary.thisMonth.totalWords} {t('total_words')} · {formatDuration(dailySummary.thisMonth.totalTime, t)}
+                          {dailySummary.thisMonth.totalWords} {t('total_words')} ·{' '}
+                          {formatDuration(dailySummary.thisMonth.totalTime, t)}
                         </div>
                       </div>
                     </Card>
@@ -777,19 +813,29 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                         {dailySummary.bestKpsDay && (
                           <div className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
                             <div>
-                              <div className="text-sm text-muted-foreground">{t('best_day_kps')}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {t('best_day_kps')}
+                              </div>
                               <div className="font-medium">{dailySummary.bestKpsDay.dateLabel}</div>
                             </div>
-                            <div className="text-2xl font-bold text-primary">{dailySummary.bestKpsDay.avgKps}</div>
+                            <div className="text-2xl font-bold text-primary">
+                              {dailySummary.bestKpsDay.avgKps}
+                            </div>
                           </div>
                         )}
                         {dailySummary.bestAccuracyDay && (
                           <div className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
                             <div>
-                              <div className="text-sm text-muted-foreground">{t('best_day_accuracy')}</div>
-                              <div className="font-medium">{dailySummary.bestAccuracyDay.dateLabel}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {t('best_day_accuracy')}
+                              </div>
+                              <div className="font-medium">
+                                {dailySummary.bestAccuracyDay.dateLabel}
+                              </div>
                             </div>
-                            <div className="text-2xl font-bold text-primary">{dailySummary.bestAccuracyDay.avgAccuracy}%</div>
+                            <div className="text-2xl font-bold text-primary">
+                              {dailySummary.bestAccuracyDay.avgAccuracy}%
+                            </div>
                           </div>
                         )}
                       </div>
@@ -812,7 +858,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                         </h2>
                         <Select
                           value={String(dailyRange)}
-                          onValueChange={(value) => setDailyRange(Number(value) as DailyRangeOption)}
+                          onValueChange={value => setDailyRange(Number(value) as DailyRangeOption)}
                         >
                           <SelectTrigger className="w-[140px]" size="sm">
                             <SelectValue />
@@ -825,7 +871,10 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                         </Select>
                       </div>
                       <ChartContainer config={dailyChartConfig} className="h-[300px] w-full">
-                        <ComposedChart data={dailyChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <ComposedChart
+                          data={dailyChartData}
+                          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                        >
                           <defs>
                             <linearGradient id="gamesGradient" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="5%" stopColor="hsl(var(--chart-4))" stopOpacity={0.3} />
@@ -833,31 +882,29 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                             </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-                          <XAxis 
-                            dataKey="date" 
-                            tickLine={false} 
+                          <XAxis
+                            dataKey="date"
+                            tickLine={false}
                             axisLine={false}
                             className="text-xs"
                           />
-                          <YAxis 
+                          <YAxis
                             yAxisId="left"
-                            tickLine={false} 
+                            tickLine={false}
                             axisLine={false}
                             className="text-xs"
                             domain={[0, 'auto']}
                           />
-                          <YAxis 
+                          <YAxis
                             yAxisId="right"
                             orientation="right"
-                            tickLine={false} 
+                            tickLine={false}
                             axisLine={false}
                             className="text-xs"
                             domain={[0, 100]}
-                            tickFormatter={(value) => `${value}%`}
+                            tickFormatter={value => `${value}%`}
                           />
-                          <ChartTooltip 
-                            content={<ChartTooltipContent />}
-                          />
+                          <ChartTooltip content={<ChartTooltipContent />} />
                           <Legend />
                           <Bar
                             yAxisId="left"
@@ -906,24 +953,38 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="border-b border-border">
-                            <th className="text-left py-2 px-2 font-medium text-muted-foreground">{t('date')}</th>
-                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">{t('games_played')}</th>
-                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">{t('total_words')}</th>
-                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">{t('avg_kps')}</th>
-                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">{t('accuracy')}</th>
-                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">{t('total_time')}</th>
+                            <th className="text-left py-2 px-2 font-medium text-muted-foreground">
+                              {t('date')}
+                            </th>
+                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">
+                              {t('games_played')}
+                            </th>
+                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">
+                              {t('total_words')}
+                            </th>
+                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">
+                              {t('avg_kps')}
+                            </th>
+                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">
+                              {t('accuracy')}
+                            </th>
+                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">
+                              {t('total_time')}
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
                           {dailyStats.slice(0, 14).map((day, index) => (
-                            <tr 
-                              key={day.date} 
+                            <tr
+                              key={day.date}
                               className={`border-b border-border/50 ${index === 0 ? 'bg-primary/5' : ''}`}
                             >
                               <td className="py-2 px-2 font-medium">{day.dateLabel}</td>
                               <td className="text-right py-2 px-2">{day.games}</td>
                               <td className="text-right py-2 px-2">{day.totalWords}</td>
-                              <td className="text-right py-2 px-2 font-semibold text-primary">{day.avgKps}</td>
+                              <td className="text-right py-2 px-2 font-semibold text-primary">
+                                {day.avgKps}
+                              </td>
                               <td className="text-right py-2 px-2">{day.avgAccuracy}%</td>
                               <td className="text-right py-2 px-2 text-muted-foreground">
                                 {formatDuration(day.totalTime, t)}
@@ -949,16 +1010,9 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">{t('reset_stats')}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t('reset_stats_desc')}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{t('reset_stats_desc')}</p>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={onReset}
-                  className="gap-2"
-                >
+                <Button variant="destructive" size="sm" onClick={onReset} className="gap-2">
                   <Trash2 className="w-4 h-4" />
                   {tc('reset')}
                 </Button>

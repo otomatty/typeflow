@@ -151,4 +151,3 @@ If you discover a security vulnerability, please send an email to the maintainer
 Made with ❤️ for developers who want to type faster
 
 </div>
-

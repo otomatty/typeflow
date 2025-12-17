@@ -19,9 +19,7 @@ export function AdvancedSettings({
         <div className="space-y-6">
           <div>
             <Label className="text-base font-semibold">{t('advanced.title')}</Label>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t('advanced.description')}
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">{t('advanced.description')}</p>
           </div>
 
           {/* SRS Toggle */}
@@ -30,15 +28,9 @@ export function AdvancedSettings({
               <Label htmlFor="srs-enabled" className="text-sm font-medium">
                 {t('advanced.srs')}
               </Label>
-              <p className="text-xs text-muted-foreground">
-                {t('advanced.srs_desc')}
-              </p>
+              <p className="text-xs text-muted-foreground">{t('advanced.srs_desc')}</p>
             </div>
-            <Switch
-              id="srs-enabled"
-              checked={srsEnabled}
-              onCheckedChange={onSrsEnabledChange}
-            />
+            <Switch id="srs-enabled" checked={srsEnabled} onCheckedChange={onSrsEnabledChange} />
           </div>
 
           {/* Warmup Toggle */}
@@ -47,9 +39,7 @@ export function AdvancedSettings({
               <Label htmlFor="warmup-enabled" className="text-sm font-medium">
                 {t('advanced.warmup')}
               </Label>
-              <p className="text-xs text-muted-foreground">
-                {t('advanced.warmup_desc')}
-              </p>
+              <p className="text-xs text-muted-foreground">{t('advanced.warmup_desc')}</p>
             </div>
             <Switch
               id="warmup-enabled"
@@ -62,4 +52,3 @@ export function AdvancedSettings({
     </SettingSection>
   )
 }
-

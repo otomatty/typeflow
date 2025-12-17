@@ -1,6 +1,13 @@
 import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,7 +19,10 @@ import { FileUp, Upload, Loader2, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface CSVImportDialogProps {
-  onImport: (words: PresetWord[], options: { clearExisting: boolean; presetName: string }) => Promise<void>
+  onImport: (
+    words: PresetWord[],
+    options: { clearExisting: boolean; presetName: string }
+  ) => Promise<void>
   /** 外部から制御する場合のopen状態 */
   open?: boolean
   /** 外部から制御する場合のonOpenChange */
@@ -21,11 +31,16 @@ interface CSVImportDialogProps {
   showTrigger?: boolean
 }
 
-export function CSVImportDialog({ onImport, open: controlledOpen, onOpenChange, showTrigger = true }: CSVImportDialogProps) {
+export function CSVImportDialog({
+  onImport,
+  open: controlledOpen,
+  onOpenChange,
+  showTrigger = true,
+}: CSVImportDialogProps) {
   const { t, i18n } = useTranslation('words')
-  
+
   const [internalOpen, setInternalOpen] = useState(false)
-  
+
   // 制御モードかどうか
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
@@ -49,15 +64,17 @@ export function CSVImportDialog({ onImport, open: controlledOpen, onOpenChange, 
     try {
       const csvText = await readCSVFile(file)
       const words = parseCSV(csvText)
-      
+
       if (words.length === 0) {
-        setError(isJa 
-          ? 'CSVファイルから単語を読み取れませんでした。形式を確認してください。' 
-          : 'Could not read words from CSV file. Please check the format.')
+        setError(
+          isJa
+            ? 'CSVファイルから単語を読み取れませんでした。形式を確認してください。'
+            : 'Could not read words from CSV file. Please check the format.'
+        )
         setPreviewWords([])
         return
       }
-      
+
       setPreviewWords(words)
     } catch (err) {
       setError(isJa ? 'ファイルの読み込みに失敗しました' : 'Failed to read file')
@@ -115,8 +132,8 @@ export function CSVImportDialog({ onImport, open: controlledOpen, onOpenChange, 
         <DialogHeader>
           <DialogTitle>{t('csv.title')}</DialogTitle>
           <DialogDescription>
-            {isJa 
-              ? 'CSVファイルから単語リストを読み込みます。形式: ワード,読み,ローマ字' 
+            {isJa
+              ? 'CSVファイルから単語リストを読み込みます。形式: ワード,読み,ローマ字'
               : 'Load word list from CSV file. Format: word,reading,romaji'}
           </DialogDescription>
         </DialogHeader>
@@ -135,8 +152,8 @@ export function CSVImportDialog({ onImport, open: controlledOpen, onOpenChange, 
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              {isJa 
-                ? '1行目がヘッダー（ワード,読み,入力例）の場合は自動的にスキップされます' 
+              {isJa
+                ? '1行目がヘッダー（ワード,読み,入力例）の場合は自動的にスキップされます'
                 : 'Header row (word,reading,romaji) will be automatically skipped'}
             </p>
           </div>
@@ -166,12 +183,16 @@ export function CSVImportDialog({ onImport, open: controlledOpen, onOpenChange, 
                     <div key={i} className="text-sm grid grid-cols-3 gap-2">
                       <span className="truncate">{word.text}</span>
                       <span className="truncate text-muted-foreground">{word.reading}</span>
-                      <span className="truncate text-muted-foreground font-mono text-xs">{word.romaji}</span>
+                      <span className="truncate text-muted-foreground font-mono text-xs">
+                        {word.romaji}
+                      </span>
                     </div>
                   ))}
                   {previewWords.length > 10 && (
                     <p className="text-xs text-muted-foreground pt-2">
-                      {isJa ? `...他 ${previewWords.length - 10} 語` : `...and ${previewWords.length - 10} more`}
+                      {isJa
+                        ? `...他 ${previewWords.length - 10} 語`
+                        : `...and ${previewWords.length - 10} more`}
                     </p>
                   )}
                 </div>
@@ -203,8 +224,12 @@ export function CSVImportDialog({ onImport, open: controlledOpen, onOpenChange, 
               <Upload className="h-4 w-4" />
             )}
             {previewWords.length > 0
-              ? (isJa ? `${previewWords.length}語をインポート` : `Import ${previewWords.length} words`)
-              : (isJa ? 'ファイルを選択してください' : 'Select a file')}
+              ? isJa
+                ? `${previewWords.length}語をインポート`
+                : `Import ${previewWords.length} words`
+              : isJa
+                ? 'ファイルを選択してください'
+                : 'Select a file'}
           </Button>
         </div>
 
@@ -212,7 +237,9 @@ export function CSVImportDialog({ onImport, open: controlledOpen, onOpenChange, 
           <p className="text-xs text-muted-foreground">
             💡 {isJa ? 'CSV形式の例:' : 'CSV format example:'}
             <br />
-            <code className="text-xs bg-muted px-1 rounded">{isJa ? 'ワード,読み,入力例' : 'word,reading,romaji'}</code>
+            <code className="text-xs bg-muted px-1 rounded">
+              {isJa ? 'ワード,読み,入力例' : 'word,reading,romaji'}
+            </code>
             <br />
             <code className="text-xs bg-muted px-1 rounded">ありがとう,ありがとう,arigatou</code>
           </p>

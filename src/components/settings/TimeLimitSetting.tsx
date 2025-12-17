@@ -22,9 +22,7 @@ export function TimeLimitSetting({
               <Gauge className="w-5 h-5 text-primary" />
               <Label className="text-base font-semibold">{t('time_limit.title')}</Label>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t('time_limit.description')}
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">{t('time_limit.description')}</p>
           </div>
 
           {/* Current → Target KPS Card */}
@@ -36,7 +34,7 @@ export function TimeLimitSetting({
                 <p className="text-3xl font-bold tabular-nums">{kpsStatus.averageKps}</p>
                 <p className="text-xs text-muted-foreground">{t('time_limit.keys_per_sec')}</p>
               </div>
-              
+
               {/* Arrow */}
               <div className="flex flex-col items-center gap-1">
                 <ArrowRight className="w-6 h-6 text-primary" />
@@ -47,15 +45,17 @@ export function TimeLimitSetting({
                   </div>
                 )}
               </div>
-              
+
               {/* Target KPS */}
               <div className="text-center flex-1">
                 <p className="text-xs text-muted-foreground mb-1">{t('time_limit.target')}</p>
-                <p className="text-3xl font-bold tabular-nums text-primary">{targetKpsInfo.targetKps}</p>
+                <p className="text-3xl font-bold tabular-nums text-primary">
+                  {targetKpsInfo.targetKps}
+                </p>
                 <p className="text-xs text-muted-foreground">{t('time_limit.keys_per_sec')}</p>
               </div>
             </div>
-            
+
             {/* Confidence Bar */}
             {kpsStatus.confidence < 100 && (
               <div className="mt-4 pt-4 border-t border-border/30">
@@ -64,7 +64,7 @@ export function TimeLimitSetting({
                   <span>{t('time_limit.games_played', { count: kpsStatus.gamesPlayed })}</span>
                 </div>
                 <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className="h-full bg-primary transition-all duration-500"
                     style={{ width: `${kpsStatus.confidence}%` }}
                   />
@@ -78,21 +78,22 @@ export function TimeLimitSetting({
             <p className="text-sm font-medium mb-2">{t('time_limit.example_title')}</p>
             <div className="flex items-center justify-between">
               <div className="text-sm text-muted-foreground">
-                {t('time_limit.example_word')} ({exampleKeystrokeCount}{t('time_limit.keystrokes')})
+                {t('time_limit.example_word')} ({exampleKeystrokeCount}
+                {t('time_limit.keystrokes')})
               </div>
               <div className="text-right">
-                <span className="text-xl font-bold tabular-nums text-primary">{timeLimitExample}</span>
-                <span className="text-sm text-muted-foreground ml-1">{t('time_limit.seconds')}</span>
+                <span className="text-xl font-bold tabular-nums text-primary">
+                  {timeLimitExample}
+                </span>
+                <span className="text-sm text-muted-foreground ml-1">
+                  {t('time_limit.seconds')}
+                </span>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              {t('time_limit.example_note')}
-            </p>
+            <p className="text-xs text-muted-foreground mt-2">{t('time_limit.example_note')}</p>
           </div>
-
         </div>
       </Card>
     </SettingSection>
   )
 }
-

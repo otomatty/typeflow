@@ -34,9 +34,9 @@ const app = new Hono<HonoEnv>()
 
 // CORSミドルウェア
 app.use('/*', async (c, next) => {
-  const origin = c.req.header('Origin')
+  // const origin = c.req.header('Origin') // Not used in current implementation
   const allowedOriginsStr = c.env.ALLOWED_ORIGINS || '*'
-  const allowedOrigins = allowedOriginsStr.split(',').map((o) => o.trim())
+  const allowedOrigins = allowedOriginsStr.split(',').map(o => o.trim())
 
   const corsOptions = {
     origin: (origin: string) => {
@@ -53,7 +53,7 @@ app.use('/*', async (c, next) => {
 })
 
 // Words API
-app.get('/api/words', async (c) => {
+app.get('/api/words', async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')
@@ -67,7 +67,7 @@ app.get('/api/words', async (c) => {
   }
 })
 
-app.post('/api/words', async (c) => {
+app.post('/api/words', async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')
@@ -82,7 +82,7 @@ app.post('/api/words', async (c) => {
   }
 })
 
-app.delete('/api/words', async (c) => {
+app.delete('/api/words', async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')
@@ -92,12 +92,15 @@ app.delete('/api/words', async (c) => {
     return c.json({ success: true })
   } catch (error) {
     console.error('Failed to delete all words:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to delete all words' }, 500)
+    return c.json(
+      { error: error instanceof Error ? error.message : 'Failed to delete all words' },
+      500
+    )
   }
 })
 
 // Bulk insert
-app.post('/api/words/bulk', async (c) => {
+app.post('/api/words/bulk', async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')
@@ -112,12 +115,15 @@ app.post('/api/words/bulk', async (c) => {
     })
   } catch (error) {
     console.error('Failed to bulk insert words:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to bulk insert words' }, 500)
+    return c.json(
+      { error: error instanceof Error ? error.message : 'Failed to bulk insert words' },
+      500
+    )
   }
 })
 
 // Single word operations
-app.delete('/api/words/:id', async (c) => {
+app.delete('/api/words/:id', async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')
@@ -135,19 +141,19 @@ app.delete('/api/words/:id', async (c) => {
   }
 })
 
-app.put('/api/words/:id', async (c) => {
+app.put('/api/words/:id', async c => {
   try {
     const id = parseInt(c.req.param('id'))
     if (isNaN(id)) {
       return c.json({ error: 'Invalid ID' }, 400)
     }
     const body = await c.req.json<UpdateWordInput>()
-    
+
     if (!c.env.DB) {
       console.error('Database not available')
       return c.json({ error: 'Database not configured' }, 500)
     }
-    
+
     await updateWord(c.env.DB, id, body)
     return c.json({ success: true })
   } catch (error) {
@@ -157,7 +163,7 @@ app.put('/api/words/:id', async (c) => {
 })
 
 // Aggregated Stats API
-app.get('/api/stats', async (c) => {
+app.get('/api/stats', async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')
@@ -171,7 +177,7 @@ app.get('/api/stats', async (c) => {
   }
 })
 
-app.put('/api/stats', async (c) => {
+app.put('/api/stats', async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')
@@ -179,7 +185,7 @@ app.put('/api/stats', async (c) => {
     }
     const body = await c.req.json<UpdateAggregatedStatsInput>()
     const existing = await getAggregatedStats(c.env.DB)
-    
+
     await upsertAggregatedStats(c.env.DB, {
       id: 1,
       keyStats: body.keyStats ?? existing?.keyStats ?? {},
@@ -193,7 +199,7 @@ app.put('/api/stats', async (c) => {
   }
 })
 
-app.delete('/api/stats', async (c) => {
+app.delete('/api/stats', async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')
@@ -208,7 +214,7 @@ app.delete('/api/stats', async (c) => {
 })
 
 // Game Scores API
-app.get('/api/scores', async (c) => {
+app.get('/api/scores', async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')
@@ -222,7 +228,7 @@ app.get('/api/scores', async (c) => {
   }
 })
 
-app.post('/api/scores', async (c) => {
+app.post('/api/scores', async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')
@@ -237,7 +243,7 @@ app.post('/api/scores', async (c) => {
   }
 })
 
-app.delete('/api/scores', async (c) => {
+app.delete('/api/scores', async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')
@@ -247,12 +253,15 @@ app.delete('/api/scores', async (c) => {
     return c.json({ success: true })
   } catch (error) {
     console.error('Failed to delete all scores:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to delete all scores' }, 500)
+    return c.json(
+      { error: error instanceof Error ? error.message : 'Failed to delete all scores' },
+      500
+    )
   }
 })
 
 // Settings API
-app.get('/api/settings', async (c) => {
+app.get('/api/settings', async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')
@@ -266,7 +275,7 @@ app.get('/api/settings', async (c) => {
   }
 })
 
-app.put('/api/settings', async (c) => {
+app.put('/api/settings', async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')
@@ -277,12 +286,15 @@ app.put('/api/settings', async (c) => {
     return c.json({ success: true })
   } catch (error) {
     console.error('Failed to update settings:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to update settings' }, 500)
+    return c.json(
+      { error: error instanceof Error ? error.message : 'Failed to update settings' },
+      500
+    )
   }
 })
 
 // 404 Handler
-app.notFound((c) => {
+app.notFound(c => {
   return c.json({ error: 'Not found' }, 404)
 })
 
@@ -293,4 +305,3 @@ app.onError((err, c) => {
 })
 
 export default app
-

@@ -16,12 +16,8 @@ export function ScreenHeader({ title, description, action }: ScreenHeaderProps) 
       transition={{ duration: 0.3 }}
     >
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          {title}
-        </h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          {description}
-        </p>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{title}</h1>
+        <p className="text-muted-foreground text-sm mt-1">{description}</p>
       </div>
       {action && <div>{action}</div>}
     </motion.div>

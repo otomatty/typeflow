@@ -20,13 +20,13 @@ export function ResetAllSetting({ onResetAll }: ResetAllSettingProps) {
             <div>
               <div className="flex items-center gap-2">
                 <RotateCcw className="w-5 h-5 text-destructive" />
-                <Label className="text-base font-semibold text-destructive">{t('reset_all.title')}</Label>
+                <Label className="text-base font-semibold text-destructive">
+                  {t('reset_all.title')}
+                </Label>
               </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                {t('reset_all.description')}
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">{t('reset_all.description')}</p>
             </div>
-            
+
             <Button
               variant="destructive"
               onClick={() => setResetDialogOpen(true)}
@@ -47,4 +47,3 @@ export function ResetAllSetting({ onResetAll }: ResetAllSettingProps) {
     </>
   )
 }
-

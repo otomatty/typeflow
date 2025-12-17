@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 
-export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] {
+export function useLocalStorage<T>(
+  key: string,
+  initialValue: T
+): [T, (value: T | ((prev: T) => T)) => void] {
   // Get initial value from localStorage or use default
   const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === 'undefined') {
@@ -29,7 +32,7 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
 
   // Wrapped setter that handles function updates
   const setValue = useCallback((value: T | ((prev: T) => T)) => {
-    setStoredValue((prev) => {
+    setStoredValue(prev => {
       const newValue = value instanceof Function ? value(prev) : value
       return newValue
     })

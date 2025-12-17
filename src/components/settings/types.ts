@@ -78,4 +78,3 @@ export interface ThemeSettingProps {
 export interface ResetAllSettingProps {
   onResetAll: () => Promise<void>
 }
-

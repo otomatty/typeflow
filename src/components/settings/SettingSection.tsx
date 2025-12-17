@@ -17,4 +17,3 @@ export function SettingSection({ delay = 0, children }: SettingSectionProps) {
     </motion.div>
   )
 }
-

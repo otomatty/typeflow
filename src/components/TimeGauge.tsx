@@ -8,7 +8,7 @@ interface TimeGaugeProps {
 
 export function TimeGauge({ timeRemaining, totalTime }: TimeGaugeProps) {
   const percentage = (timeRemaining / totalTime) * 100
-  
+
   const getColor = () => {
     if (percentage > 50) return 'bg-primary'
     if (percentage > 25) return 'bg-yellow-500'
@@ -18,10 +18,7 @@ export function TimeGauge({ timeRemaining, totalTime }: TimeGaugeProps) {
   return (
     <div className="w-full px-4 sm:px-8">
       <div className="relative">
-        <Progress 
-          value={percentage} 
-          className="h-2 sm:h-3 bg-secondary"
-        />
+        <Progress value={percentage} className="h-2 sm:h-3 bg-secondary" />
         <motion.div
           className={`absolute inset-0 h-2 sm:h-3 rounded-full ${getColor()} transition-all duration-300`}
           style={{ width: `${percentage}%` }}

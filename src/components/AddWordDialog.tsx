@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,19 +28,19 @@ interface AddWordDialogProps {
   showTrigger?: boolean
 }
 
-export function AddWordDialog({ 
-  onAddWord, 
+export function AddWordDialog({
+  onAddWord,
   onEditWord,
   editingWord,
-  open: controlledOpen, 
-  onOpenChange, 
-  showTrigger = true 
+  open: controlledOpen,
+  onOpenChange,
+  showTrigger = true,
 }: AddWordDialogProps) {
   const { t } = useTranslation('words')
   const { t: tc } = useTranslation('common')
-  
+
   const [internalOpen, setInternalOpen] = useState(false)
-  
+
   // 制御モードかどうか
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
@@ -43,9 +49,9 @@ export function AddWordDialog({
   const [reading, setReading] = useState('')
   const [romaji, setRomaji] = useState('')
   const [needsManualReading, setNeedsManualReading] = useState(false)
-  
+
   const isEditMode = !!editingWord
-  
+
   // 編集モードの場合、初期値を設定
   useEffect(() => {
     if (editingWord && open) {
@@ -66,7 +72,7 @@ export function AddWordDialog({
     }
 
     const result = processTextForTyping(text)
-    
+
     if (result.needsManualReading) {
       setNeedsManualReading(true)
       // Don't overwrite if user has already entered reading
@@ -102,9 +108,9 @@ export function AddWordDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!text.trim()) return
-    
+
     // Validate that reading is provided for kanji
     if (containsKanji(text) && !reading.trim()) {
       return
@@ -158,7 +164,7 @@ export function AddWordDialog({
             <Input
               id="text"
               value={text}
-              onChange={(e) => handleTextChange(e.target.value)}
+              onChange={e => handleTextChange(e.target.value)}
               placeholder={t('dialog.word_placeholder')}
               autoFocus
             />
@@ -177,14 +183,16 @@ export function AddWordDialog({
             <Input
               id="reading"
               value={reading}
-              onChange={(e) => handleReadingChange(e.target.value)}
-              placeholder={needsManualReading ? t('dialog.reading_placeholder_manual') : t('dialog.reading_placeholder_auto')}
-              className={needsManualReading && !reading ? "border-amber-500" : ""}
+              onChange={e => handleReadingChange(e.target.value)}
+              placeholder={
+                needsManualReading
+                  ? t('dialog.reading_placeholder_manual')
+                  : t('dialog.reading_placeholder_auto')
+              }
+              className={needsManualReading && !reading ? 'border-amber-500' : ''}
             />
             {needsManualReading && (
-              <p className="text-xs text-muted-foreground">
-                {t('dialog.reading_hint')}
-              </p>
+              <p className="text-xs text-muted-foreground">{t('dialog.reading_hint')}</p>
             )}
           </div>
 
@@ -193,7 +201,7 @@ export function AddWordDialog({
             <Input
               id="romaji"
               value={romaji}
-              onChange={(e) => setRomaji(e.target.value)}
+              onChange={e => setRomaji(e.target.value)}
               placeholder={t('dialog.romaji_placeholder')}
             />
           </div>

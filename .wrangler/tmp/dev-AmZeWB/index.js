@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/bundle-wzFRea/strip-cf-connecting-ip-header.js
+// .wrangler/tmp/bundle-FV87BO/strip-cf-connecting-ip-header.js
 function stripCfConnectingIPHeader(input, init) {
   const request = new Request(input, init);
   request.headers.delete("CF-Connecting-IP");
@@ -2450,15 +2450,14 @@ __name(deleteAllGameScores, "deleteAllGameScores");
 // src/server/index.ts
 var app = new Hono2();
 app.use("/*", async (c, next) => {
-  const origin = c.req.header("Origin");
   const allowedOriginsStr = c.env.ALLOWED_ORIGINS || "*";
   const allowedOrigins = allowedOriginsStr.split(",").map((o) => o.trim());
   const corsOptions = {
-    origin: (origin2) => {
+    origin: (origin) => {
       if (allowedOrigins.includes("*")) {
         return "*";
       }
-      return allowedOrigins.includes(origin2) ? origin2 : null;
+      return allowedOrigins.includes(origin) ? origin : null;
     },
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type"]
@@ -2502,7 +2501,10 @@ app.delete("/api/words", async (c) => {
     return c.json({ success: true });
   } catch (error) {
     console.error("Failed to delete all words:", error);
-    return c.json({ error: error instanceof Error ? error.message : "Failed to delete all words" }, 500);
+    return c.json(
+      { error: error instanceof Error ? error.message : "Failed to delete all words" },
+      500
+    );
   }
 });
 app.post("/api/words/bulk", async (c) => {
@@ -2520,7 +2522,10 @@ app.post("/api/words/bulk", async (c) => {
     });
   } catch (error) {
     console.error("Failed to bulk insert words:", error);
-    return c.json({ error: error instanceof Error ? error.message : "Failed to bulk insert words" }, 500);
+    return c.json(
+      { error: error instanceof Error ? error.message : "Failed to bulk insert words" },
+      500
+    );
   }
 });
 app.delete("/api/words/:id", async (c) => {
@@ -2641,7 +2646,10 @@ app.delete("/api/scores", async (c) => {
     return c.json({ success: true });
   } catch (error) {
     console.error("Failed to delete all scores:", error);
-    return c.json({ error: error instanceof Error ? error.message : "Failed to delete all scores" }, 500);
+    return c.json(
+      { error: error instanceof Error ? error.message : "Failed to delete all scores" },
+      500
+    );
   }
 });
 app.get("/api/settings", async (c) => {
@@ -2668,7 +2676,10 @@ app.put("/api/settings", async (c) => {
     return c.json({ success: true });
   } catch (error) {
     console.error("Failed to update settings:", error);
-    return c.json({ error: error instanceof Error ? error.message : "Failed to update settings" }, 500);
+    return c.json(
+      { error: error instanceof Error ? error.message : "Failed to update settings" },
+      500
+    );
   }
 });
 app.notFound((c) => {
@@ -2721,7 +2732,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-wzFRea/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-FV87BO/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -2753,7 +2764,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-wzFRea/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-FV87BO/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

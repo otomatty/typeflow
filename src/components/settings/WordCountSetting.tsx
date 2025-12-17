@@ -11,7 +11,7 @@ import type { WordCountPreset } from '@/lib/types'
 
 export function WordCountSetting({ wordCount, onWordCountChange }: WordCountSettingProps) {
   const { t } = useTranslation('settings')
-  
+
   const isAllWords = wordCount === 'all'
   const sliderValue = typeof wordCount === 'number' ? wordCount : 20
 
@@ -35,9 +35,7 @@ export function WordCountSetting({ wordCount, onWordCountChange }: WordCountSett
         <div className="space-y-6">
           <div>
             <Label className="text-base font-semibold">{t('word_count.title')}</Label>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t('word_count.description')}
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">{t('word_count.description')}</p>
           </div>
 
           {/* All Words Toggle */}
@@ -46,30 +44,28 @@ export function WordCountSetting({ wordCount, onWordCountChange }: WordCountSett
               <Label htmlFor="all-words" className="text-sm font-medium">
                 {t('word_count.use_all')}
               </Label>
-              <p className="text-xs text-muted-foreground">
-                {t('word_count.use_all_description')}
-              </p>
+              <p className="text-xs text-muted-foreground">{t('word_count.use_all_description')}</p>
             </div>
-            <Switch
-              id="all-words"
-              checked={isAllWords}
-              onCheckedChange={handleAllWordsToggle}
-            />
+            <Switch id="all-words" checked={isAllWords} onCheckedChange={handleAllWordsToggle} />
           </div>
 
           {/* Slider */}
-          <div className={cn(
-            'space-y-4 transition-opacity',
-            isAllWords && 'opacity-50 pointer-events-none'
-          )}>
+          <div
+            className={cn(
+              'space-y-4 transition-opacity',
+              isAllWords && 'opacity-50 pointer-events-none'
+            )}
+          >
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{t('word_count.select')}</span>
               <span className="text-2xl font-bold tabular-nums">
                 {sliderValue}
-                <span className="text-sm font-normal text-muted-foreground ml-1">{t('word_count.questions')}</span>
+                <span className="text-sm font-normal text-muted-foreground ml-1">
+                  {t('word_count.questions')}
+                </span>
               </span>
             </div>
-            
+
             <Slider
               value={[sliderValue]}
               onValueChange={handleSliderChange}
@@ -79,19 +75,20 @@ export function WordCountSetting({ wordCount, onWordCountChange }: WordCountSett
               disabled={isAllWords}
               className="w-full"
             />
-            
+
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{MIN_WORD_COUNT} {t('word_count.questions')}</span>
-              <span>{MAX_WORD_COUNT} {t('word_count.questions')}</span>
+              <span>
+                {MIN_WORD_COUNT} {t('word_count.questions')}
+              </span>
+              <span>
+                {MAX_WORD_COUNT} {t('word_count.questions')}
+              </span>
             </div>
           </div>
-          
-          <p className="text-xs text-muted-foreground">
-            {t('word_count.note')}
-          </p>
+
+          <p className="text-xs text-muted-foreground">{t('word_count.note')}</p>
         </div>
       </Card>
     </SettingSection>
   )
 }
-

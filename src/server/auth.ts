@@ -3,7 +3,7 @@ import type { Env } from './types'
 
 /**
  * 認証ミドルウェア（将来の拡張用）
- * 
+ *
  * 現在はスケルトンのみ実装されています。
  * 将来的に以下の認証方式を実装可能：
  * - JWT認証
@@ -33,7 +33,7 @@ export async function authMiddleware(
 ): Promise<void> {
   // TODO: 認証ロジックを実装
   // 例: JWTトークンの検証、APIキーの確認など
-  
+
   // 現時点では認証なしで通過
   c.set('auth', {
     user: null,
@@ -75,4 +75,3 @@ export function getAuthUser(c: Context<{ Bindings: Env }>): AuthUser | null {
   const auth = c.get('auth') as AuthContext | undefined
   return auth?.user ?? null
 }
-

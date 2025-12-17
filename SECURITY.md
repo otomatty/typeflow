@@ -4,9 +4,9 @@
 
 We actively support the following versions of TypeFlow with security updates:
 
-| Version | Supported          |
-| ------- | ------------------ |
-| Latest  | :white_check_mark: |
+| Version  | Supported          |
+| -------- | ------------------ |
+| Latest   | :white_check_mark: |
 | < Latest | :x:                |
 
 ## Reporting a Vulnerability
@@ -65,4 +65,3 @@ However, if you are deploying TypeFlow as a web service, please ensure:
 For security-related inquiries, please contact the maintainer directly.
 
 Thank you for helping keep TypeFlow and its users safe!
-

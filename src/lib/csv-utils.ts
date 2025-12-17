@@ -17,14 +17,14 @@ export function parseCSV(csvText: string): PresetWord[] {
 
     // CSVパース（カンマを含む値に対応）
     const parts = parseCSVLine(line)
-    
+
     if (parts.length >= 3) {
       const text = parts[0]
       const reading = parts[1]
       // 3列目以降のすべてをカンマで結合してromajiとして扱う
       // （romajiにカンマが含まれる場合、例: "aoisora,shiroikumo"）
       const romaji = parts.slice(2).join(',')
-      
+
       // 有効なデータのみ追加
       if (text && reading && romaji) {
         words.push({
@@ -91,7 +91,7 @@ export function createPresetFromCSV(
 export function readCSVFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.onload = (e) => {
+    reader.onload = e => {
       const text = e.target?.result
       if (typeof text === 'string') {
         resolve(text)
@@ -103,4 +103,3 @@ export function readCSVFile(file: File): Promise<string> {
     reader.readAsText(file)
   })
 }
-

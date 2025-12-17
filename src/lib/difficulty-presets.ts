@@ -11,7 +11,7 @@ import type { DifficultyPreset, DifficultyParams } from './types'
 export const DIFFICULTY_PRESETS: Record<DifficultyPreset, DifficultyParams> = {
   easy: {
     // 目標: 現在より30%速い（旧expertレベル）
-    targetKpsMultiplier: 1.30,
+    targetKpsMultiplier: 1.3,
     // 制限時間: 5%厳しい（旧expertレベル）
     comfortZoneRatio: 0.95,
     // 難易度ごとの最低制限時間: 2.0秒
@@ -25,9 +25,9 @@ export const DIFFICULTY_PRESETS: Record<DifficultyPreset, DifficultyParams> = {
   },
   normal: {
     // 目標: 現在より40%速い（旧expertより高い）
-    targetKpsMultiplier: 1.40,
+    targetKpsMultiplier: 1.4,
     // 制限時間: 10%厳しい
-    comfortZoneRatio: 0.90,
+    comfortZoneRatio: 0.9,
     // 難易度ごとの最低制限時間: 1.5秒
     minTimeLimitByDifficulty: 1.5,
     // ミスペナルティ: より厳しい
@@ -39,7 +39,7 @@ export const DIFFICULTY_PRESETS: Record<DifficultyPreset, DifficultyParams> = {
   },
   hard: {
     // 目標: 現在より50%速い
-    targetKpsMultiplier: 1.50,
+    targetKpsMultiplier: 1.5,
     // 制限時間: 15%厳しい
     comfortZoneRatio: 0.85,
     // 難易度ごとの最低制限時間: 1.2秒
@@ -55,7 +55,7 @@ export const DIFFICULTY_PRESETS: Record<DifficultyPreset, DifficultyParams> = {
     // 目標: 現在より65%速い
     targetKpsMultiplier: 1.65,
     // 制限時間: 20%厳しい（極限レベル）
-    comfortZoneRatio: 0.80,
+    comfortZoneRatio: 0.8,
     // 難易度ごとの最低制限時間: 1.0秒
     minTimeLimitByDifficulty: 1.0,
     // ミスペナルティ: 極限レベル
@@ -121,20 +121,20 @@ export function calculateMissPenalty(
   params: DifficultyParams
 ): number {
   if (!params.missPenaltyEnabled || missCount < 1) return 0
-  
+
   // ペナルティ割合を計算（段階的に増加）
   const penaltyPercent = Math.min(
     params.basePenaltyPercent * Math.pow(params.penaltyEscalationFactor, missCount - 1),
     params.maxPenaltyPercent
   )
-  
+
   // 減少時間を計算
   let penalty = currentTimeRemaining * (penaltyPercent / 100)
-  
+
   // 最低残り時間を確保
   const maxAllowedPenalty = Math.max(0, currentTimeRemaining - params.minTimeAfterPenalty)
   penalty = Math.min(penalty, maxAllowedPenalty)
-  
+
   // 小数点2位で丸める
   return Math.round(penalty * 100) / 100
 }
@@ -153,4 +153,3 @@ export function generatePenaltyPreview(params: DifficultyParams, count: number =
   }
   return previews
 }
-

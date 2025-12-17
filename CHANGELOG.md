@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Initial release of TypeFlow
 - Widget-first design for ultra-compact windows
 - Custom word management with automatic hiragana/romaji generation
@@ -23,18 +24,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings screen with customizable options
 
 ### Changed
+
 - N/A (Initial release)
 
 ### Deprecated
+
 - N/A (Initial release)
 
 ### Removed
+
 - N/A (Initial release)
 
 ### Fixed
+
 - N/A (Initial release)
 
 ### Security
+
 - N/A (Initial release)
 
 ---
@@ -42,8 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2024-XX-XX
 
 ### Added
+
 - Initial public release
 
 [Unreleased]: https://github.com/otomatty/typeflow/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/otomatty/typeflow/releases/tag/v0.1.0
-

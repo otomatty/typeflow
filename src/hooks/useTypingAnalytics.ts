@@ -1,6 +1,25 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
-import { getAggregatedStats, saveAggregatedStats, resetAggregatedStats, AggregatedStatsRecord, getAllGameScores, saveGameScore, resetGameScores, GameScoreRecord } from '@/lib/db'
-import type { KeystrokeRecord, KeyStats, KeyTransitionStats, Word, GameStats, GameSessionState, ScoringContext, WordScore, PracticeMode } from '@/lib/types'
+import {
+  getAggregatedStats,
+  saveAggregatedStats,
+  resetAggregatedStats,
+  AggregatedStatsRecord,
+  getAllGameScores,
+  saveGameScore,
+  resetGameScores,
+  GameScoreRecord,
+} from '@/lib/db'
+import type {
+  KeystrokeRecord,
+  KeyStats,
+  KeyTransitionStats,
+  Word,
+  GameStats,
+  GameSessionState,
+  ScoringContext,
+  WordScore,
+  PracticeMode,
+} from '@/lib/types'
 import {
   MIN_SAMPLE_COUNT,
   calculateTimeDecayScore,
@@ -25,9 +44,11 @@ const RECENT_WORDS_COUNT = 5
 
 export function useTypingAnalytics() {
   const [isInitialized, setIsInitialized] = useState(false)
-  const [aggregatedStats, setAggregatedStats] = useState<AggregatedStatsRecord | undefined>(undefined)
+  const [aggregatedStats, setAggregatedStats] = useState<AggregatedStatsRecord | undefined>(
+    undefined
+  )
   const [gameScores, setGameScores] = useState<GameScoreRecord[]>([])
-  
+
   // ゲームセッション状態
   const sessionStateRef = useRef<GameSessionState>({
     wordsPlayed: 0,
@@ -72,7 +93,9 @@ export function useTypingAnalytics() {
 
     const current = await getAggregatedStats()
     const keyStats: Record<string, KeyStats> = current?.keyStats ? { ...current.keyStats } : {}
-    const transitionStats: Record<string, KeyTransitionStats> = current?.transitionStats ? { ...current.transitionStats } : {}
+    const transitionStats: Record<string, KeyTransitionStats> = current?.transitionStats
+      ? { ...current.transitionStats }
+      : {}
 
     for (const keystroke of keystrokes) {
       const { key, actualKey, isCorrect, latency, previousKey } = keystroke
@@ -113,7 +136,7 @@ export function useTypingAnalytics() {
         }
         transitionStats[transitionKey].totalCount++
         transitionStats[transitionKey].totalLatency += latency
-        
+
         if (!isCorrect) {
           transitionStats[transitionKey].errorCount++
         }
@@ -189,19 +212,19 @@ export function useTypingAnalytics() {
   // セッション状態を更新（単語完了時に呼び出す）
   const updateSessionState = useCallback((wordId: string, wasCorrect: boolean) => {
     const session = sessionStateRef.current
-    
+
     // 結果を追加
     session.recentResults.push(wasCorrect)
     if (session.recentResults.length > RECENT_RESULTS_COUNT) {
       session.recentResults.shift()
     }
-    
+
     // 単語IDを追加
     session.recentWordIds.push(wordId)
     if (session.recentWordIds.length > RECENT_WORDS_COUNT) {
       session.recentWordIds.shift()
     }
-    
+
     session.sessionWordIds.add(wordId)
     session.wordsPlayed++
   }, [])
@@ -209,45 +232,48 @@ export function useTypingAnalytics() {
   // 直近の正答率を計算
   const getRecentCorrectRate = useCallback((): number => {
     const results = sessionStateRef.current.recentResults
-    if (results.length === 0) return 0.75  // デフォルト
+    if (results.length === 0) return 0.75 // デフォルト
     return results.filter(r => r).length / results.length
   }, [])
 
   // スコアリングコンテキストを構築
-  const buildScoringContext = useCallback((
-    practiceMode: PracticeMode = 'balanced',
-    srsEnabled: boolean = true,
-    warmupEnabled: boolean = true
-  ): ScoringContext => {
-    const { weakTransitions, weakKeys } = calculateWeaknesses()
-    
-    const weakKeySet = new Set(weakKeys.map(k => k.key))
-    const weakTransitionSet = new Set(weakTransitions.map(t => `${t.fromKey}->${t.toKey}`))
-    
-    const weakKeyScores = new Map(
-      weakKeys.map(k => [k.key, k.errorRate + Math.min(k.avgLatency / 500, 1)])
-    )
-    const weakTransitionScores = new Map(
-      weakTransitions.map(t => [`${t.fromKey}->${t.toKey}`, t.errorRate + Math.min(t.avgLatency / 500, 1)])
-    )
-    
-    return {
-      weakKeys: weakKeySet,
-      weakTransitions: weakTransitionSet,
-      weakKeyScores,
-      weakTransitionScores,
-      recentCorrectRate: getRecentCorrectRate(),
-      practiceMode,
-      srsEnabled,
-      warmupEnabled,
-    }
-  }, [calculateWeaknesses, getRecentCorrectRate])
+  const buildScoringContext = useCallback(
+    (
+      practiceMode: PracticeMode = 'balanced',
+      srsEnabled: boolean = true,
+      warmupEnabled: boolean = true
+    ): ScoringContext => {
+      const { weakTransitions, weakKeys } = calculateWeaknesses()
+
+      const weakKeySet = new Set(weakKeys.map(k => k.key))
+      const weakTransitionSet = new Set(weakTransitions.map(t => `${t.fromKey}->${t.toKey}`))
+
+      const weakKeyScores = new Map(
+        weakKeys.map(k => [k.key, k.errorRate + Math.min(k.avgLatency / 500, 1)])
+      )
+      const weakTransitionScores = new Map(
+        weakTransitions.map(t => [
+          `${t.fromKey}->${t.toKey}`,
+          t.errorRate + Math.min(t.avgLatency / 500, 1),
+        ])
+      )
+
+      return {
+        weakKeys: weakKeySet,
+        weakTransitions: weakTransitionSet,
+        weakKeyScores,
+        weakTransitionScores,
+        recentCorrectRate: getRecentCorrectRate(),
+        practiceMode,
+        srsEnabled,
+        warmupEnabled,
+      }
+    },
+    [calculateWeaknesses, getRecentCorrectRate]
+  )
 
   // 単語の弱点スコアを計算（正規化: 0.0 〜 1.0）
-  const calculateWeaknessScore = useCallback((
-    word: Word,
-    context: ScoringContext
-  ): number => {
+  const calculateWeaknessScore = useCallback((word: Word, context: ScoringContext): number => {
     const romaji = word.romaji.toLowerCase()
     let rawScore = 0
     let maxPossibleScore = 0
@@ -259,7 +285,7 @@ export function useTypingAnalytics() {
       if (transitionScore !== undefined) {
         rawScore += transitionScore * 2
       }
-      maxPossibleScore += 2 * 2  // 最大スコア
+      maxPossibleScore += 2 * 2 // 最大スコア
     }
 
     // 弱点キーチェック
@@ -268,7 +294,7 @@ export function useTypingAnalytics() {
       if (keyScore !== undefined) {
         rawScore += keyScore
       }
-      maxPossibleScore += 2  // 最大スコア
+      maxPossibleScore += 2 // 最大スコア
     }
 
     // 既存の単語精度も考慮（精度が低いほどスコアが高い）
@@ -280,75 +306,74 @@ export function useTypingAnalytics() {
     return Math.min(rawScore / maxPossibleScore, 1.0)
   }, [])
 
-  // 単語の総合スコアを計算
-  const calculateWordScore = useCallback((
-    word: Word,
-    context: ScoringContext,
-    wordIndex: number,
-    totalWords: number
-  ): WordScore => {
-    const weights = getWeightsForPracticeMode(context.practiceMode)
-    const session = sessionStateRef.current
+  // 単語の総合スコアを計算（将来の使用のために保持）
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _calculateWordScore = useCallback(
+    (word: Word, context: ScoringContext, wordIndex: number, totalWords: number): WordScore => {
+      const weights = getWeightsForPracticeMode(context.practiceMode)
+      const session = sessionStateRef.current
 
-    // 各スコアを計算
-    const weaknessScore = calculateWeaknessScore(word, context)
-    
-    const timeDecayScore = context.srsEnabled
-      ? calculateTimeDecayScore(word.stats.lastPlayed, word.stats.masteryLevel)
-      : 0.5
-    
-    const totalAttempts = word.stats.correct + word.stats.miss
-    const noveltyScore = calculateNoveltyScore(totalAttempts)
-    
-    const wordDifficulty = calculateWordDifficulty(
-      word.romaji,
-      context.weakKeys,
-      context.weakTransitions
-    )
-    
-    const difficultyAdjustScore = calculateDifficultyAdjustment(
-      context.recentCorrectRate,
-      wordDifficulty
-    )
-    
-    const randomScore = Math.random()
+      // 各スコアを計算
+      const weaknessScore = calculateWeaknessScore(word, context)
 
-    // 重み付け合計を計算
-    const breakdown = {
-      weakness: weaknessScore,
-      timeDecay: timeDecayScore,
-      novelty: noveltyScore,
-      difficultyAdjust: difficultyAdjustScore,
-      random: randomScore,
-    }
+      const timeDecayScore = context.srsEnabled
+        ? calculateTimeDecayScore(word.stats.lastPlayed, word.stats.masteryLevel)
+        : 0.5
 
-    let totalScore = 
-      breakdown.weakness * weights.weakness +
-      breakdown.timeDecay * weights.timeDecay +
-      breakdown.novelty * weights.novelty +
-      breakdown.difficultyAdjust * weights.difficultyAdjust +
-      breakdown.random * weights.random
+      const totalAttempts = word.stats.correct + word.stats.miss
+      const noveltyScore = calculateNoveltyScore(totalAttempts)
 
-    // ウォームアップブースト適用
-    if (context.warmupEnabled) {
-      const warmupMultiplier = applyWarmupBoost(wordIndex, totalWords, wordDifficulty)
-      totalScore *= warmupMultiplier
-    }
+      const wordDifficulty = calculateWordDifficulty(
+        word.romaji,
+        context.weakKeys,
+        context.weakTransitions
+      )
 
-    // 重複ペナルティ適用
-    const duplicationMultiplier = applyDuplicationPenalty(
-      word.id,
-      session.recentWordIds,
-      session.sessionWordIds
-    )
-    totalScore *= duplicationMultiplier
+      const difficultyAdjustScore = calculateDifficultyAdjustment(
+        context.recentCorrectRate,
+        wordDifficulty
+      )
 
-    return {
-      wordId: word.id,
-      totalScore,
-      breakdown,
-    }
-  }, [calculateWeaknessScore])
+      const randomScore = Math.random()
+
+      // 重み付け合計を計算
+      const breakdown = {
+        weakness: weaknessScore,
+        timeDecay: timeDecayScore,
+        novelty: noveltyScore,
+        difficultyAdjust: difficultyAdjustScore,
+        random: randomScore,
+      }
+
+      let totalScore =
+        breakdown.weakness * weights.weakness +
+        breakdown.timeDecay * weights.timeDecay +
+        breakdown.novelty * weights.novelty +
+        breakdown.difficultyAdjust * weights.difficultyAdjust +
+        breakdown.random * weights.random
+
+      // ウォームアップブースト適用
+      if (context.warmupEnabled) {
+        const warmupMultiplier = applyWarmupBoost(wordIndex, totalWords, wordDifficulty)
+        totalScore *= warmupMultiplier
+      }
+
+      // 重複ペナルティ適用
+      const duplicationMultiplier = applyDuplicationPenalty(
+        word.id,
+        session.recentWordIds,
+        session.sessionWordIds
+      )
+      totalScore *= duplicationMultiplier
+
+      return {
+        wordId: word.id,
+        totalScore,
+        breakdown,
+      }
+    },
+    [calculateWeaknessScore]
+  )
 
   // 弱点強化モード用: 正確率が低い順にソート（シャッフルなし）
   // 呼び出し側で slice 後にシャッフルを行う
@@ -357,13 +382,13 @@ export function useTypingAnalytics() {
       // 練習回数が少ない単語は優先度を下げる
       const aAttempts = a.stats.correct + a.stats.miss
       const bAttempts = b.stats.correct + b.stats.miss
-      
+
       // 練習回数が0の単語は最後に
       if (aAttempts === 0 && bAttempts > 0) return 1
       if (bAttempts === 0 && aAttempts > 0) return -1
       // 両方とも0の場合は順序を維持（安定ソート）
       if (aAttempts === 0 && bAttempts === 0) return 0
-      
+
       // 正確率が低い順
       return a.stats.accuracy - b.stats.accuracy
     })
@@ -378,7 +403,7 @@ export function useTypingAnalytics() {
       if (b.stats.lastPlayed === 0 && a.stats.lastPlayed > 0) return -1
       // 両方とも未練習の場合は順序を維持
       if (a.stats.lastPlayed === 0 && b.stats.lastPlayed === 0) return 0
-      
+
       // 次回復習時刻が早い順（過ぎているものが最優先）
       const aOverdue = now - a.stats.nextReviewAt
       const bOverdue = now - b.stats.nextReviewAt
@@ -388,71 +413,73 @@ export function useTypingAnalytics() {
 
   // 練習モードに応じて単語を選択
   // 各モードでソート後、slice → シャッフルの順で処理
-  const selectWordsWithScoring = useCallback((
-    words: Word[],
-    context: ScoringContext
-  ): Word[] => {
-    if (words.length === 0) return []
+  const selectWordsWithScoring = useCallback(
+    (words: Word[], context: ScoringContext): Word[] => {
+      if (words.length === 0) return []
 
-    // ランダムモードの場合は単純にシャッフル
-    if (context.practiceMode === 'random') {
+      // ランダムモードの場合は単純にシャッフル
+      if (context.practiceMode === 'random') {
+        return shuffleArray(words)
+      }
+
+      // 弱点強化モード: 正確率が低い順にソート
+      // シャッフルは呼び出し側で slice 後に行う
+      if (context.practiceMode === 'weakness-focus') {
+        return sortWordsByAccuracy(words)
+      }
+
+      // 復習優先モード: 復習時期でソート
+      // シャッフルは呼び出し側で slice 後に行う
+      if (context.practiceMode === 'review') {
+        return sortWordsByReviewTime(words)
+      }
+
+      // デフォルト（ランダム）
       return shuffleArray(words)
-    }
-
-    // 弱点強化モード: 正確率が低い順にソート
-    // シャッフルは呼び出し側で slice 後に行う
-    if (context.practiceMode === 'weakness-focus') {
-      return sortWordsByAccuracy(words)
-    }
-
-    // 復習優先モード: 復習時期でソート
-    // シャッフルは呼び出し側で slice 後に行う
-    if (context.practiceMode === 'review') {
-      return sortWordsByReviewTime(words)
-    }
-
-    // デフォルト（ランダム）
-    return shuffleArray(words)
-  }, [sortWordsByAccuracy, sortWordsByReviewTime])
+    },
+    [sortWordsByAccuracy, sortWordsByReviewTime]
+  )
 
   // 弱点に基づいて単語をソート（後方互換性のため維持、内部で新しいロジックを使用）
-  const selectWeaknessBasedWords = useCallback((
-    words: Word[],
-    options?: { 
-      weaknessWeight?: number
-      randomWeight?: number 
-      practiceMode?: PracticeMode
-      srsEnabled?: boolean
-      warmupEnabled?: boolean
-    }
-  ): Word[] => {
-    const {
-      practiceMode = 'balanced',
-      srsEnabled = true,
-      warmupEnabled = true,
-    } = options || {}
+  const selectWeaknessBasedWords = useCallback(
+    (
+      words: Word[],
+      options?: {
+        weaknessWeight?: number
+        randomWeight?: number
+        practiceMode?: PracticeMode
+        srsEnabled?: boolean
+        warmupEnabled?: boolean
+      }
+    ): Word[] => {
+      const { practiceMode = 'balanced', srsEnabled = true, warmupEnabled = true } = options || {}
 
-    const context = buildScoringContext(practiceMode, srsEnabled, warmupEnabled)
-    return selectWordsWithScoring(words, context)
-  }, [buildScoringContext, selectWordsWithScoring])
+      const context = buildScoringContext(practiceMode, srsEnabled, warmupEnabled)
+      return selectWordsWithScoring(words, context)
+    },
+    [buildScoringContext, selectWordsWithScoring]
+  )
 
   // ゲームスコアを保存
-  const saveScore = useCallback(async (stats: GameStats) => {
-    try {
-      await saveGameScore({
-        kps: stats.kps,
-        totalKeystrokes: stats.totalKeystrokes,
-        accuracy: stats.accuracy,
-        correctWords: stats.correctWords,
-        perfectWords: stats.perfectWords,
-        totalWords: stats.totalWords,
-        totalTime: stats.totalTime,
-      })
-      await fetchGameScores()
-    } catch (error) {
-      console.error('Failed to save game score:', error)
-    }
-  }, [fetchGameScores])
+  const saveScore = useCallback(
+    async (stats: GameStats) => {
+      try {
+        await saveGameScore({
+          kps: stats.kps,
+          totalKeystrokes: stats.totalKeystrokes,
+          accuracy: stats.accuracy,
+          correctWords: stats.correctWords,
+          perfectWords: stats.perfectWords,
+          totalWords: stats.totalWords,
+          totalTime: stats.totalTime,
+        })
+        await fetchGameScores()
+      } catch (error) {
+        console.error('Failed to save game score:', error)
+      }
+    },
+    [fetchGameScores]
+  )
 
   // 統計をリセット
   const resetStats = useCallback(async () => {

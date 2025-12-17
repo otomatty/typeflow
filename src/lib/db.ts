@@ -1,4 +1,13 @@
-import type { KeyStats, KeyTransitionStats, AppSettings, WordCountPreset, ThemeType, PresetWord, GameStats, PracticeMode, DifficultyPreset } from './types'
+import type {
+  KeyStats,
+  KeyTransitionStats,
+  AppSettings,
+  WordCountPreset,
+  ThemeType,
+  PresetWord,
+  PracticeMode,
+  DifficultyPreset,
+} from './types'
 
 // APIベースURL（環境変数から取得、デフォルトはローカル）
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3456/api'
@@ -15,14 +24,14 @@ export interface WordRecord {
   accuracy: number
   createdAt: number
   // SRS (Spaced Repetition System) 用フィールド
-  masteryLevel: number        // 習熟度レベル (0-5)
-  nextReviewAt: number        // 次回復習推奨時刻 (timestamp)
-  consecutiveCorrect: number  // 連続正解数
+  masteryLevel: number // 習熟度レベル (0-5)
+  nextReviewAt: number // 次回復習推奨時刻 (timestamp)
+  consecutiveCorrect: number // 連続正解数
 }
 
 // Aggregated stats record for database
 export interface AggregatedStatsRecord {
-  id: number  // 常に1（シングルトン）
+  id: number // 常に1（シングルトン）
   keyStats: Record<string, KeyStats>
   transitionStats: Record<string, KeyTransitionStats>
   lastUpdated: number
@@ -30,7 +39,7 @@ export interface AggregatedStatsRecord {
 
 // Settings record for database
 export interface SettingsRecord {
-  id: number  // 常に1（シングルトン）
+  id: number // 常に1（シングルトン）
   wordCount: WordCountPreset
   theme: ThemeType
   practiceMode: PracticeMode
@@ -75,11 +84,11 @@ async function api<T>(path: string, options?: RequestInit): Promise<T> {
       ...options?.headers,
     },
   })
-  
+
   if (!response.ok) {
     throw new Error(`API error: ${response.status}`)
   }
-  
+
   return response.json()
 }
 
@@ -169,13 +178,13 @@ export async function initializeAggregatedStats(): Promise<AggregatedStatsRecord
   if (existing) {
     return existing
   }
-  
+
   const newStats: Omit<AggregatedStatsRecord, 'id'> = {
     keyStats: {},
     transitionStats: {},
     lastUpdated: Date.now(),
   }
-  
+
   await saveAggregatedStats(newStats)
   return { id: 1, ...newStats }
 }
@@ -194,17 +203,17 @@ export const DEFAULT_SETTINGS: AppSettings = {
   // 難易度設定（デフォルトは「ふつう」）
   difficultyPreset: 'normal',
   // 制限時間設定（難易度に応じて自動計算）
-  targetKpsMultiplier: 1.40,           // normalプリセット相当（40%速い目標）
-  comfortZoneRatio: 0.90,              // 0.90 = 10%厳しい制限時間
-  minTimeLimit: 1.5,                   // 最小1.5秒（あまりに短すぎないように）
-  maxTimeLimit: 15,                    // 最大15秒（長すぎないように）
-  minTimeLimitByDifficulty: 1.5,       // 難易度ごとの最低制限時間（normalプリセット相当）
+  targetKpsMultiplier: 1.4, // normalプリセット相当（40%速い目標）
+  comfortZoneRatio: 0.9, // 0.90 = 10%厳しい制限時間
+  minTimeLimit: 1.5, // 最小1.5秒（あまりに短すぎないように）
+  maxTimeLimit: 15, // 最大15秒（長すぎないように）
+  minTimeLimitByDifficulty: 1.5, // 難易度ごとの最低制限時間（normalプリセット相当）
   // ミスペナルティのデフォルト設定（normalプリセット相当）
-  missPenaltyEnabled: true,            // デフォルトで有効
-  basePenaltyPercent: 12,              // 基本12%減少
-  penaltyEscalationFactor: 2.2,        // ミスごとに2.2倍
-  maxPenaltyPercent: 55,               // 最大55%
-  minTimeAfterPenalty: 0.15,           // 最低0.15秒は残す
+  missPenaltyEnabled: true, // デフォルトで有効
+  basePenaltyPercent: 12, // 基本12%減少
+  penaltyEscalationFactor: 2.2, // ミスごとに2.2倍
+  maxPenaltyPercent: 55, // 最大55%
+  minTimeAfterPenalty: 0.15, // 最低0.15秒は残す
 }
 
 // Settings helper functions
@@ -225,7 +234,7 @@ export async function initializeSettings(): Promise<SettingsRecord> {
   if (existing) {
     return existing
   }
-  
+
   await saveSettings(DEFAULT_SETTINGS)
   return {
     id: 1,
@@ -239,7 +248,9 @@ export async function getAllGameScores(): Promise<GameScoreRecord[]> {
   return api<GameScoreRecord[]>('/scores')
 }
 
-export async function saveGameScore(score: Omit<GameScoreRecord, 'id' | 'playedAt'>): Promise<number> {
+export async function saveGameScore(
+  score: Omit<GameScoreRecord, 'id' | 'playedAt'>
+): Promise<number> {
   const result = await api<{ id: number }>('/scores', {
     method: 'POST',
     body: JSON.stringify(score),

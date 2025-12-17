@@ -1,7 +1,15 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { RotateCcw, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -44,9 +52,7 @@ export function ResetAllDialog({ open, onOpenChange, onReset }: ResetAllDialogPr
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isResetting}>
-            {t('reset_all.cancel')}
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={isResetting}>{t('reset_all.cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleReset}
             disabled={isResetting}
@@ -69,4 +75,3 @@ export function ResetAllDialog({ open, onOpenChange, onReset }: ResetAllDialogPr
     </AlertDialog>
   )
 }
-
