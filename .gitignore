@@ -39,3 +39,7 @@ coverage/
 # Scripts output (collected data)
 scripts/output/*.json
 !scripts/output/.gitkeep
+
+.serena/
+.cursor/
+.wrangler/
