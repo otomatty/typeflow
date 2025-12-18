@@ -7,7 +7,16 @@ import type {
   DifficultyPreset,
 } from '../lib/types'
 
-// D1データベースの生のレコード型（snake_case）
+/**
+ * Tursoデータベース（libSQL/SQLite）の生のレコード型（snake_case）
+ *
+ * デプロイ先:
+ * - バックエンド: Cloudflare Workers
+ * - フロントエンド: Cloudflare Pages
+ * - データベース: Turso（クラウド）またはローカルSQLiteファイル
+ *
+ * 詳細は docs/TURSO_SETUP.md を参照してください。
+ */
 export interface WordRow {
   id: number
   text: string
@@ -77,7 +86,9 @@ export interface BulkInsertInput {
   clearExisting?: boolean
 }
 
-// Aggregated Stats
+/**
+ * Aggregated Stats - Tursoデータベースの生のレコード型（snake_case）
+ */
 export interface AggregatedStatsRow {
   id: number
   key_stats: string
@@ -98,7 +109,9 @@ export interface UpdateAggregatedStatsInput {
   lastUpdated?: number
 }
 
-// Settings
+/**
+ * Settings - Tursoデータベースの生のレコード型（snake_case）
+ */
 export interface SettingsRow {
   id: number
   word_count: string
@@ -163,7 +176,9 @@ export interface UpdateSettingsInput {
   minTimeAfterPenalty?: number
 }
 
-// Game Scores
+/**
+ * Game Scores - Tursoデータベースの生のレコード型（snake_case）
+ */
 export interface GameScoreRow {
   id: number
   kps: number
@@ -212,11 +227,71 @@ export interface BulkInsertResult {
 }
 
 import type { Client } from '@libsql/client'
+import type { PresetWord } from '../lib/types'
 
-// 環境変数（Turso対応）
+/**
+ * Presets - Tursoデータベースの生のレコード型（snake_case）
+ */
+export interface PresetRow {
+  id: string
+  name: string
+  description: string
+  difficulty: string
+  word_count: number
+  created_at: number
+  updated_at: number
+}
+
+export interface PresetWordRow {
+  id: number
+  preset_id: string
+  text: string
+  reading: string
+  romaji: string
+  word_order: number
+  created_at: number
+}
+
+export interface PresetRecord {
+  id: string
+  name: string
+  description: string
+  difficulty: 'easy' | 'normal' | 'hard'
+  wordCount: number
+  words: PresetWord[]
+  createdAt: number
+  updatedAt: number
+}
+
+export interface CreatePresetInput {
+  id: string
+  name: string
+  description: string
+  difficulty: 'easy' | 'normal' | 'hard'
+  words: PresetWord[]
+}
+
+export interface UpdatePresetInput {
+  name?: string
+  description?: string
+  difficulty?: 'easy' | 'normal' | 'hard'
+  words?: PresetWord[]
+}
+
+/**
+ * サーバー環境変数の型定義（Turso対応）
+ *
+ * デプロイ先:
+ * - Cloudflare Workers（wrangler.tomlで設定）
+ * - ローカル開発時はBunサーバー（src/server/server.ts）も使用可能
+ */
 export interface Env {
-  DB?: Client // サーバー起動時に初期化される
+  /** Tursoクライアント（サーバー起動時に初期化される） */
+  DB?: Client
+  /** TursoデータベースURL（libsql://... または file:...） */
   TURSO_DATABASE_URL?: string
+  /** Turso認証トークン（リモートデータベースの場合のみ必要） */
   TURSO_AUTH_TOKEN?: string
+  /** CORS許可オリジン（カンマ区切り） */
   ALLOWED_ORIGINS?: string
 }

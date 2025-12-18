@@ -4,7 +4,6 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AddWordDialog } from '@/components/AddWordDialog'
-import { PresetDialog } from '@/components/PresetDialog'
 import { WordList } from '@/components/WordList'
 import { ScreenHeader } from '@/components/ScreenHeader'
 import { Container } from '@/components/Container'
@@ -38,6 +37,7 @@ interface WordManagementScreenProps {
     options: { clearExisting?: boolean; presetName?: string }
   ) => Promise<unknown>
   onClearAllWords: () => Promise<void>
+  onNavigate?: (view: 'presets') => void
 }
 
 export function WordManagementScreen({
@@ -45,21 +45,19 @@ export function WordManagementScreen({
   onAddWord,
   onEditWord,
   onDeleteWord,
-  onLoadPreset,
   onClearAllWords,
+  onNavigate,
 }: WordManagementScreenProps) {
   const { t } = useTranslation('words')
   const { t: tc } = useTranslation('common')
   const [isClearing, setIsClearing] = useState(false)
-  const [presetDialogOpen, setPresetDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  const handleLoadPreset = async (
-    presetWords: PresetWord[],
-    options: { clearExisting: boolean; presetName: string }
-  ) => {
-    await onLoadPreset(presetWords, options)
+  const handleNavigateToPresets = () => {
+    if (onNavigate) {
+      onNavigate('presets')
+    }
   }
 
   const handleClearAll = async () => {
@@ -99,7 +97,7 @@ export function WordManagementScreen({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setPresetDialogOpen(true)}>
+                  <DropdownMenuItem onClick={handleNavigateToPresets}>
                     <Package className="w-4 h-4 mr-2" />
                     {t('preset')}
                   </DropdownMenuItem>
@@ -119,14 +117,6 @@ export function WordManagementScreen({
               </DropdownMenu>
 
               <AddWordDialog onAddWord={onAddWord} />
-
-              {/* ダイアログ（制御モード） */}
-              <PresetDialog
-                onLoadPreset={handleLoadPreset}
-                open={presetDialogOpen}
-                onOpenChange={setPresetDialogOpen}
-                showTrigger={false}
-              />
               <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <AlertDialogContent>
                   <AlertDialogHeader>
@@ -156,7 +146,12 @@ export function WordManagementScreen({
         <Card className="p-8 text-center space-y-4">
           <p className="text-muted-foreground">{t('no_words')}</p>
           <div className="flex justify-center gap-2 flex-wrap">
-            <PresetDialog onLoadPreset={handleLoadPreset} />
+            {onNavigate && (
+              <Button variant="outline" onClick={handleNavigateToPresets} className="gap-2">
+                <Package className="h-4 w-4" />
+                {t('preset')}
+              </Button>
+            )}
             <AddWordDialog onAddWord={onAddWord} />
           </div>
         </Card>

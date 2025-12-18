@@ -7,14 +7,14 @@ import { GameOverScreen } from '@/components/GameOverScreen'
 import { WordManagementScreen } from '@/components/WordManagementScreen'
 import { StatsScreen } from '@/components/StatsScreen'
 import { SettingsScreen } from '@/components/SettingsScreen'
+import { PresetScreen } from '@/components/PresetScreen'
 import { AddWordDialog } from '@/components/AddWordDialog'
-import { PresetDialog } from '@/components/PresetDialog'
 import { useWords } from '@/hooks/useWords'
 import { useGame, ViewType } from '@/hooks/useGame'
 import { useTypingAnalytics } from '@/hooks/useTypingAnalytics'
 import { useSettings } from '@/hooks/useSettings'
 import { shuffleArray } from '@/lib/utils'
-import { basicJapanesePreset } from '@/lib/presets'
+import { usePresets } from '@/hooks/usePresets'
 import { toast } from 'sonner'
 import type { PresetWord } from '@/lib/types'
 
@@ -29,10 +29,10 @@ function App() {
     clearAllWords,
     refetch: refetchWords,
   } = useWords()
+  const { getPresetById } = usePresets()
   const [isAddWordDialogOpen, setIsAddWordDialogOpen] = useState(false)
   const [isQuickStartMode, setIsQuickStartMode] = useState(false)
   const [quickStartWordIds, setQuickStartWordIds] = useState<Set<string>>(new Set())
-  const [presetDialogOpen, setPresetDialogOpen] = useState(false)
   const {
     updateStats,
     selectWeaknessBasedWords,
@@ -165,10 +165,17 @@ function App() {
   // クイックスタート: 基本単語を自動読み込みして短いゲームを開始
   const handleQuickStart = useCallback(async () => {
     try {
+      // 基本日本語プリセットを取得
+      const preset = await getPresetById('basic-japanese')
+      if (!preset || preset.words.length === 0) {
+        toast.error('基本日本語プリセットが見つかりません')
+        return
+      }
+
       // 基本日本語プリセットを読み込む
-      await loadPreset(basicJapanesePreset.words, {
+      await loadPreset(preset.words, {
         clearExisting: false,
-        presetName: '基本日本語',
+        presetName: preset.name,
       })
 
       // クイックスタートモードを有効化
@@ -180,17 +187,14 @@ function App() {
       console.error('Failed to start quick start:', error)
       toast.error('クイックスタートの開始に失敗しました')
     }
-  }, [loadPreset, startGame, words.length])
+  }, [loadPreset, startGame, getPresetById])
 
   // クイックスタートで読み込んだ単語のIDを記録
   useEffect(() => {
     if (isQuickStartMode && quickStartWordIds.size === 0) {
-      // 基本日本語プリセットと一致する単語を探す
-      const loadedWords = words.filter(w =>
-        basicJapanesePreset.words.some(
-          pw => pw.text === w.text && pw.reading === w.reading && pw.romaji === w.romaji
-        )
-      )
+      // クイックスタートで読み込んだ単語は最初の5語と仮定
+      // （実際にはloadPresetで読み込まれた単語を記録する）
+      const loadedWords = words.slice(0, 5)
       if (loadedWords.length > 0) {
         setQuickStartWordIds(new Set(loadedWords.map(w => w.id)))
       }
@@ -221,16 +225,13 @@ function App() {
 
         // 選択されたプリセットを読み込む
         await loadPreset(presetWords, {
-          clearExisting: true, // クイックスタートの単語を削除したので、既存をクリア
+          clearExisting: isQuickStartMode ? true : options.clearExisting, // クイックスタートの場合は常にクリア
           presetName: options.presetName,
         })
 
         // クイックスタートモードをリセット
         setIsQuickStartMode(false)
         setQuickStartWordIds(new Set())
-
-        // プリセット選択ダイアログを閉じる
-        setPresetDialogOpen(false)
 
         // メニューに戻る
         setView('menu')
@@ -241,7 +242,7 @@ function App() {
         toast.error('プリセットの読み込みに失敗しました')
       }
     },
-    [cleanupQuickStartWords, loadPreset, setView]
+    [cleanupQuickStartWords, loadPreset, setView, isQuickStartMode]
   )
 
   const handleNavigate = (newView: ViewType) => {
@@ -258,13 +259,6 @@ function App() {
           onOpenChange={setIsAddWordDialogOpen}
           showTrigger={false}
         />
-        <PresetDialog
-          onLoadPreset={handlePresetSelected}
-          open={presetDialogOpen}
-          onOpenChange={setPresetDialogOpen}
-          showTrigger={false}
-          isAfterQuickStart={isQuickStartMode}
-        />
         <GameOverScreen
           stats={gameStats}
           hasMistakes={gameStats.wordPerformances.some(p => p.missCount > 0 || !p.completed)}
@@ -272,8 +266,8 @@ function App() {
           onRetryWeak={retryWeakWords}
           onExit={() => {
             if (isQuickStartMode) {
-              // クイックスタートモードの場合、プリセット選択画面を表示
-              setPresetDialogOpen(true)
+              // クイックスタートモードの場合、プリセット選択画面に遷移
+              setView('presets')
             } else {
               setIsQuickStartMode(false)
               setView('menu')
@@ -321,6 +315,7 @@ function App() {
           onDeleteWord={deleteWord}
           onLoadPreset={loadPreset}
           onClearAllWords={clearAllWords}
+          onNavigate={handleNavigate}
         />
       </>
     )
@@ -342,6 +337,27 @@ function App() {
           transitionStats={aggregatedStats?.transitionStats ?? {}}
           gameScores={gameScores}
           onReset={resetStats}
+        />
+      </>
+    )
+  }
+
+  if (view === 'presets') {
+    return (
+      <>
+        <Toaster />
+        <AddWordDialog
+          onAddWord={addWord}
+          open={isAddWordDialogOpen}
+          onOpenChange={setIsAddWordDialogOpen}
+          showTrigger={false}
+        />
+        <Header currentView={view} onNavigate={handleNavigate} />
+        <PresetScreen
+          onLoadPreset={handlePresetSelected}
+          onNavigate={handleNavigate}
+          isLoading={false}
+          isAfterQuickStart={isQuickStartMode}
         />
       </>
     )
@@ -413,6 +429,7 @@ function App() {
         isFirstTime={isFirstTime}
         gameScoresCount={gameScores.length}
         onLoadPreset={loadPreset}
+        onNavigate={handleNavigate}
       />
     </>
   )

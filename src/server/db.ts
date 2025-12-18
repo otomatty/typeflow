@@ -1,4 +1,5 @@
 import type { Client } from '@libsql/client'
+import type { InValue } from '@libsql/core/api'
 import type { WordCountPreset, ThemeType, PracticeMode, DifficultyPreset } from '../lib/types'
 import type {
   WordRow,
@@ -14,6 +15,11 @@ import type {
   GameScoreRecord,
   CreateGameScoreInput,
   BulkInsertWord,
+  PresetRow,
+  PresetWordRow,
+  PresetRecord,
+  CreatePresetInput,
+  UpdatePresetInput,
 } from './types'
 
 // snake_case → camelCase 変換
@@ -75,7 +81,7 @@ export async function createWord(db: Client, input: CreateWordInput): Promise<nu
 
 export async function updateWord(db: Client, id: number, input: UpdateWordInput): Promise<void> {
   const updates: string[] = []
-  const values: unknown[] = []
+  const values: InValue[] = []
 
   if (input.correct !== undefined) {
     updates.push('correct = ?')
@@ -235,7 +241,7 @@ export async function upsertSettings(db: Client, input: UpdateSettingsInput): Pr
 
   if (existing) {
     const updates: string[] = []
-    const values: unknown[] = []
+    const values: InValue[] = []
 
     if (input.wordCount !== undefined) {
       updates.push('word_count = ?')
@@ -387,4 +393,174 @@ export async function createGameScore(db: Client, input: CreateGameScoreInput): 
 
 export async function deleteAllGameScores(db: Client): Promise<void> {
   await db.execute('DELETE FROM game_scores')
+}
+
+// Presets操作
+export async function getAllPresets(db: Client): Promise<PresetRecord[]> {
+  const presetsResult = await db.execute('SELECT * FROM presets ORDER BY created_at DESC')
+  const presets: PresetRecord[] = []
+
+  for (const presetRow of presetsResult.rows) {
+    const row = presetRow as unknown as PresetRow
+    const wordsResult = await db.execute({
+      sql: 'SELECT * FROM preset_words WHERE preset_id = ? ORDER BY word_order ASC',
+      args: [row.id],
+    })
+
+    const words = wordsResult.rows.map(wordRow => {
+      const w = wordRow as unknown as PresetWordRow
+      return {
+        text: w.text,
+        reading: w.reading,
+        romaji: w.romaji,
+      }
+    })
+
+    presets.push({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      difficulty: row.difficulty as 'easy' | 'normal' | 'hard',
+      wordCount: row.word_count,
+      words,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    })
+  }
+
+  return presets
+}
+
+export async function getPresetById(db: Client, id: string): Promise<PresetRecord | null> {
+  const presetResult = await db.execute({
+    sql: 'SELECT * FROM presets WHERE id = ?',
+    args: [id],
+  })
+
+  const presetRow = presetResult.rows[0] as unknown as PresetRow | undefined
+  if (!presetRow) {
+    return null
+  }
+
+  const wordsResult = await db.execute({
+    sql: 'SELECT * FROM preset_words WHERE preset_id = ? ORDER BY word_order ASC',
+    args: [id],
+  })
+
+  const words = wordsResult.rows.map(wordRow => {
+    const w = wordRow as unknown as PresetWordRow
+    return {
+      text: w.text,
+      reading: w.reading,
+      romaji: w.romaji,
+    }
+  })
+
+  return {
+    id: presetRow.id,
+    name: presetRow.name,
+    description: presetRow.description,
+    difficulty: presetRow.difficulty as 'easy' | 'normal' | 'hard',
+    wordCount: presetRow.word_count,
+    words,
+    createdAt: presetRow.created_at,
+    updatedAt: presetRow.updated_at,
+  }
+}
+
+export async function createPreset(db: Client, input: CreatePresetInput): Promise<void> {
+  const now = Date.now()
+
+  // プリセットを作成
+  await db.execute({
+    sql: `INSERT INTO presets (id, name, description, difficulty, word_count, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    args: [input.id, input.name, input.description, input.difficulty, input.words.length, now, now],
+  })
+
+  // 単語を挿入
+  if (input.words.length > 0) {
+    const wordStatements = input.words.map((word, index) => ({
+      sql: `INSERT INTO preset_words (preset_id, text, reading, romaji, word_order, created_at)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+      args: [input.id, word.text, word.reading, word.romaji, index, now],
+    }))
+
+    await db.batch(wordStatements)
+  }
+}
+
+export async function updatePreset(
+  db: Client,
+  id: string,
+  input: UpdatePresetInput
+): Promise<void> {
+  const existing = await getPresetById(db, id)
+  if (!existing) {
+    throw new Error(`Preset with id ${id} not found`)
+  }
+
+  const updates: string[] = []
+  const values: InValue[] = []
+
+  if (input.name !== undefined) {
+    updates.push('name = ?')
+    values.push(input.name)
+  }
+  if (input.description !== undefined) {
+    updates.push('description = ?')
+    values.push(input.description)
+  }
+  if (input.difficulty !== undefined) {
+    updates.push('difficulty = ?')
+    values.push(input.difficulty)
+  }
+
+  // 単語が更新される場合
+  if (input.words !== undefined) {
+    // 既存の単語を削除
+    await db.execute({
+      sql: 'DELETE FROM preset_words WHERE preset_id = ?',
+      args: [id],
+    })
+
+    // 新しい単語を挿入
+    if (input.words.length > 0) {
+      const now = Date.now()
+      const wordStatements = input.words.map((word, index) => ({
+        sql: `INSERT INTO preset_words (preset_id, text, reading, romaji, word_order, created_at)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+        args: [id, word.text, word.reading, word.romaji, index, now],
+      }))
+
+      await db.batch(wordStatements)
+    }
+
+    updates.push('word_count = ?')
+    values.push(input.words.length)
+  }
+
+  if (updates.length > 0) {
+    updates.push('updated_at = ?')
+    values.push(Date.now())
+    values.push(id)
+
+    await db.execute({
+      sql: `UPDATE presets SET ${updates.join(', ')} WHERE id = ?`,
+      args: values,
+    })
+  }
+}
+
+export async function deletePreset(db: Client, id: string): Promise<void> {
+  // 外部キー制約により、preset_wordsも自動的に削除される
+  await db.execute({
+    sql: 'DELETE FROM presets WHERE id = ?',
+    args: [id],
+  })
+}
+
+export async function deleteAllPresets(db: Client): Promise<void> {
+  // 外部キー制約により、preset_wordsも自動的に削除される
+  await db.execute('DELETE FROM presets')
 }

@@ -64,7 +64,7 @@ async function loadMigrations(): Promise<Array<{ name: string; sql: string }>> {
   const files = await readdir(MIGRATIONS_DIR)
   const sqlFiles = files.filter(f => f.endsWith('.sql')).sort() // ファイル名でソート（0001, 0002...の順）
 
-  const migrations = []
+  const migrations: Array<{ name: string; sql: string }> = []
   for (const file of sqlFiles) {
     const path = join(MIGRATIONS_DIR, file)
     const sql = await readFile(path, 'utf-8')
@@ -104,10 +104,24 @@ async function applyMigration(db: ReturnType<typeof createClient>, name: string,
   await db.execute('BEGIN')
   try {
     // SQLを実行（複数のステートメントが含まれる場合がある）
-    const statements = sql
+    // コメント行を削除してから分割
+    const cleanedSql = sql
+      .split('\n')
+      .map(line => {
+        // 行内コメントを削除
+        const commentIndex = line.indexOf('--')
+        if (commentIndex >= 0) {
+          return line.substring(0, commentIndex).trim()
+        }
+        return line.trim()
+      })
+      .filter(line => line.length > 0)
+      .join('\n')
+
+    const statements = cleanedSql
       .split(';')
       .map(s => s.trim())
-      .filter(s => s.length > 0 && !s.startsWith('--'))
+      .filter(s => s.length > 0)
 
     for (const statement of statements) {
       if (statement) {

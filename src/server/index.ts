@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { createClient } from '@libsql/client'
 import type { Env } from './types'
 import {
   getAllWords,
@@ -16,6 +17,12 @@ import {
   getAllGameScores,
   createGameScore,
   deleteAllGameScores,
+  getAllPresets,
+  getPresetById,
+  createPreset,
+  updatePreset,
+  deletePreset,
+  deleteAllPresets,
 } from './db'
 import type {
   CreateWordInput,
@@ -24,13 +31,31 @@ import type {
   UpdateAggregatedStatsInput,
   UpdateSettingsInput,
   CreateGameScoreInput,
+  CreatePresetInput,
+  UpdatePresetInput,
 } from './types'
+
+// Honoのコンテキスト変数の型定義
+type HonoVariables = {
+  auth: {
+    user: {
+      id: string
+      email?: string
+      name?: string
+    } | null
+    isAuthenticated: boolean
+  }
+}
 
 type HonoEnv = {
   Bindings: Env
+  Variables: HonoVariables
 }
 
 const app = new Hono<HonoEnv>()
+
+// Honoインスタンスを名前付きエクスポート（Bunサーバー用）
+export { app }
 
 // CORSミドルウェア
 app.use('/*', async (c, next) => {
@@ -293,6 +318,111 @@ app.put('/api/settings', async c => {
   }
 })
 
+// Presets API
+app.get('/api/presets', async c => {
+  try {
+    if (!c.env.DB) {
+      console.error('Database not available')
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+    const presets = await getAllPresets(c.env.DB)
+    return c.json(presets)
+  } catch (error) {
+    console.error('Failed to get presets:', error)
+    return c.json({ error: error instanceof Error ? error.message : 'Failed to get presets' }, 500)
+  }
+})
+
+app.get('/api/presets/:id', async c => {
+  try {
+    if (!c.env.DB) {
+      console.error('Database not available')
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+    const id = c.req.param('id')
+    const preset = await getPresetById(c.env.DB, id)
+    if (!preset) {
+      return c.json({ error: 'Preset not found' }, 404)
+    }
+    return c.json(preset)
+  } catch (error) {
+    console.error('Failed to get preset:', error)
+    return c.json({ error: error instanceof Error ? error.message : 'Failed to get preset' }, 500)
+  }
+})
+
+app.post('/api/presets', async c => {
+  try {
+    if (!c.env.DB) {
+      console.error('Database not available')
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+    const body = await c.req.json<CreatePresetInput>()
+    await createPreset(c.env.DB, body)
+    return c.json({ success: true })
+  } catch (error) {
+    console.error('Failed to create preset:', error)
+    return c.json(
+      { error: error instanceof Error ? error.message : 'Failed to create preset' },
+      500
+    )
+  }
+})
+
+app.put('/api/presets/:id', async c => {
+  try {
+    if (!c.env.DB) {
+      console.error('Database not available')
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+    const id = c.req.param('id')
+    const body = await c.req.json<UpdatePresetInput>()
+    await updatePreset(c.env.DB, id, body)
+    return c.json({ success: true })
+  } catch (error) {
+    console.error('Failed to update preset:', error)
+    return c.json(
+      { error: error instanceof Error ? error.message : 'Failed to update preset' },
+      500
+    )
+  }
+})
+
+app.delete('/api/presets/:id', async c => {
+  try {
+    if (!c.env.DB) {
+      console.error('Database not available')
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+    const id = c.req.param('id')
+    await deletePreset(c.env.DB, id)
+    return c.json({ success: true })
+  } catch (error) {
+    console.error('Failed to delete preset:', error)
+    return c.json(
+      { error: error instanceof Error ? error.message : 'Failed to delete preset' },
+      500
+    )
+  }
+})
+
+app.delete('/api/presets', async c => {
+  try {
+    if (!c.env.DB) {
+      console.error('Database not available')
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+    await deleteAllPresets(c.env.DB)
+    return c.json({ success: true })
+  } catch (error) {
+    console.error('Failed to delete all presets:', error)
+    return c.json(
+      { error: error instanceof Error ? error.message : 'Failed to delete all presets' },
+      500
+    )
+  }
+})
+
 // 404 Handler
 app.notFound(c => {
   return c.json({ error: 'Not found' }, 404)
@@ -304,4 +434,37 @@ app.onError((err, c) => {
   return c.json({ error: 'Internal server error' }, 500)
 })
 
-export default app
+// Cloudflare Workers用のエントリーポイント
+// 環境変数からTursoクライアントを初期化してHonoアプリに注入
+export default {
+  async fetch(request: Request, env: Env, ctx: unknown): Promise<Response> {
+    // Tursoクライアントを初期化（まだ初期化されていない場合）
+    if (!env.DB) {
+      const url = env.TURSO_DATABASE_URL
+      const authToken = env.TURSO_AUTH_TOKEN
+
+      if (!url) {
+        return new Response(JSON.stringify({ error: 'TURSO_DATABASE_URL is not configured' }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
+
+      // リモートデータベースの場合、認証トークンが必要
+      if (!url.startsWith('file:') && !authToken) {
+        return new Response(
+          JSON.stringify({ error: 'TURSO_AUTH_TOKEN is required for remote database' }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+
+      env.DB = createClient({
+        url,
+        authToken: url.startsWith('file:') ? undefined : authToken,
+      })
+    }
+
+    // Honoアプリに環境変数を注入してリクエストを処理
+    return app.fetch(request, env, ctx as Parameters<typeof app.fetch>[2])
+  },
+}

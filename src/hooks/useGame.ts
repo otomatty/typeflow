@@ -14,7 +14,7 @@ import { calculateMissPenalty } from '@/lib/difficulty-presets'
 import { GameScoreRecord } from '@/lib/db'
 import { toast } from 'sonner'
 
-export type ViewType = 'menu' | 'words' | 'stats' | 'settings' | 'game' | 'gameover'
+export type ViewType = 'menu' | 'words' | 'stats' | 'settings' | 'presets' | 'game' | 'gameover'
 
 interface UseGameProps {
   words: Word[]

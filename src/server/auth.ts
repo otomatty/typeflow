@@ -1,6 +1,11 @@
 import type { Context } from 'hono'
 import type { Env } from './types'
 
+// Honoのコンテキスト変数の型定義（index.tsと一致させる）
+type HonoVariables = {
+  auth: AuthContext
+}
+
 /**
  * 認証ミドルウェア（将来の拡張用）
  *
@@ -28,7 +33,7 @@ export interface AuthContext {
  * リクエストから認証情報を取得し、コンテキストに追加
  */
 export async function authMiddleware(
-  c: Context<{ Bindings: Env }>,
+  c: Context<{ Bindings: Env; Variables: HonoVariables }>,
   next: () => Promise<void>
 ): Promise<void> {
   // TODO: 認証ロジックを実装
@@ -38,7 +43,7 @@ export async function authMiddleware(
   c.set('auth', {
     user: null,
     isAuthenticated: false,
-  } as AuthContext)
+  })
 
   await next()
 }
@@ -48,10 +53,10 @@ export async function authMiddleware(
  * 認証されていないリクエストを拒否
  */
 export async function requireAuth(
-  c: Context<{ Bindings: Env }>,
+  c: Context<{ Bindings: Env; Variables: HonoVariables }>,
   next: () => Promise<void>
-): Promise<void> {
-  const auth = c.get('auth') as AuthContext | undefined
+): Promise<Response | void> {
+  const auth = c.get('auth')
 
   if (!auth || !auth.isAuthenticated) {
     return c.json({ error: 'Unauthorized' }, 401)
@@ -63,15 +68,17 @@ export async function requireAuth(
 /**
  * ユーザーIDを取得
  */
-export function getUserId(c: Context<{ Bindings: Env }>): string | null {
-  const auth = c.get('auth') as AuthContext | undefined
+export function getUserId(c: Context<{ Bindings: Env; Variables: HonoVariables }>): string | null {
+  const auth = c.get('auth')
   return auth?.user?.id ?? null
 }
 
 /**
  * 認証ユーザーを取得
  */
-export function getAuthUser(c: Context<{ Bindings: Env }>): AuthUser | null {
-  const auth = c.get('auth') as AuthContext | undefined
+export function getAuthUser(
+  c: Context<{ Bindings: Env; Variables: HonoVariables }>
+): AuthUser | null {
+  const auth = c.get('auth')
   return auth?.user ?? null
 }

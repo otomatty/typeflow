@@ -262,6 +262,27 @@ export async function resetGameScores(): Promise<void> {
   await api('/scores', { method: 'DELETE' })
 }
 
+// Presets helper functions
+export interface PresetRecord {
+  id: string
+  name: string
+  description: string
+  difficulty: 'easy' | 'normal' | 'hard'
+  wordCount: number
+  words: PresetWord[]
+  createdAt: number
+  updatedAt: number
+}
+
+export async function getAllPresets(): Promise<PresetRecord[]> {
+  return api<PresetRecord[]>('/presets')
+}
+
+export async function getPresetById(id: string): Promise<PresetRecord | undefined> {
+  const result = await api<PresetRecord | null>(`/presets/${id}`)
+  return result ?? undefined
+}
+
 // 互換性のためのダミー db オブジェクト（Dexie から移行時に必要な場合）
 export const db = {
   // Dexie互換のダミー - 必要に応じて拡張

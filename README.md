@@ -141,6 +141,88 @@ For detailed setup instructions:
 - Local development: [docs/LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md)
 - Turso cloud: [docs/TURSO_SETUP.md](docs/TURSO_SETUP.md)
 
+## 🚀 Deployment
+
+This project is designed to be deployed on **Cloudflare**:
+
+- **Frontend**: Cloudflare Pages
+- **Backend**: Cloudflare Workers
+- **Database**: Turso (libSQL/SQLite)
+
+### Deploy to Cloudflare
+
+#### Prerequisites
+
+1. **Cloudflare account**: Sign up at [Cloudflare](https://dash.cloudflare.com/sign-up)
+2. **Wrangler CLI**: Install globally
+   ```bash
+   npm install -g wrangler
+   # or
+   bun add -g wrangler
+   ```
+3. **Login to Cloudflare**:
+   ```bash
+   wrangler login
+   ```
+
+#### Deploy Backend (Cloudflare Workers)
+
+1. **Set up environment variables in `wrangler.toml`**:
+
+   ```toml
+   [env.production.vars]
+   TURSO_DATABASE_URL = "libsql://your-database.turso.io"
+   TURSO_AUTH_TOKEN = "your-auth-token"
+   ALLOWED_ORIGINS = "https://your-app.pages.dev"
+   ```
+
+2. **Deploy**:
+
+   ```bash
+   wrangler deploy
+   ```
+
+3. **Copy the Worker URL** (e.g., `https://typeflow-api.your-subdomain.workers.dev`)
+
+#### Deploy Frontend (Cloudflare Pages)
+
+1. **Connect your GitHub repository** to Cloudflare Pages:
+   - Go to [Cloudflare Dashboard](https://dash.cloudflare.com) → Pages
+   - Click "Create a project" → "Connect to Git"
+   - Select your repository
+
+2. **Configure build settings**:
+   - **Build command**: `bun run build`
+   - **Build output directory**: `dist`
+   - **Root directory**: `/` (project root)
+
+3. **Set environment variables**:
+   - `VITE_API_BASE_URL`: Your Cloudflare Workers URL (e.g., `https://typeflow-api.your-subdomain.workers.dev/api`)
+
+4. **Deploy**: Cloudflare Pages will automatically deploy on every push to your main branch
+
+#### Alternative: Manual Deployment
+
+You can also deploy manually using Wrangler:
+
+```bash
+# Build the frontend
+bun run build
+
+# Deploy to Cloudflare Pages
+wrangler pages deploy dist --project-name=typeflow
+```
+
+### Development vs Production
+
+- **Development**: Use local SQLite file (`./local.db`) - no setup required
+- **Production**: Use Turso cloud database for multi-device sync
+
+For more details, see:
+
+- [docs/TURSO_SETUP.md](docs/TURSO_SETUP.md) - Turso database setup
+- [docs/LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md) - Local development guide
+
 ### Build for Production
 
 ```bash
@@ -176,8 +258,9 @@ The built files will be in the `dist` directory.
 - **Animations**: Framer Motion
 - **Japanese Processing**: wanakana
 - **Storage**: @github/spark (useKV) for IndexedDB
-- **Backend**: Bun + Hono
+- **Backend**: Cloudflare Workers + Hono
 - **Database**: Turso (libSQL/SQLite)
+- **Deployment**: Cloudflare Pages (Frontend) + Cloudflare Workers (Backend)
 - **i18n**: i18next
 
 ## 📁 Project Structure

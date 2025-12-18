@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Package, Download, Loader2 } from 'lucide-react'
-import { allPresets, getPresetById } from '@/lib/presets'
+import { usePresets } from '@/hooks/usePresets'
 import type { PresetWord } from '@/lib/types'
 
 interface RecommendedPresetsProps {
@@ -20,18 +20,12 @@ export function RecommendedPresets({ onLoadPreset, isLoading }: RecommendedPrese
   const { t: tMenu } = useTranslation('menu')
   const { t: tWords } = useTranslation('words')
   const [loadingPresetId, setLoadingPresetId] = useState<string | null>(null)
+  const { presets, getPresetById } = usePresets()
 
   // おすすめプリセット（基本日本語、プログラミング用語、寿司打）
-  const recommendedPresets = (() => {
-    try {
-      return allPresets.filter(
-        p => p.id === 'basic-japanese' || p.id === 'programming' || p.id === 'sushida-10000'
-      )
-    } catch (error) {
-      console.error('Failed to load recommended presets:', error)
-      return []
-    }
-  })()
+  const recommendedPresets = presets.filter(
+    p => p.id === 'basic-japanese' || p.id === 'programming' || p.id === 'sushida-10000'
+  )
 
   const difficultyColors: Record<string, string> = {
     easy: 'bg-green-500/20 text-green-400 border-green-500/30',
@@ -54,7 +48,7 @@ export function RecommendedPresets({ onLoadPreset, isLoading }: RecommendedPrese
 
   const handleLoadPreset = async (presetId: string) => {
     try {
-      const preset = getPresetById(presetId)
+      const preset = await getPresetById(presetId)
       if (!preset) {
         console.error(`Preset not found: ${presetId}`)
         return

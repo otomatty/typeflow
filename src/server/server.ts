@@ -1,7 +1,7 @@
 /// <reference types="bun-types" />
 import { Hono } from 'hono'
 import { createClient } from '@libsql/client'
-import app from './index'
+import { app } from './index'
 import type { Env } from './types'
 
 // Tursoクライアントの初期化

@@ -7,6 +7,7 @@
 ### 1. Vitestの設定
 
 #### package.jsonへの追加
+
 ```json
 {
   "scripts": {
@@ -28,6 +29,7 @@
 ```
 
 #### vitest.config.ts
+
 ```typescript
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react-swc'
@@ -42,13 +44,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
-      exclude: [
-        'node_modules/',
-        'src/__tests__/',
-        '**/*.d.ts',
-        '**/*.config.*',
-        '**/dist/**',
-      ],
+      exclude: ['node_modules/', 'src/__tests__/', '**/*.d.ts', '**/*.config.*', '**/dist/**'],
       thresholds: {
         lines: 80,
         functions: 80,
@@ -65,7 +61,8 @@ export default defineConfig({
 })
 ```
 
-#### src/__tests__/setup.ts
+#### src/**tests**/setup.ts
+
 ```typescript
 import '@testing-library/jest-dom'
 import { expect, afterEach } from 'vitest'
@@ -80,6 +77,7 @@ afterEach(() => {
 ### 2. GitHub Actions CIワークフロー
 
 #### .github/workflows/ci.yml
+
 ```yaml
 name: CI
 
@@ -158,6 +156,7 @@ jobs:
 ### 3. Prettierの設定
 
 #### .prettierrc.json
+
 ```json
 {
   "semi": false,
@@ -171,6 +170,7 @@ jobs:
 ```
 
 #### .prettierignore
+
 ```
 node_modules
 dist
@@ -182,6 +182,7 @@ coverage
 ```
 
 #### package.jsonへの追加
+
 ```json
 {
   "scripts": {
@@ -198,6 +199,7 @@ coverage
 ### 4. ESLint設定ファイル
 
 #### eslint.config.mjs
+
 ```javascript
 import js from '@eslint/js'
 import globals from 'globals'
@@ -221,14 +223,8 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        { argsIgnorePattern: '^_' },
-      ],
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   }
 )
@@ -237,6 +233,7 @@ export default tseslint.config(
 ### 5. Husky + lint-stagedの設定
 
 #### package.jsonへの追加
+
 ```json
 {
   "scripts": {
@@ -250,19 +247,16 @@ export default tseslint.config(
 ```
 
 #### .lintstagedrc.json
+
 ```json
 {
-  "*.{ts,tsx}": [
-    "eslint --fix",
-    "prettier --write"
-  ],
-  "*.{json,css,md}": [
-    "prettier --write"
-  ]
+  "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
+  "*.{json,css,md}": ["prettier --write"]
 }
 ```
 
 #### .husky/pre-commit
+
 ```bash
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
@@ -271,6 +265,7 @@ bun run lint-staged
 ```
 
 #### .husky/commit-msg
+
 ```bash
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
@@ -283,7 +278,8 @@ bun run lint-staged
 
 ### ユーティリティ関数のテスト例
 
-#### src/lib/__tests__/romaji-utils.test.ts
+#### src/lib/**tests**/romaji-utils.test.ts
+
 ```typescript
 import { describe, it, expect } from 'vitest'
 import { toRomaji, fromRomaji } from '../romaji-utils'
@@ -314,7 +310,8 @@ describe('romaji-utils', () => {
 
 ### カスタムフックのテスト例
 
-#### src/hooks/__tests__/useSettings.test.tsx
+#### src/hooks/**tests**/useSettings.test.tsx
+
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
@@ -333,7 +330,7 @@ describe('useSettings', () => {
 
   it('should update settings', () => {
     const { result } = renderHook(() => useSettings())
-    
+
     act(() => {
       result.current.updateSettings({ theme: 'dark' })
     })
@@ -346,6 +343,7 @@ describe('useSettings', () => {
 ## Phase 3: デプロイワークフロー例
 
 ### .github/workflows/deploy.yml
+
 ```yaml
 name: Deploy
 
@@ -379,6 +377,7 @@ jobs:
 ```
 
 ### .github/workflows/security.yml
+
 ```yaml
 name: Security
 
@@ -411,6 +410,7 @@ jobs:
 ## 実装のチェックリスト
 
 ### Phase 1
+
 - [ ] Vitestのインストールと設定
 - [ ] テストセットアップファイルの作成
 - [ ] GitHub Actions CIワークフローの作成
@@ -420,12 +420,14 @@ jobs:
 - [ ] package.jsonスクリプトの更新
 
 ### Phase 2
+
 - [ ] ユーティリティ関数のテスト作成
 - [ ] カスタムフックのテスト作成
 - [ ] コードカバレッジの設定
 - [ ] Codecovの統合
 
 ### Phase 3
+
 - [ ] デプロイワークフローの作成
 - [ ] セキュリティチェックの追加
 - [ ] マイグレーション検証の追加
@@ -450,4 +452,3 @@ jobs:
 4. **Huskyが動作しない**
    - `bun run prepare`を実行
    - `.husky`ディレクトリの権限を確認
-
