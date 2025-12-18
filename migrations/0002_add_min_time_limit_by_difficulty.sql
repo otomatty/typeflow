@@ -1,5 +1,9 @@
 -- TypeFlow マイグレーション: min_time_limit_by_difficulty カラムを追加
 -- 難易度ごとの最低制限時間を設定できるようにする
+-- 注意: このカラムは0001_initial.sqlに既に含まれているため、このマイグレーションは空です
+-- 既存のデータベースに後から追加する場合のみ使用してください
 
-ALTER TABLE settings ADD COLUMN min_time_limit_by_difficulty REAL NOT NULL DEFAULT 1.5;
+-- SQLiteではIF NOT EXISTSがサポートされていないため、
+-- カラムが存在するかどうかを確認してから追加する必要があります
+-- このマイグレーションは既に0001_initial.sqlに含まれているため、何もしません
 

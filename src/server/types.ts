@@ -211,10 +211,12 @@ export interface BulkInsertResult {
   totalWords: number
 }
 
-import type { D1Database } from '@cloudflare/workers-types'
+import type { Client } from '@libsql/client'
 
-// Cloudflare Workers環境変数
+// 環境変数（Turso対応）
 export interface Env {
-  DB: D1Database
+  DB?: Client // サーバー起動時に初期化される
+  TURSO_DATABASE_URL?: string
+  TURSO_AUTH_TOKEN?: string
   ALLOWED_ORIGINS?: string
 }

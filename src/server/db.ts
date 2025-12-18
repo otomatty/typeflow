@@ -1,4 +1,5 @@
-import type { D1Database } from '@cloudflare/workers-types'
+import type { Client } from '@libsql/client'
+import type { WordCountPreset, ThemeType, PracticeMode, DifficultyPreset } from '../lib/types'
 import type {
   WordRow,
   WordRecord,
@@ -34,23 +35,25 @@ export function wordRowToRecord(row: WordRow): WordRecord {
 }
 
 // Words操作
-export async function getAllWords(db: D1Database): Promise<WordRecord[]> {
-  const result = await db.prepare('SELECT * FROM words ORDER BY created_at DESC').all<WordRow>()
-  return result.results.map(wordRowToRecord)
+export async function getAllWords(db: Client): Promise<WordRecord[]> {
+  const result = await db.execute('SELECT * FROM words ORDER BY created_at DESC')
+  return result.rows.map(row => wordRowToRecord(row as unknown as WordRow))
 }
 
-export async function getWordById(db: D1Database, id: number): Promise<WordRecord | null> {
-  const result = await db.prepare('SELECT * FROM words WHERE id = ?').bind(id).first<WordRow>()
-  return result ? wordRowToRecord(result) : null
+export async function getWordById(db: Client, id: number): Promise<WordRecord | null> {
+  const result = await db.execute({
+    sql: 'SELECT * FROM words WHERE id = ?',
+    args: [id],
+  })
+  const row = result.rows[0] as unknown as WordRow | undefined
+  return row ? wordRowToRecord(row) : null
 }
 
-export async function createWord(db: D1Database, input: CreateWordInput): Promise<number> {
-  const result = await db
-    .prepare(
-      `INSERT INTO words (text, reading, romaji, correct, miss, last_played, accuracy, created_at, mastery_level, next_review_at, consecutive_correct)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    )
-    .bind(
+export async function createWord(db: Client, input: CreateWordInput): Promise<number> {
+  await db.execute({
+    sql: `INSERT INTO words (text, reading, romaji, correct, miss, last_played, accuracy, created_at, mastery_level, next_review_at, consecutive_correct)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
       input.text,
       input.reading,
       input.romaji,
@@ -61,18 +64,16 @@ export async function createWord(db: D1Database, input: CreateWordInput): Promis
       input.createdAt ?? Date.now(),
       input.masteryLevel ?? 0,
       input.nextReviewAt ?? 0,
-      input.consecutiveCorrect ?? 0
-    )
-    .run()
+      input.consecutiveCorrect ?? 0,
+    ],
+  })
 
-  return result.meta.last_row_id ?? 0
+  // libSQLではlastInsertRowidを取得するために別のクエリが必要
+  const lastIdResult = await db.execute('SELECT last_insert_rowid() as id')
+  return (lastIdResult.rows[0]?.id as number) ?? 0
 }
 
-export async function updateWord(
-  db: D1Database,
-  id: number,
-  input: UpdateWordInput
-): Promise<void> {
+export async function updateWord(db: Client, id: number, input: UpdateWordInput): Promise<void> {
   const updates: string[] = []
   const values: unknown[] = []
 
@@ -107,23 +108,26 @@ export async function updateWord(
 
   if (updates.length > 0) {
     values.push(id)
-    await db
-      .prepare(`UPDATE words SET ${updates.join(', ')} WHERE id = ?`)
-      .bind(...values)
-      .run()
+    await db.execute({
+      sql: `UPDATE words SET ${updates.join(', ')} WHERE id = ?`,
+      args: values,
+    })
   }
 }
 
-export async function deleteWord(db: D1Database, id: number): Promise<void> {
-  await db.prepare('DELETE FROM words WHERE id = ?').bind(id).run()
+export async function deleteWord(db: Client, id: number): Promise<void> {
+  await db.execute({
+    sql: 'DELETE FROM words WHERE id = ?',
+    args: [id],
+  })
 }
 
-export async function deleteAllWords(db: D1Database): Promise<void> {
-  await db.prepare('DELETE FROM words').run()
+export async function deleteAllWords(db: Client): Promise<void> {
+  await db.execute('DELETE FROM words')
 }
 
 export async function bulkInsertWords(
-  db: D1Database,
+  db: Client,
   words: BulkInsertWord[],
   clearExisting: boolean = false
 ): Promise<number> {
@@ -131,20 +135,20 @@ export async function bulkInsertWords(
     await deleteAllWords(db)
   }
 
-  const stmt = db.prepare(
-    `INSERT INTO words (text, reading, romaji, correct, miss, last_played, accuracy, created_at, mastery_level, next_review_at, consecutive_correct)
-     VALUES (?, ?, ?, 0, 0, 0, 100, ?, 0, 0, 0)`
-  )
-
   const now = Date.now()
   let insertedCount = 0
 
   // バッチ処理で挿入
-  const batch = words.map(word => stmt.bind(word.text, word.reading, word.romaji, now))
-  const results = await db.batch(batch)
+  const statements = words.map(word => ({
+    sql: `INSERT INTO words (text, reading, romaji, correct, miss, last_played, accuracy, created_at, mastery_level, next_review_at, consecutive_correct)
+     VALUES (?, ?, ?, 0, 0, 0, 100, ?, 0, 0, 0)`,
+    args: [word.text, word.reading, word.romaji, now],
+  }))
+
+  const results = await db.batch(statements)
 
   for (const result of results) {
-    if (result.success) {
+    if (result.rowsAffected > 0) {
       insertedCount++
     }
   }
@@ -153,76 +157,80 @@ export async function bulkInsertWords(
 }
 
 // Aggregated Stats操作
-export async function getAggregatedStats(db: D1Database): Promise<AggregatedStatsRecord | null> {
-  const result = await db
-    .prepare('SELECT * FROM aggregated_stats WHERE id = 1')
-    .first<AggregatedStatsRow>()
+export async function getAggregatedStats(db: Client): Promise<AggregatedStatsRecord | null> {
+  const result = await db.execute({
+    sql: 'SELECT * FROM aggregated_stats WHERE id = 1',
+  })
 
-  if (!result) {
+  const row = result.rows[0] as unknown as AggregatedStatsRow | undefined
+  if (!row) {
     return null
   }
 
   return {
-    id: result.id,
-    keyStats: JSON.parse(result.key_stats),
-    transitionStats: JSON.parse(result.transition_stats),
-    lastUpdated: result.last_updated,
+    id: row.id,
+    keyStats: JSON.parse(row.key_stats),
+    transitionStats: JSON.parse(row.transition_stats),
+    lastUpdated: row.last_updated,
   }
 }
 
 export async function upsertAggregatedStats(
-  db: D1Database,
+  db: Client,
   input: AggregatedStatsRecord
 ): Promise<void> {
-  await db
-    .prepare(
-      `INSERT OR REPLACE INTO aggregated_stats (id, key_stats, transition_stats, last_updated)
-       VALUES (1, ?, ?, ?)`
-    )
-    .bind(
+  await db.execute({
+    sql: `INSERT OR REPLACE INTO aggregated_stats (id, key_stats, transition_stats, last_updated)
+       VALUES (1, ?, ?, ?)`,
+    args: [
       JSON.stringify(input.keyStats ?? {}),
       JSON.stringify(input.transitionStats ?? {}),
-      input.lastUpdated ?? Date.now()
-    )
-    .run()
+      input.lastUpdated ?? Date.now(),
+    ],
+  })
 }
 
-export async function deleteAggregatedStats(db: D1Database): Promise<void> {
-  await db.prepare('DELETE FROM aggregated_stats WHERE id = 1').run()
+export async function deleteAggregatedStats(db: Client): Promise<void> {
+  await db.execute({
+    sql: 'DELETE FROM aggregated_stats WHERE id = 1',
+  })
 }
 
 // Settings操作
-export async function getSettings(db: D1Database): Promise<SettingsRecord | null> {
-  const result = await db.prepare('SELECT * FROM settings WHERE id = 1').first<SettingsRow>()
+export async function getSettings(db: Client): Promise<SettingsRecord | null> {
+  const result = await db.execute({
+    sql: 'SELECT * FROM settings WHERE id = 1',
+  })
 
-  if (!result) {
+  const row = result.rows[0] as unknown as SettingsRow | undefined
+  if (!row) {
     return null
   }
 
   return {
-    id: result.id,
-    wordCount: result.word_count as any,
-    theme: result.theme as any,
-    practiceMode: result.practice_mode as any,
-    srsEnabled: Boolean(result.srs_enabled),
-    warmupEnabled: Boolean(result.warmup_enabled),
-    difficultyPreset: result.difficulty_preset as any,
-    timeLimitMode: result.time_limit_mode,
-    fixedTimeLimit: result.fixed_time_limit,
-    comfortZoneRatio: result.comfort_zone_ratio,
-    minTimeLimit: result.min_time_limit,
-    maxTimeLimit: result.max_time_limit,
-    minTimeLimitByDifficulty: result.min_time_limit_by_difficulty ?? 1.5,
-    missPenaltyEnabled: Boolean(result.miss_penalty_enabled),
-    basePenaltyPercent: result.base_penalty_percent,
-    penaltyEscalationFactor: result.penalty_escalation_factor,
-    maxPenaltyPercent: result.max_penalty_percent,
-    minTimeAfterPenalty: result.min_time_after_penalty,
-    updatedAt: result.updated_at,
+    id: row.id,
+    wordCount: row.word_count as WordCountPreset,
+    theme: row.theme as ThemeType,
+    practiceMode: row.practice_mode as PracticeMode,
+    srsEnabled: Boolean(row.srs_enabled),
+    warmupEnabled: Boolean(row.warmup_enabled),
+    difficultyPreset: row.difficulty_preset as DifficultyPreset,
+    timeLimitMode: row.time_limit_mode,
+    fixedTimeLimit: row.fixed_time_limit,
+    comfortZoneRatio: row.comfort_zone_ratio,
+    minTimeLimit: row.min_time_limit,
+    maxTimeLimit: row.max_time_limit,
+    minTimeLimitByDifficulty: row.min_time_limit_by_difficulty ?? 1.5,
+    missPenaltyEnabled: Boolean(row.miss_penalty_enabled),
+    basePenaltyPercent: row.base_penalty_percent,
+    penaltyEscalationFactor: row.penalty_escalation_factor,
+    maxPenaltyPercent: row.max_penalty_percent,
+    minTimeAfterPenalty: row.min_time_after_penalty,
+    updatedAt: row.updated_at,
   }
 }
 
-export async function upsertSettings(db: D1Database, input: UpdateSettingsInput): Promise<void> {
+export async function upsertSettings(db: Client, input: UpdateSettingsInput): Promise<void> {
   const existing = await getSettings(db)
 
   if (existing) {
@@ -301,18 +309,16 @@ export async function upsertSettings(db: D1Database, input: UpdateSettingsInput)
     values.push(Date.now())
 
     if (updates.length > 0) {
-      await db
-        .prepare(`UPDATE settings SET ${updates.join(', ')} WHERE id = 1`)
-        .bind(...values)
-        .run()
+      await db.execute({
+        sql: `UPDATE settings SET ${updates.join(', ')} WHERE id = 1`,
+        args: values,
+      })
     }
   } else {
-    await db
-      .prepare(
-        `INSERT INTO settings (id, word_count, theme, practice_mode, srs_enabled, warmup_enabled, difficulty_preset, time_limit_mode, fixed_time_limit, comfort_zone_ratio, min_time_limit, max_time_limit, min_time_limit_by_difficulty, miss_penalty_enabled, base_penalty_percent, penalty_escalation_factor, max_penalty_percent, min_time_after_penalty, updated_at)
-         VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      )
-      .bind(
+    await db.execute({
+      sql: `INSERT INTO settings (id, word_count, theme, practice_mode, srs_enabled, warmup_enabled, difficulty_preset, time_limit_mode, fixed_time_limit, comfort_zone_ratio, min_time_limit, max_time_limit, min_time_limit_by_difficulty, miss_penalty_enabled, base_penalty_percent, penalty_escalation_factor, max_penalty_percent, min_time_after_penalty, updated_at)
+         VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
         input.wordCount ?? 'all',
         input.theme ?? 'dark',
         input.practiceMode ?? 'balanced',
@@ -330,41 +336,39 @@ export async function upsertSettings(db: D1Database, input: UpdateSettingsInput)
         input.penaltyEscalationFactor ?? 1.5,
         input.maxPenaltyPercent ?? 30,
         input.minTimeAfterPenalty ?? 0.5,
-        Date.now()
-      )
-      .run()
+        Date.now(),
+      ],
+    })
   }
 }
 
 // Game Scores操作
-export async function getAllGameScores(db: D1Database): Promise<GameScoreRecord[]> {
-  const result = await db
-    .prepare('SELECT * FROM game_scores ORDER BY played_at DESC')
-    .all<GameScoreRow>()
+export async function getAllGameScores(db: Client): Promise<GameScoreRecord[]> {
+  const result = await db.execute({
+    sql: 'SELECT * FROM game_scores ORDER BY played_at DESC',
+  })
 
-  return result.results.map(row => ({
-    id: row.id,
-    kps: row.kps,
-    totalKeystrokes: row.total_keystrokes,
-    accuracy: row.accuracy,
-    correctWords: row.correct_words,
-    perfectWords: row.perfect_words,
-    totalWords: row.total_words,
-    totalTime: row.total_time,
-    playedAt: row.played_at,
-  }))
+  return result.rows.map(row => {
+    const r = row as unknown as GameScoreRow
+    return {
+      id: r.id,
+      kps: r.kps,
+      totalKeystrokes: r.total_keystrokes,
+      accuracy: r.accuracy,
+      correctWords: r.correct_words,
+      perfectWords: r.perfect_words,
+      totalWords: r.total_words,
+      totalTime: r.total_time,
+      playedAt: r.played_at,
+    }
+  })
 }
 
-export async function createGameScore(
-  db: D1Database,
-  input: CreateGameScoreInput
-): Promise<number> {
-  const result = await db
-    .prepare(
-      `INSERT INTO game_scores (kps, total_keystrokes, accuracy, correct_words, perfect_words, total_words, total_time, played_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    )
-    .bind(
+export async function createGameScore(db: Client, input: CreateGameScoreInput): Promise<number> {
+  await db.execute({
+    sql: `INSERT INTO game_scores (kps, total_keystrokes, accuracy, correct_words, perfect_words, total_words, total_time, played_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
       input.kps,
       input.totalKeystrokes,
       input.accuracy,
@@ -372,13 +376,15 @@ export async function createGameScore(
       input.perfectWords,
       input.totalWords,
       input.totalTime,
-      Date.now()
-    )
-    .run()
+      Date.now(),
+    ],
+  })
 
-  return result.meta.last_row_id ?? 0
+  // libSQLではlastInsertRowidを取得するために別のクエリが必要
+  const lastIdResult = await db.execute('SELECT last_insert_rowid() as id')
+  return (lastIdResult.rows[0]?.id as number) ?? 0
 }
 
-export async function deleteAllGameScores(db: D1Database): Promise<void> {
-  await db.prepare('DELETE FROM game_scores').run()
+export async function deleteAllGameScores(db: Client): Promise<void> {
+  await db.execute('DELETE FROM game_scores')
 }

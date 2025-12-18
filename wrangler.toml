@@ -1,33 +1,30 @@
+# TypeFlow API - Cloudflare Workers設定
+# 
+# 注意: このプロジェクトは現在Tursoデータベースを使用しています。
+# Cloudflare Workersを使用する場合は、以下の設定を有効化してください。
+# 
+# 通常の開発・本番環境では、Bunサーバー（src/server/server.ts）を使用します。
+# 詳細は docs/TURSO_SETUP.md を参照してください。
+
 name = "typeflow-api"
 main = "src/server/index.ts"
 compatibility_date = "2024-11-06"
 dev = { port = 3456 }
 
-# ローカル開発用のD1データベース設定
-[[d1_databases]]
-binding = "DB"
-database_name = "typeflow-db-dev"
-database_id = "adaebe97-c7fe-4ea6-b02b-2c36c8de151f"
+# Cloudflare Workers + Tursoを使用する場合の設定例
+# [env.production.vars]
+# TURSO_DATABASE_URL = "libsql://your-database.turso.io"
+# TURSO_AUTH_TOKEN = "your-auth-token"
+# ALLOWED_ORIGINS = "https://your-app.vercel.app,https://your-app.netlify.app"
 
-[env.production]
-name = "typeflow-api"
+# [env.development.vars]
+# TURSO_DATABASE_URL = "libsql://your-database.turso.io"
+# TURSO_AUTH_TOKEN = "your-auth-token"
+# ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:3000"
 
-[env.production.vars]
-ALLOWED_ORIGINS = "https://your-app.vercel.app,https://your-app.netlify.app"
-
-[[env.production.d1_databases]]
-binding = "DB"
-database_name = "typeflow-db"
-database_id = ""  # デプロイ時に自動生成されるか、手動で設定
-
-[env.development]
-name = "typeflow-api-dev"
-
-[env.development.vars]
-ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:3000"
-
-[[env.development.d1_databases]]
-binding = "DB"
-database_name = "typeflow-db-dev"
-database_id = "adaebe97-c7fe-4ea6-b02b-2c36c8de151f"
+# 旧D1データベース設定（非推奨 - Tursoに移行済み）
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "typeflow-db-dev"
+# database_id = "adaebe97-c7fe-4ea6-b02b-2c36c8de151f"
 

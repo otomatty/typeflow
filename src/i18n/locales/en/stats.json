@@ -6,6 +6,7 @@
   "keystrokes": "Keystrokes",
   "accuracy": "Accuracy",
   "errors": "Errors",
+  "kps": "KPS",
   "avg_latency": "Avg Latency",
   "performance_history": "Performance History",
   "kps_chart": "Keys Per Second (KPS)",

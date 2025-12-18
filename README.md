@@ -55,6 +55,92 @@ bun dev
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
+### Start Full Stack Development (Frontend + Backend)
+
+To start both frontend and backend together:
+
+```bash
+bun run dev:all
+```
+
+This will start:
+
+- **Frontend**: React app on http://localhost:5173
+- **Backend**: Hono API server on http://localhost:3456
+
+Press `Ctrl+C` to stop all services.
+
+### Server Setup (Optional - for Cloud Sync)
+
+If you want to enable cloud sync across devices, you'll need to set up the backend server with Turso database.
+
+#### Option 1: Local Development (Recommended for Development)
+
+Use a local SQLite file for development. This is the easiest way to get started:
+
+1. **Quick setup** (recommended):
+
+   ```bash
+   bun run db:setup
+   ```
+
+   This will create `.env` file and run migrations automatically.
+
+2. **Manual setup**:
+
+   ```bash
+   # Create .env file (copy from example)
+   # Note: .env.example has local DB as default
+   cp .env.example .env
+
+   # Run migrations
+   bun run db:migrate:local
+   ```
+
+3. **Start the server**:
+   ```bash
+   bun run server:dev
+   ```
+
+The server will automatically use the local database (`./local.db`) if `TURSO_DATABASE_URL` is not set.
+
+#### Option 2: Turso Cloud (For Production or Multi-Device Sync)
+
+1. **Install Turso CLI**:
+
+   ```bash
+   curl -sSfL https://get.tur.so/install.sh | bash
+   ```
+
+2. **Create Turso database**:
+
+   ```bash
+   turso db create typeflow-db
+   ```
+
+3. **Set up environment variables**:
+
+   ```bash
+   cp .env.example .env
+   # Edit .env with your Turso credentials
+   ```
+
+4. **Run migrations**:
+
+   ```bash
+   bun run db:migrate
+   ```
+
+5. **Start the server**:
+   ```bash
+   bun run server:dev
+   ```
+
+For detailed setup instructions:
+
+- Local development: [docs/LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md)
+- Turso cloud: [docs/TURSO_SETUP.md](docs/TURSO_SETUP.md)
+
 ### Build for Production
 
 ```bash
@@ -90,6 +176,8 @@ The built files will be in the `dist` directory.
 - **Animations**: Framer Motion
 - **Japanese Processing**: wanakana
 - **Storage**: @github/spark (useKV) for IndexedDB
+- **Backend**: Bun + Hono
+- **Database**: Turso (libSQL/SQLite)
 - **i18n**: i18next
 
 ## 📁 Project Structure

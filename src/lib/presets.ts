@@ -560,7 +560,15 @@ const sushidaCSV = `ワード,読み,入力例
 ワレワレハウチュウジンダ,われわれはうちゅうじんだ,warewarehautyuujinda`
 
 // 寿司打プリセット（CSVからパース）
-const sushidaWords = parseCSV(sushidaCSV)
+// エラーハンドリングを追加して、パースに失敗してもモジュールが読み込めるようにする
+let sushidaWords: PresetWord[] = []
+try {
+  sushidaWords = parseCSV(sushidaCSV)
+} catch (error) {
+  console.error('Failed to parse sushida CSV:', error)
+  // エラーが発生した場合は空の配列を使用
+  sushidaWords = []
+}
 
 export const sushidaPreset: WordPreset = {
   id: 'sushida-10000',
@@ -686,17 +694,52 @@ export const emptyPreset: WordPreset = {
   words: [],
 }
 
-// 全プリセットのリスト
-export const allPresets: WordPreset[] = [
-  sushidaPreset,
-  basicJapanesePreset,
-  programmingPreset,
-  advancedSentencesPreset,
-]
+// 全プリセットのリスト（エラーハンドリング付き）
+export const allPresets: WordPreset[] = (() => {
+  try {
+    const presets: WordPreset[] = []
+
+    // 各プリセットを個別に追加し、エラーが発生しても他のプリセットは使用可能にする
+    try {
+      presets.push(sushidaPreset)
+    } catch (error) {
+      console.error('Failed to add sushida preset:', error)
+    }
+
+    try {
+      presets.push(basicJapanesePreset)
+    } catch (error) {
+      console.error('Failed to add basic Japanese preset:', error)
+    }
+
+    try {
+      presets.push(programmingPreset)
+    } catch (error) {
+      console.error('Failed to add programming preset:', error)
+    }
+
+    try {
+      presets.push(advancedSentencesPreset)
+    } catch (error) {
+      console.error('Failed to add advanced sentences preset:', error)
+    }
+
+    return presets
+  } catch (error) {
+    console.error('Failed to initialize presets:', error)
+    // 最低限、基本的なプリセットは返す
+    return [basicJapanesePreset, programmingPreset]
+  }
+})()
 
 // プリセットをIDで取得
 export function getPresetById(id: string): WordPreset | undefined {
-  return allPresets.find(preset => preset.id === id)
+  try {
+    return allPresets.find(preset => preset.id === id)
+  } catch (error) {
+    console.error('Failed to get preset by id:', id, error)
+    return undefined
+  }
 }
 
 // プリセット一覧を取得（単語データなしの軽量版）

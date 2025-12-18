@@ -207,13 +207,23 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
       totalKeystrokes > 0 ? Math.round((1 - totalErrors / totalKeystrokes) * 1000) / 10 : 100
     const avgLatency = totalKeystrokes > 0 ? Math.round(totalLatency / totalKeystrokes) : 0
 
+    // Calculate average KPS from game scores
+    // Use the average of KPS from each game score (already calculated per game)
+    const avgKps =
+      gameScores.length > 0
+        ? Math.round(
+            (gameScores.reduce((sum, score) => sum + score.kps, 0) / gameScores.length) * 10
+          ) / 10
+        : 0
+
     return {
       totalKeystrokes,
       totalErrors,
       accuracy,
       avgLatency,
+      avgKps,
     }
-  }, [keyStats])
+  }, [keyStats, gameScores])
 
   // Calculate daily statistics
   const dailyStats = useMemo(() => {
@@ -429,11 +439,9 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                   </div>
                   <div className="text-center">
                     <div className="text-2xl sm:text-3xl font-bold text-primary">
-                      {summary.totalErrors.toLocaleString()}
+                      {summary.avgKps.toFixed(1)}
                     </div>
-                    <div className="text-xs text-muted-foreground uppercase mt-1">
-                      {t('errors')}
-                    </div>
+                    <div className="text-xs text-muted-foreground uppercase mt-1">{t('kps')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl sm:text-3xl font-bold text-primary">

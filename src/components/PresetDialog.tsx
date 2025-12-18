@@ -71,18 +71,26 @@ export function PresetDialog({
   }
 
   const handleLoadPreset = async (presetId: string) => {
-    const preset = getPresetById(presetId)
-    if (!preset) return
-
-    setLoadingPresetId(presetId)
     try {
-      await onLoadPreset(preset.words, {
-        clearExisting: isAfterQuickStart ? true : clearExisting, // クイックスタート後は常に既存を削除
-        presetName: preset.name,
-      })
-      setOpen(false)
-      setSelectedPresetId(null)
-    } finally {
+      const preset = getPresetById(presetId)
+      if (!preset) {
+        console.error(`Preset not found: ${presetId}`)
+        return
+      }
+
+      setLoadingPresetId(presetId)
+      try {
+        await onLoadPreset(preset.words, {
+          clearExisting: isAfterQuickStart ? true : clearExisting, // クイックスタート後は常に既存を削除
+          presetName: preset.name,
+        })
+        setOpen(false)
+        setSelectedPresetId(null)
+      } finally {
+        setLoadingPresetId(null)
+      }
+    } catch (error) {
+      console.error('Failed to load preset:', error)
       setLoadingPresetId(null)
     }
   }

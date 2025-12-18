@@ -6,6 +6,7 @@
   "keystrokes": "打鍵数",
   "accuracy": "正確率",
   "errors": "エラー",
+  "kps": "打鍵数/秒",
   "avg_latency": "平均反応時間",
   "performance_history": "パフォーマンス履歴",
   "kps_chart": "打鍵速度 (KPS)",

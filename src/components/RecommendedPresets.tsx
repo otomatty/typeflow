@@ -22,9 +22,16 @@ export function RecommendedPresets({ onLoadPreset, isLoading }: RecommendedPrese
   const [loadingPresetId, setLoadingPresetId] = useState<string | null>(null)
 
   // おすすめプリセット（基本日本語、プログラミング用語、寿司打）
-  const recommendedPresets = allPresets.filter(
-    p => p.id === 'basic-japanese' || p.id === 'programming' || p.id === 'sushida-10000'
-  )
+  const recommendedPresets = (() => {
+    try {
+      return allPresets.filter(
+        p => p.id === 'basic-japanese' || p.id === 'programming' || p.id === 'sushida-10000'
+      )
+    } catch (error) {
+      console.error('Failed to load recommended presets:', error)
+      return []
+    }
+  })()
 
   const difficultyColors: Record<string, string> = {
     easy: 'bg-green-500/20 text-green-400 border-green-500/30',
@@ -46,16 +53,24 @@ export function RecommendedPresets({ onLoadPreset, isLoading }: RecommendedPrese
   }
 
   const handleLoadPreset = async (presetId: string) => {
-    const preset = getPresetById(presetId)
-    if (!preset) return
-
-    setLoadingPresetId(presetId)
     try {
-      await onLoadPreset(preset.words, {
-        clearExisting: false,
-        presetName: preset.name,
-      })
-    } finally {
+      const preset = getPresetById(presetId)
+      if (!preset) {
+        console.error(`Preset not found: ${presetId}`)
+        return
+      }
+
+      setLoadingPresetId(presetId)
+      try {
+        await onLoadPreset(preset.words, {
+          clearExisting: false,
+          presetName: preset.name,
+        })
+      } finally {
+        setLoadingPresetId(null)
+      }
+    } catch (error) {
+      console.error('Failed to load preset:', error)
       setLoadingPresetId(null)
     }
   }

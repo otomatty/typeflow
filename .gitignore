@@ -35,6 +35,10 @@ coverage/
 
 # Database (optional - uncomment if you want to ignore the db)
 # data/*.db
+local.db
+*.db
+*.db-shm
+*.db-wal
 
 # Scripts output (collected data)
 scripts/output/*.json
