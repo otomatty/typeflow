@@ -32,10 +32,6 @@
     "romaji": "ローマ字（タイピング用）",
     "romaji_placeholder": "自動生成 / 手動入力可"
   },
-  "csv": {
-    "import": "CSVインポート",
-    "title": "CSVから単語をインポート"
-  },
   "word_list": {
     "search_placeholder": "単語を検索...",
     "sort_by": "並び替え",

@@ -32,10 +32,6 @@
     "romaji": "Romaji (for typing)",
     "romaji_placeholder": "Auto-generated / Manual entry"
   },
-  "csv": {
-    "import": "Import CSV",
-    "title": "Import Words from CSV"
-  },
   "word_list": {
     "search_placeholder": "Search words...",
     "sort_by": "Sort by",

@@ -5,12 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AddWordDialog } from '@/components/AddWordDialog'
 import { PresetDialog } from '@/components/PresetDialog'
-import { CSVImportDialog } from '@/components/CSVImportDialog'
 import { WordList } from '@/components/WordList'
 import { ScreenHeader } from '@/components/ScreenHeader'
 import { Container } from '@/components/Container'
 import { Word, PresetWord } from '@/lib/types'
-import { Trash2, MoreVertical, Package, FileUp, Search } from 'lucide-react'
+import { Trash2, MoreVertical, Package, Search } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,7 +52,6 @@ export function WordManagementScreen({
   const { t: tc } = useTranslation('common')
   const [isClearing, setIsClearing] = useState(false)
   const [presetDialogOpen, setPresetDialogOpen] = useState(false)
-  const [csvDialogOpen, setCsvDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -105,10 +103,6 @@ export function WordManagementScreen({
                     <Package className="w-4 h-4 mr-2" />
                     {t('preset')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setCsvDialogOpen(true)}>
-                    <FileUp className="w-4 h-4 mr-2" />
-                    {t('csv.import')}
-                  </DropdownMenuItem>
                   {words.length > 0 && (
                     <>
                       <DropdownMenuSeparator />
@@ -131,12 +125,6 @@ export function WordManagementScreen({
                 onLoadPreset={handleLoadPreset}
                 open={presetDialogOpen}
                 onOpenChange={setPresetDialogOpen}
-                showTrigger={false}
-              />
-              <CSVImportDialog
-                onImport={handleLoadPreset}
-                open={csvDialogOpen}
-                onOpenChange={setCsvDialogOpen}
                 showTrigger={false}
               />
               <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -169,7 +157,6 @@ export function WordManagementScreen({
           <p className="text-muted-foreground">{t('no_words')}</p>
           <div className="flex justify-center gap-2 flex-wrap">
             <PresetDialog onLoadPreset={handleLoadPreset} />
-            <CSVImportDialog onImport={handleLoadPreset} />
             <AddWordDialog onAddWord={onAddWord} />
           </div>
         </Card>
