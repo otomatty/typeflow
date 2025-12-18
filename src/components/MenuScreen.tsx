@@ -15,7 +15,7 @@ interface MenuScreenProps {
   onLoadPreset?: (
     words: PresetWord[],
     options?: { clearExisting?: boolean; presetName?: string }
-  ) => Promise<void>
+  ) => Promise<unknown>
 }
 
 export function MenuScreen({

@@ -429,7 +429,6 @@ function App() {
         isFirstTime={isFirstTime}
         gameScoresCount={gameScores.length}
         onLoadPreset={loadPreset}
-        onNavigate={handleNavigate}
       />
     </>
   )

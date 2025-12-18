@@ -12,7 +12,7 @@ interface RecommendedPresetsProps {
   onLoadPreset: (
     words: PresetWord[],
     options: { clearExisting: boolean; presetName: string }
-  ) => Promise<void>
+  ) => Promise<unknown>
   isLoading?: boolean
 }
 
