@@ -255,7 +255,19 @@ describe('adaptive-time-utils', () => {
 
   describe('calculateWordTimeLimit', () => {
     it('should calculate time limit with all settings', () => {
-      const scores: GameScoreRecord[] = [{ id: '1', kps: 5.0, totalTime: 10, playedAt: Date.now() }]
+      const scores: GameScoreRecord[] = [
+        {
+          id: 1,
+          kps: 5.0,
+          totalKeystrokes: 50,
+          accuracy: 90,
+          correctWords: 8,
+          perfectWords: 6,
+          totalWords: 10,
+          totalTime: 10,
+          playedAt: Date.now(),
+        },
+      ]
       const result = calculateWordTimeLimit(mockWord, scores, mockSettings)
       expect(result).toBeGreaterThan(0)
       expect(result).toBeLessThanOrEqual(mockSettings.maxTimeLimit)
@@ -296,7 +308,19 @@ describe('adaptive-time-utils', () => {
 
   describe('getTargetKpsInfo', () => {
     it('should calculate target KPS info', () => {
-      const scores: GameScoreRecord[] = [{ id: '1', kps: 5.0, totalTime: 10, playedAt: Date.now() }]
+      const scores: GameScoreRecord[] = [
+        {
+          id: 1,
+          kps: 5.0,
+          totalKeystrokes: 50,
+          accuracy: 90,
+          correctWords: 8,
+          perfectWords: 6,
+          totalWords: 10,
+          totalTime: 10,
+          playedAt: Date.now(),
+        },
+      ]
       const result = getTargetKpsInfo(scores, 1.2)
       expect(result.averageKps).toBe(5.0)
       expect(result.targetKps).toBe(6.0)
