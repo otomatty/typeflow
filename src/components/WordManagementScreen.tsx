@@ -7,8 +7,9 @@ import { AddWordDialog } from '@/components/AddWordDialog'
 import { WordList } from '@/components/WordList'
 import { ScreenHeader } from '@/components/ScreenHeader'
 import { Container } from '@/components/Container'
+import { SavePresetDialog } from '@/components/SavePresetDialog'
 import { Word, PresetWord } from '@/lib/types'
-import { Trash2, MoreVertical, Package, Search } from 'lucide-react'
+import { Trash2, MoreVertical, Package, Search, Save } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +38,11 @@ interface WordManagementScreenProps {
     options: { clearExisting?: boolean; presetName?: string }
   ) => Promise<unknown>
   onClearAllWords: () => Promise<void>
+  onSavePreset: (
+    name: string,
+    description: string,
+    difficulty: 'easy' | 'normal' | 'hard'
+  ) => Promise<void>
   onNavigate?: (view: 'presets') => void
 }
 
@@ -46,6 +52,7 @@ export function WordManagementScreen({
   onEditWord,
   onDeleteWord,
   onClearAllWords,
+  onSavePreset,
   onNavigate,
 }: WordManagementScreenProps) {
   const { t } = useTranslation('words')
@@ -53,6 +60,7 @@ export function WordManagementScreen({
   const [isClearing, setIsClearing] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [savePresetDialogOpen, setSavePresetDialogOpen] = useState(false)
 
   const handleNavigateToPresets = () => {
     if (onNavigate) {
@@ -104,6 +112,11 @@ export function WordManagementScreen({
                   {words.length > 0 && (
                     <>
                       <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setSavePresetDialogOpen(true)}>
+                        <Save className="w-4 h-4 mr-2" />
+                        {t('save_preset', { defaultValue: 'プリセットとして保存' })}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => setDeleteDialogOpen(true)}
                         className="text-destructive focus:text-destructive"
@@ -141,6 +154,13 @@ export function WordManagementScreen({
           }
         />
       </div>
+
+      <SavePresetDialog
+        open={savePresetDialogOpen}
+        onOpenChange={setSavePresetDialogOpen}
+        words={words}
+        onSave={onSavePreset}
+      />
 
       {words.length === 0 ? (
         <Card className="p-8 text-center space-y-4">

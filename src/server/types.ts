@@ -86,6 +86,24 @@ export interface BulkInsertInput {
   clearExisting?: boolean
 }
 
+export interface BulkInsertWordWithStats {
+  text: string
+  reading: string
+  romaji: string
+  correct?: number
+  miss?: number
+  lastPlayed?: number
+  accuracy?: number
+  masteryLevel?: number
+  nextReviewAt?: number
+  consecutiveCorrect?: number
+}
+
+export interface BulkInsertWithStatsInput {
+  words: BulkInsertWordWithStats[]
+  clearExisting?: boolean
+}
+
 /**
  * Aggregated Stats - Tursoデータベースの生のレコード型（snake_case）
  */
@@ -276,6 +294,77 @@ export interface UpdatePresetInput {
   description?: string
   difficulty?: 'easy' | 'normal' | 'hard'
   words?: PresetWord[]
+}
+
+/**
+ * User Presets - ユーザーが保存したプリセット（統計データを含む）
+ */
+export interface UserPresetRow {
+  id: string
+  name: string
+  description: string | null
+  difficulty: string
+  word_count: number
+  created_at: number
+  updated_at: number
+}
+
+export interface UserPresetWordRow {
+  id: number
+  preset_id: string
+  text: string
+  reading: string
+  romaji: string
+  word_order: number
+  correct: number
+  miss: number
+  last_played: number
+  accuracy: number
+  mastery_level: number
+  next_review_at: number
+  consecutive_correct: number
+  created_at: number
+}
+
+export interface UserPresetWord {
+  text: string
+  reading: string
+  romaji: string
+  stats: {
+    correct: number
+    miss: number
+    lastPlayed: number
+    accuracy: number
+    masteryLevel: number
+    nextReviewAt: number
+    consecutiveCorrect: number
+  }
+}
+
+export interface UserPresetRecord {
+  id: string
+  name: string
+  description: string
+  difficulty: 'easy' | 'normal' | 'hard'
+  wordCount: number
+  words: UserPresetWord[]
+  createdAt: number
+  updatedAt: number
+}
+
+export interface CreateUserPresetInput {
+  id: string
+  name: string
+  description?: string
+  difficulty: 'easy' | 'normal' | 'hard'
+  words: UserPresetWord[]
+}
+
+export interface UpdateUserPresetInput {
+  name?: string
+  description?: string
+  difficulty?: 'easy' | 'normal' | 'hard'
+  words?: UserPresetWord[]
 }
 
 /**

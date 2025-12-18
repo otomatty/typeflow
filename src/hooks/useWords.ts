@@ -5,8 +5,10 @@ import {
   deleteWord as deleteWordApi,
   updateWord,
   bulkInsertWords,
+  bulkInsertWordsWithStats,
   deleteAllWords,
   WordRecord,
+  type BulkInsertWordWithStats,
 } from '@/lib/db'
 import { Word, PresetWord } from '@/lib/types'
 import { toast } from 'sonner'
@@ -194,6 +196,60 @@ export function useWords() {
     }
   }, [fetchWords])
 
+  // ユーザープリセットを読み込む（統計データも復元）
+  const loadUserPreset = useCallback(
+    async (
+      presetWords: Array<{
+        text: string
+        reading: string
+        romaji: string
+        stats: {
+          correct: number
+          miss: number
+          lastPlayed: number
+          accuracy: number
+          masteryLevel: number
+          nextReviewAt: number
+          consecutiveCorrect: number
+        }
+      }>,
+      options: { clearExisting?: boolean; presetName?: string } = {}
+    ) => {
+      const { clearExisting = false, presetName = 'ユーザープリセット' } = options
+
+      try {
+        const wordsWithStats: BulkInsertWordWithStats[] = presetWords.map(word => ({
+          text: word.text,
+          reading: word.reading,
+          romaji: word.romaji,
+          correct: word.stats.correct,
+          miss: word.stats.miss,
+          lastPlayed: word.stats.lastPlayed,
+          accuracy: word.stats.accuracy,
+          masteryLevel: word.stats.masteryLevel,
+          nextReviewAt: word.stats.nextReviewAt,
+          consecutiveCorrect: word.stats.consecutiveCorrect,
+        }))
+
+        const result = await bulkInsertWordsWithStats(wordsWithStats, clearExisting)
+
+        if (result.success) {
+          toast.success(`${presetName}を読み込みました（${result.insertedCount}件）`)
+          await fetchWords()
+        } else {
+          toast.error('プリセットの読み込みに失敗しました')
+        }
+
+        return result
+      } catch (error) {
+        console.error('Failed to load user preset:', error)
+        toast.error('プリセットの読み込みに失敗しました')
+        throw error
+      }
+    },
+    [fetchWords]
+  )
+
   return {
     words,
     isLoading,
@@ -202,6 +258,7 @@ export function useWords() {
     deleteWord,
     updateWordStats,
     loadPreset,
+    loadUserPreset,
     clearAllWords,
     refetch: fetchWords,
   }

@@ -15,8 +15,10 @@ import { useTypingAnalytics } from '@/hooks/useTypingAnalytics'
 import { useSettings } from '@/hooks/useSettings'
 import { shuffleArray } from '@/lib/utils'
 import { usePresets } from '@/hooks/usePresets'
+import { useUserPresets } from '@/hooks/useUserPresets'
 import { toast } from 'sonner'
 import type { PresetWord } from '@/lib/types'
+import type { UserPresetWord } from '@/lib/db'
 
 function App() {
   const {
@@ -26,10 +28,12 @@ function App() {
     deleteWord,
     updateWordStats,
     loadPreset,
+    loadUserPreset,
     clearAllWords,
     refetch: refetchWords,
   } = useWords()
   const { getPresetById } = usePresets()
+  const { saveCurrentWordsAsPreset } = useUserPresets()
   const [isAddWordDialogOpen, setIsAddWordDialogOpen] = useState(false)
   const [isQuickStartMode, setIsQuickStartMode] = useState(false)
   const [quickStartWordIds, setQuickStartWordIds] = useState<Set<string>>(new Set())
@@ -245,6 +249,51 @@ function App() {
     [cleanupQuickStartWords, loadPreset, setView, isQuickStartMode]
   )
 
+  // ユーザープリセット選択後の処理
+  const handleUserPresetSelected = useCallback(
+    async (
+      presetWords: UserPresetWord[],
+      options: { clearExisting: boolean; presetName: string }
+    ) => {
+      try {
+        // クイックスタートで使用した単語を削除
+        await cleanupQuickStartWords()
+
+        // 選択されたユーザープリセットを読み込む（統計データも復元）
+        await loadUserPreset(presetWords, {
+          clearExisting: isQuickStartMode ? true : options.clearExisting,
+          presetName: options.presetName,
+        })
+
+        // クイックスタートモードをリセット
+        setIsQuickStartMode(false)
+        setQuickStartWordIds(new Set())
+
+        // メニューに戻る
+        setView('menu')
+
+        toast.success(`${options.presetName}を読み込みました`)
+      } catch (error) {
+        console.error('Failed to load user preset:', error)
+        toast.error('プリセットの読み込みに失敗しました')
+      }
+    },
+    [cleanupQuickStartWords, loadUserPreset, setView, isQuickStartMode]
+  )
+
+  // 現在の単語リストをプリセットとして保存
+  const handleSavePreset = useCallback(
+    async (name: string, description: string, difficulty: 'easy' | 'normal' | 'hard') => {
+      try {
+        await saveCurrentWordsAsPreset(name, description, difficulty, words)
+      } catch (error) {
+        console.error('Failed to save preset:', error)
+        throw error
+      }
+    },
+    [saveCurrentWordsAsPreset, words]
+  )
+
   const handleNavigate = (newView: ViewType) => {
     setView(newView)
   }
@@ -315,6 +364,7 @@ function App() {
           onDeleteWord={deleteWord}
           onLoadPreset={loadPreset}
           onClearAllWords={clearAllWords}
+          onSavePreset={handleSavePreset}
           onNavigate={handleNavigate}
         />
       </>
@@ -355,6 +405,7 @@ function App() {
         <Header currentView={view} onNavigate={handleNavigate} />
         <PresetScreen
           onLoadPreset={handlePresetSelected}
+          onLoadUserPreset={handleUserPresetSelected}
           onNavigate={handleNavigate}
           isLoading={false}
           isAfterQuickStart={isQuickStartMode}

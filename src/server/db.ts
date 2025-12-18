@@ -15,11 +15,17 @@ import type {
   GameScoreRecord,
   CreateGameScoreInput,
   BulkInsertWord,
+  BulkInsertWordWithStats,
   PresetRow,
   PresetWordRow,
   PresetRecord,
   CreatePresetInput,
   UpdatePresetInput,
+  UserPresetRow,
+  UserPresetWordRow,
+  UserPresetRecord,
+  CreateUserPresetInput,
+  UpdateUserPresetInput,
 } from './types'
 
 // snake_case → camelCase 変換
@@ -149,6 +155,48 @@ export async function bulkInsertWords(
     sql: `INSERT INTO words (text, reading, romaji, correct, miss, last_played, accuracy, created_at, mastery_level, next_review_at, consecutive_correct)
      VALUES (?, ?, ?, 0, 0, 0, 100, ?, 0, 0, 0)`,
     args: [word.text, word.reading, word.romaji, now],
+  }))
+
+  const results = await db.batch(statements)
+
+  for (const result of results) {
+    if (result.rowsAffected > 0) {
+      insertedCount++
+    }
+  }
+
+  return insertedCount
+}
+
+export async function bulkInsertWordsWithStats(
+  db: Client,
+  words: BulkInsertWordWithStats[],
+  clearExisting: boolean = false
+): Promise<number> {
+  if (clearExisting) {
+    await deleteAllWords(db)
+  }
+
+  const now = Date.now()
+  let insertedCount = 0
+
+  // バッチ処理で挿入（統計データも含む）
+  const statements = words.map(word => ({
+    sql: `INSERT INTO words (text, reading, romaji, correct, miss, last_played, accuracy, created_at, mastery_level, next_review_at, consecutive_correct)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      word.text,
+      word.reading,
+      word.romaji,
+      word.correct ?? 0,
+      word.miss ?? 0,
+      word.lastPlayed ?? 0,
+      word.accuracy ?? 100,
+      now,
+      word.masteryLevel ?? 0,
+      word.nextReviewAt ?? 0,
+      word.consecutiveCorrect ?? 0,
+    ],
   }))
 
   const results = await db.batch(statements)
@@ -563,4 +611,234 @@ export async function deletePreset(db: Client, id: string): Promise<void> {
 export async function deleteAllPresets(db: Client): Promise<void> {
   // 外部キー制約により、preset_wordsも自動的に削除される
   await db.execute('DELETE FROM presets')
+}
+
+// User Presets操作
+export async function getAllUserPresets(db: Client): Promise<UserPresetRecord[]> {
+  const presetResult = await db.execute('SELECT * FROM user_presets ORDER BY updated_at DESC')
+  const presets: UserPresetRecord[] = []
+
+  for (const row of presetResult.rows) {
+    const presetRow = row as unknown as UserPresetRow
+    const wordsResult = await db.execute({
+      sql: 'SELECT * FROM user_preset_words WHERE preset_id = ? ORDER BY word_order ASC',
+      args: [presetRow.id],
+    })
+
+    const words = wordsResult.rows.map(wordRow => {
+      const w = wordRow as unknown as UserPresetWordRow
+      return {
+        text: w.text,
+        reading: w.reading,
+        romaji: w.romaji,
+        stats: {
+          correct: w.correct,
+          miss: w.miss,
+          lastPlayed: w.last_played,
+          accuracy: w.accuracy,
+          masteryLevel: w.mastery_level,
+          nextReviewAt: w.next_review_at,
+          consecutiveCorrect: w.consecutive_correct,
+        },
+      }
+    })
+
+    presets.push({
+      id: presetRow.id,
+      name: presetRow.name,
+      description: presetRow.description || '',
+      difficulty: presetRow.difficulty as 'easy' | 'normal' | 'hard',
+      wordCount: presetRow.word_count,
+      words,
+      createdAt: presetRow.created_at,
+      updatedAt: presetRow.updated_at,
+    })
+  }
+
+  return presets
+}
+
+export async function getUserPresetById(db: Client, id: string): Promise<UserPresetRecord | null> {
+  const presetResult = await db.execute({
+    sql: 'SELECT * FROM user_presets WHERE id = ?',
+    args: [id],
+  })
+
+  const presetRow = presetResult.rows[0] as unknown as UserPresetRow | undefined
+  if (!presetRow) {
+    return null
+  }
+
+  const wordsResult = await db.execute({
+    sql: 'SELECT * FROM user_preset_words WHERE preset_id = ? ORDER BY word_order ASC',
+    args: [id],
+  })
+
+  const words = wordsResult.rows.map(wordRow => {
+    const w = wordRow as unknown as UserPresetWordRow
+    return {
+      text: w.text,
+      reading: w.reading,
+      romaji: w.romaji,
+      stats: {
+        correct: w.correct,
+        miss: w.miss,
+        lastPlayed: w.last_played,
+        accuracy: w.accuracy,
+        masteryLevel: w.mastery_level,
+        nextReviewAt: w.next_review_at,
+        consecutiveCorrect: w.consecutive_correct,
+      },
+    }
+  })
+
+  return {
+    id: presetRow.id,
+    name: presetRow.name,
+    description: presetRow.description || '',
+    difficulty: presetRow.difficulty as 'easy' | 'normal' | 'hard',
+    wordCount: presetRow.word_count,
+    words,
+    createdAt: presetRow.created_at,
+    updatedAt: presetRow.updated_at,
+  }
+}
+
+export async function createUserPreset(db: Client, input: CreateUserPresetInput): Promise<void> {
+  const now = Date.now()
+
+  // プリセットを作成
+  await db.execute({
+    sql: `INSERT INTO user_presets (id, name, description, difficulty, word_count, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      input.id,
+      input.name,
+      input.description || '',
+      input.difficulty,
+      input.words.length,
+      now,
+      now,
+    ],
+  })
+
+  // 単語を挿入（統計データも含む）
+  if (input.words.length > 0) {
+    const wordStatements = input.words.map((word, index) => ({
+      sql: `INSERT INTO user_preset_words (
+        preset_id, text, reading, romaji, word_order,
+        correct, miss, last_played, accuracy,
+        mastery_level, next_review_at, consecutive_correct, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
+        input.id,
+        word.text,
+        word.reading,
+        word.romaji,
+        index,
+        word.stats.correct,
+        word.stats.miss,
+        word.stats.lastPlayed,
+        word.stats.accuracy,
+        word.stats.masteryLevel,
+        word.stats.nextReviewAt,
+        word.stats.consecutiveCorrect,
+        now,
+      ],
+    }))
+
+    await db.batch(wordStatements)
+  }
+}
+
+export async function updateUserPreset(
+  db: Client,
+  id: string,
+  input: UpdateUserPresetInput
+): Promise<void> {
+  const existing = await getUserPresetById(db, id)
+  if (!existing) {
+    throw new Error(`User preset with id ${id} not found`)
+  }
+
+  const updates: string[] = []
+  const values: InValue[] = []
+
+  if (input.name !== undefined) {
+    updates.push('name = ?')
+    values.push(input.name)
+  }
+  if (input.description !== undefined) {
+    updates.push('description = ?')
+    values.push(input.description)
+  }
+  if (input.difficulty !== undefined) {
+    updates.push('difficulty = ?')
+    values.push(input.difficulty)
+  }
+
+  // 単語が更新される場合
+  if (input.words !== undefined) {
+    // 既存の単語を削除
+    await db.execute({
+      sql: 'DELETE FROM user_preset_words WHERE preset_id = ?',
+      args: [id],
+    })
+
+    // 新しい単語を挿入
+    if (input.words.length > 0) {
+      const now = Date.now()
+      const wordStatements = input.words.map((word, index) => ({
+        sql: `INSERT INTO user_preset_words (
+          preset_id, text, reading, romaji, word_order,
+          correct, miss, last_played, accuracy,
+          mastery_level, next_review_at, consecutive_correct, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        args: [
+          id,
+          word.text,
+          word.reading,
+          word.romaji,
+          index,
+          word.stats.correct,
+          word.stats.miss,
+          word.stats.lastPlayed,
+          word.stats.accuracy,
+          word.stats.masteryLevel,
+          word.stats.nextReviewAt,
+          word.stats.consecutiveCorrect,
+          now,
+        ],
+      }))
+
+      await db.batch(wordStatements)
+    }
+
+    updates.push('word_count = ?')
+    values.push(input.words.length)
+  }
+
+  if (updates.length > 0) {
+    updates.push('updated_at = ?')
+    values.push(Date.now())
+    values.push(id)
+
+    await db.execute({
+      sql: `UPDATE user_presets SET ${updates.join(', ')} WHERE id = ?`,
+      args: values,
+    })
+  }
+}
+
+export async function deleteUserPreset(db: Client, id: string): Promise<void> {
+  // 外部キー制約により、user_preset_wordsも自動的に削除される
+  await db.execute({
+    sql: 'DELETE FROM user_presets WHERE id = ?',
+    args: [id],
+  })
+}
+
+export async function deleteAllUserPresets(db: Client): Promise<void> {
+  // 外部キー制約により、user_preset_wordsも自動的に削除される
+  await db.execute('DELETE FROM user_presets')
 }

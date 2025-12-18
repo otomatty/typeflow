@@ -160,6 +160,39 @@ export async function deleteAllWords(): Promise<void> {
   await api('/words', { method: 'DELETE' })
 }
 
+// Bulk insert with stats (for user presets)
+export interface BulkInsertWordWithStats {
+  text: string
+  reading: string
+  romaji: string
+  correct?: number
+  miss?: number
+  lastPlayed?: number
+  accuracy?: number
+  masteryLevel?: number
+  nextReviewAt?: number
+  consecutiveCorrect?: number
+}
+
+export interface BulkInsertWithStatsResult {
+  success: boolean
+  insertedCount: number
+  totalWords: number
+}
+
+export async function bulkInsertWordsWithStats(
+  words: BulkInsertWordWithStats[],
+  clearExisting: boolean = false
+): Promise<BulkInsertWithStatsResult> {
+  return api<BulkInsertWithStatsResult>('/words/bulk-with-stats', {
+    method: 'POST',
+    body: JSON.stringify({
+      words,
+      clearExisting,
+    }),
+  })
+}
+
 // Aggregated stats helper functions
 export async function getAggregatedStats(): Promise<AggregatedStatsRecord | undefined> {
   const result = await api<AggregatedStatsRecord | null>('/stats')
@@ -281,6 +314,71 @@ export async function getAllPresets(): Promise<PresetRecord[]> {
 export async function getPresetById(id: string): Promise<PresetRecord | undefined> {
   const result = await api<PresetRecord | null>(`/presets/${id}`)
   return result ?? undefined
+}
+
+// User Presets helper functions
+export interface UserPresetWord {
+  text: string
+  reading: string
+  romaji: string
+  stats: {
+    correct: number
+    miss: number
+    lastPlayed: number
+    accuracy: number
+    masteryLevel: number
+    nextReviewAt: number
+    consecutiveCorrect: number
+  }
+}
+
+export interface UserPresetRecord {
+  id: string
+  name: string
+  description: string
+  difficulty: 'easy' | 'normal' | 'hard'
+  wordCount: number
+  words: UserPresetWord[]
+  createdAt: number
+  updatedAt: number
+}
+
+export interface CreateUserPresetInput {
+  id: string
+  name: string
+  description?: string
+  difficulty: 'easy' | 'normal' | 'hard'
+  words: UserPresetWord[]
+}
+
+export async function getAllUserPresets(): Promise<UserPresetRecord[]> {
+  return api<UserPresetRecord[]>('/user-presets')
+}
+
+export async function getUserPresetById(id: string): Promise<UserPresetRecord | undefined> {
+  const result = await api<UserPresetRecord | null>(`/user-presets/${id}`)
+  return result ?? undefined
+}
+
+export async function createUserPreset(input: CreateUserPresetInput): Promise<void> {
+  await api('/user-presets', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function updateUserPreset(
+  id: string,
+  input: Partial<CreateUserPresetInput>
+): Promise<void> {
+  await api(`/user-presets/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function deleteUserPreset(id: string): Promise<void> {
+  await api(`/user-presets/${id}`, { method: 'DELETE' })
 }
 
 // 互換性のためのダミー db オブジェクト（Dexie から移行時に必要な場合）

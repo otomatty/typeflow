@@ -9,6 +9,7 @@ import {
   deleteWord,
   deleteAllWords,
   bulkInsertWords,
+  bulkInsertWordsWithStats,
   getAggregatedStats,
   upsertAggregatedStats,
   deleteAggregatedStats,
@@ -23,16 +24,24 @@ import {
   updatePreset,
   deletePreset,
   deleteAllPresets,
+  getAllUserPresets,
+  getUserPresetById,
+  createUserPreset,
+  updateUserPreset,
+  deleteUserPreset,
 } from './db'
 import type {
   CreateWordInput,
   UpdateWordInput,
   BulkInsertInput,
+  BulkInsertWithStatsInput,
   UpdateAggregatedStatsInput,
   UpdateSettingsInput,
   CreateGameScoreInput,
   CreatePresetInput,
   UpdatePresetInput,
+  CreateUserPresetInput,
+  UpdateUserPresetInput,
 } from './types'
 
 // Honoのコンテキスト変数の型定義
@@ -142,6 +151,33 @@ app.post('/api/words/bulk', async c => {
     console.error('Failed to bulk insert words:', error)
     return c.json(
       { error: error instanceof Error ? error.message : 'Failed to bulk insert words' },
+      500
+    )
+  }
+})
+
+// Bulk insert with stats (for user presets)
+app.post('/api/words/bulk-with-stats', async c => {
+  try {
+    if (!c.env.DB) {
+      console.error('Database not available')
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+    const body = await c.req.json<BulkInsertWithStatsInput>()
+    const insertedCount = await bulkInsertWordsWithStats(
+      c.env.DB,
+      body.words,
+      body.clearExisting ?? false
+    )
+    return c.json({
+      success: true,
+      insertedCount,
+      totalWords: body.words.length,
+    })
+  } catch (error) {
+    console.error('Failed to bulk insert words with stats:', error)
+    return c.json(
+      { error: error instanceof Error ? error.message : 'Failed to bulk insert words with stats' },
       500
     )
   }
@@ -418,6 +454,100 @@ app.delete('/api/presets', async c => {
     console.error('Failed to delete all presets:', error)
     return c.json(
       { error: error instanceof Error ? error.message : 'Failed to delete all presets' },
+      500
+    )
+  }
+})
+
+// User Presets API
+app.get('/api/user-presets', async c => {
+  try {
+    if (!c.env.DB) {
+      console.error('Database not available')
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+    const presets = await getAllUserPresets(c.env.DB)
+    return c.json(presets)
+  } catch (error) {
+    console.error('Failed to get user presets:', error)
+    return c.json(
+      { error: error instanceof Error ? error.message : 'Failed to get user presets' },
+      500
+    )
+  }
+})
+
+app.get('/api/user-presets/:id', async c => {
+  try {
+    if (!c.env.DB) {
+      console.error('Database not available')
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+    const id = c.req.param('id')
+    const preset = await getUserPresetById(c.env.DB, id)
+    if (!preset) {
+      return c.json({ error: 'User preset not found' }, 404)
+    }
+    return c.json(preset)
+  } catch (error) {
+    console.error('Failed to get user preset:', error)
+    return c.json(
+      { error: error instanceof Error ? error.message : 'Failed to get user preset' },
+      500
+    )
+  }
+})
+
+app.post('/api/user-presets', async c => {
+  try {
+    if (!c.env.DB) {
+      console.error('Database not available')
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+    const body = await c.req.json<CreateUserPresetInput>()
+    await createUserPreset(c.env.DB, body)
+    return c.json({ success: true })
+  } catch (error) {
+    console.error('Failed to create user preset:', error)
+    return c.json(
+      { error: error instanceof Error ? error.message : 'Failed to create user preset' },
+      500
+    )
+  }
+})
+
+app.put('/api/user-presets/:id', async c => {
+  try {
+    if (!c.env.DB) {
+      console.error('Database not available')
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+    const id = c.req.param('id')
+    const body = await c.req.json<UpdateUserPresetInput>()
+    await updateUserPreset(c.env.DB, id, body)
+    return c.json({ success: true })
+  } catch (error) {
+    console.error('Failed to update user preset:', error)
+    return c.json(
+      { error: error instanceof Error ? error.message : 'Failed to update user preset' },
+      500
+    )
+  }
+})
+
+app.delete('/api/user-presets/:id', async c => {
+  try {
+    if (!c.env.DB) {
+      console.error('Database not available')
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+    const id = c.req.param('id')
+    await deleteUserPreset(c.env.DB, id)
+    return c.json({ success: true })
+  } catch (error) {
+    console.error('Failed to delete user preset:', error)
+    return c.json(
+      { error: error instanceof Error ? error.message : 'Failed to delete user preset' },
       500
     )
   }
