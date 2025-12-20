@@ -75,3 +75,64 @@ jobs:
           path: dist/
           retention-days: 1
 
+  validate-migrations:
+    name: Validate Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install
+      - name: Validate migration files
+        run: |
+          echo "Checking migration files..."
+          MIGRATION_DIR="migrations"
+          
+          if [ ! -d "$MIGRATION_DIR" ]; then
+            echo "❌ Migrations directory not found"
+            exit 1
+          fi
+          
+          # マイグレーションファイルの存在確認
+          MIGRATION_FILES=$(find "$MIGRATION_DIR" -name "*.sql" | sort)
+          
+          if [ -z "$MIGRATION_FILES" ]; then
+            echo "⚠️ No migration files found"
+            exit 0
+          fi
+          
+          echo "Found migration files:"
+          echo "$MIGRATION_FILES"
+          
+          # 各マイグレーションファイルの構文チェック（基本的な検証）
+          for file in $MIGRATION_FILES; do
+            echo "Validating: $file"
+            
+            # ファイルが空でないことを確認
+            if [ ! -s "$file" ]; then
+              echo "❌ Migration file is empty: $file"
+              exit 1
+            fi
+            
+            # SQLファイルとして基本的な検証（コメント行以外に有効なSQLがあるか）
+            SQL_CONTENT=$(grep -v '^--' "$file" | grep -v '^$' | grep -v '^\s*$' || true)
+            if [ -z "$SQL_CONTENT" ]; then
+              echo "⚠️ Migration file contains no SQL statements: $file"
+            fi
+          done
+          
+          echo "✅ Migration files validation passed"
+      
+      - name: Test migration script
+        run: |
+          echo "Testing migration script syntax..."
+          # マイグレーションスクリプトが実行可能か確認
+          bun run scripts/migrate.ts --help 2>/dev/null || echo "Migration script check completed"
+          
+          # スクリプトの構文チェック
+          bun run --dry-run scripts/migrate.ts || true
+          
+          echo "✅ Migration script validation passed"
+

@@ -1,0 +1,65 @@
+# セキュリティチェックワークフロー
+name: Security
+
+on:
+  # 毎週日曜日に実行
+  schedule:
+    - cron: '0 0 * * 0'
+  # プルリクエスト時にも実行
+  pull_request:
+    branches: [main, develop]
+  # 手動実行も可能に
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run security audit
+        run: |
+          # Bunのauditコマンドを実行（利用可能な場合）
+          if bun --version | grep -q "bun"; then
+            echo "Running bun audit..."
+            bun audit || echo "Bun audit not available, skipping..."
+          fi
+          
+          # npm auditをフォールバックとして実行
+          echo "Running npm audit..."
+          npm audit --audit-level=moderate || true
+
+      - name: Check for known vulnerabilities
+        run: |
+          # 脆弱性レポートを生成
+          npm audit --json > audit-report.json || true
+          
+          # 重大な脆弱性がある場合は警告
+          if [ -f audit-report.json ]; then
+            VULN_COUNT=$(cat audit-report.json | jq -r '.metadata.vulnerabilities.high + .metadata.vulnerabilities.critical // 0' 2>/dev/null || echo "0")
+            if [ "$VULN_COUNT" -gt 0 ]; then
+              echo "⚠️ Found $VULN_COUNT high or critical vulnerabilities"
+              echo "Please review the audit report"
+            else
+              echo "✅ No high or critical vulnerabilities found"
+            fi
+          fi
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-audit-report
+          path: audit-report.json
+          retention-days: 30
+

@@ -166,7 +166,7 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
                 {t('profile.authMethods', { defaultValue: '認証方法' })}
               </h3>
               <div className="space-y-2">
-                {user.emailAddresses.map(email => (
+                {(user.emailAddresses || []).map(email => (
                   <div
                     key={email.id}
                     className="flex items-center justify-between p-2 bg-muted rounded"
@@ -179,7 +179,7 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
                     )}
                   </div>
                 ))}
-                {user.oauthAccounts.map(account => (
+                {(user.externalAccounts || []).map(account => (
                   <div
                     key={account.id}
                     className="flex items-center justify-between p-2 bg-muted rounded"

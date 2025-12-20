@@ -44,7 +44,6 @@ import type {
   UpdateUserPresetInput,
 } from './types'
 import { authMiddleware, requireAuth } from './auth'
-import { createClient } from '@libsql/client'
 
 // Honoのコンテキスト変数の型定義（auth.tsと一致させる）
 type HonoVariables = {
@@ -92,11 +91,60 @@ app.use('/*', async (c, next) => {
   return cors(corsOptions)(c, next)
 })
 
-// 認証ミドルウェアをすべてのリクエストに適用
-app.use('/*', authMiddleware)
+// Health check endpoint (認証不要)
+app.get('/health', async c => {
+  try {
+    // データベース接続の確認
+    if (c.env.DB) {
+      await c.env.DB.execute('SELECT 1')
+    }
+    return c.json({ status: 'ok', timestamp: new Date().toISOString() })
+  } catch (error) {
+    return c.json(
+      {
+        status: 'error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
+      },
+      500
+    )
+  }
+})
+
+// 認証ミドルウェアをすべてのリクエストに適用（/healthを除く）
+app.use('/*', async (c, next) => {
+  // /healthエンドポイントは認証不要
+  if (c.req.path === '/health') {
+    await next()
+    return
+  }
+  return authMiddleware(c, next)
+})
 
 // データベースクライアントをリクエストごとに作成（Clerk JWTトークンを使用）
+// /healthエンドポイントは認証不要なので、データベース接続のみ設定
 app.use('/*', async (c, next) => {
+  // /healthエンドポイントの場合は、基本的なデータベース接続のみ設定
+  if (c.req.path === '/health') {
+    const url = c.env.TURSO_DATABASE_URL
+    if (url && !c.env.DB) {
+      if (url.startsWith('file:')) {
+        c.env.DB = createClient({
+          url: `file:${url.replace(/^file:/, '')}`,
+        })
+      } else {
+        const fallbackToken = c.env.TURSO_AUTH_TOKEN
+        if (fallbackToken) {
+          c.env.DB = createClient({
+            url,
+            authToken: fallbackToken,
+          })
+        }
+      }
+    }
+    await next()
+    return
+  }
   const tursoToken = c.get('tursoToken')
   const url = c.env.TURSO_DATABASE_URL
 
