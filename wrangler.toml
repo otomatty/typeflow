@@ -9,7 +9,7 @@
 # 
 # 詳細は docs/TURSO_SETUP.md を参照してください。
 
-name = "typeflow-api"
+name = "typeflow"
 main = "src/server/index.ts"
 compatibility_date = "2024-11-06"
 dev = { port = 3456 }
