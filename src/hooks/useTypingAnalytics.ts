@@ -398,13 +398,19 @@ export function useTypingAnalytics() {
   const sortWordsByReviewTime = useCallback((words: Word[]): Word[] => {
     const now = Date.now()
     return [...words].sort((a, b) => {
-      // 未練習の単語は優先度を下げる
-      if (a.stats.lastPlayed === 0 && b.stats.lastPlayed > 0) return 1
-      if (b.stats.lastPlayed === 0 && a.stats.lastPlayed > 0) return -1
-      // 両方とも未練習の場合は順序を維持
-      if (a.stats.lastPlayed === 0 && b.stats.lastPlayed === 0) return 0
+      // 未練習の単語を最優先（練習回数が0の単語）
+      const aAttempts = a.stats.correct + a.stats.miss
+      const bAttempts = b.stats.correct + b.stats.miss
+      const aIsUnpracticed = aAttempts === 0 || a.stats.lastPlayed === 0
+      const bIsUnpracticed = bAttempts === 0 || b.stats.lastPlayed === 0
 
-      // 次回復習時刻が早い順（過ぎているものが最優先）
+      // 未練習の単語を最優先
+      if (aIsUnpracticed && !bIsUnpracticed) return -1
+      if (!aIsUnpracticed && bIsUnpracticed) return 1
+      // 両方とも未練習の場合は順序を維持
+      if (aIsUnpracticed && bIsUnpracticed) return 0
+
+      // 練習済みの単語は、次回復習時刻が早い順（過ぎているものが最優先）
       const aOverdue = now - a.stats.nextReviewAt
       const bOverdue = now - b.stats.nextReviewAt
       return bOverdue - aOverdue
