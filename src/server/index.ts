@@ -121,31 +121,9 @@ app.use('/*', async (c, next) => {
   return authMiddleware(c, next)
 })
 
-// データベースクライアントをリクエストごとに作成（Clerk JWTトークンを使用）
-// /healthエンドポイントは認証不要なので、データベース接続のみ設定
+// データベースクライアントをリクエストごとに作成
+// 認証はClerkで行い、データベースアクセスはTURSO_AUTH_TOKENを使用
 app.use('/*', async (c, next) => {
-  // /healthエンドポイントの場合は、基本的なデータベース接続のみ設定
-  if (c.req.path === '/health') {
-    const url = c.env.TURSO_DATABASE_URL
-    if (url && !c.env.DB) {
-      if (url.startsWith('file:')) {
-        c.env.DB = createClient({
-          url: `file:${url.replace(/^file:/, '')}`,
-        })
-      } else {
-        const fallbackToken = c.env.TURSO_AUTH_TOKEN
-        if (fallbackToken) {
-          c.env.DB = createClient({
-            url,
-            authToken: fallbackToken,
-          })
-        }
-      }
-    }
-    await next()
-    return
-  }
-  const tursoToken = c.get('tursoToken')
   const url = c.env.TURSO_DATABASE_URL
 
   if (!url) {
@@ -153,27 +131,21 @@ app.use('/*', async (c, next) => {
     return
   }
 
-  // ローカルデータベースの場合は通常のトークンを使用
-  if (url.startsWith('file:')) {
-    const filePath = url.replace(/^file:/, '')
-    c.env.DB = createClient({
-      url: `file:${filePath}`,
-    })
-  } else {
-    // リモートTursoデータベースの場合、ClerkのJWTトークンを使用
-    // TursoはClerkのJWTトークンを直接使用してデータベースアクセスを制御
-    if (tursoToken) {
+  // データベースクライアントが未設定の場合のみ作成
+  if (!c.env.DB) {
+    // ローカルデータベースの場合
+    if (url.startsWith('file:')) {
+      const filePath = url.replace(/^file:/, '')
       c.env.DB = createClient({
-        url,
-        authToken: tursoToken, // ClerkのJWTトークンを使用
+        url: `file:${filePath}`,
       })
     } else {
-      // 認証されていない場合は、通常のトークンを使用（読み取り専用アクセスなど）
-      const fallbackToken = c.env.TURSO_AUTH_TOKEN
-      if (fallbackToken) {
+      // リモートTursoデータベースの場合、TURSO_AUTH_TOKENを使用
+      const authToken = c.env.TURSO_AUTH_TOKEN
+      if (authToken) {
         c.env.DB = createClient({
           url,
-          authToken: fallbackToken,
+          authToken,
         })
       }
     }
