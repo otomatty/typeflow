@@ -50,6 +50,7 @@
     "turso:shell": "turso db shell typeflow-db",
     "deploy": "bunx wrangler deploy",
     "deploy:dev": "bunx wrangler deploy --env development",
+    "deploy:pages": "bun run build && bunx wrangler pages deploy dist --project-name=typeflow",
     "prepare": "husky install"
   },
   "dependencies": {

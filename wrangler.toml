@@ -1,10 +1,15 @@
 # TypeFlow API - Cloudflare Workers設定
 # 
-# このプロジェクトはCloudflare Workers + Tursoデータベースを使用します。
+# ⚠️ 重要: このファイルはバックエンド（Workers）専用の設定です
+# フロントエンドはCloudflare Pagesでデプロイされます（wrangler.tomlは使用しません）
 # 
 # デプロイ先:
 # - バックエンド: Cloudflare Workers（このファイルで設定）
-# - フロントエンド: Cloudflare Pages
+#   - Worker名: typeflow-api
+#   - エントリーポイント: src/server/index.ts
+# - フロントエンド: Cloudflare Pages（GitHub Actionsで自動デプロイ）
+#   - プロジェクト名: typeflow
+#   - ビルド出力: dist/
 # - データベース: Turso（クラウド）またはローカルSQLiteファイル
 # 
 # 詳細は docs/TURSO_SETUP.md を参照してください。

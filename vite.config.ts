@@ -8,10 +8,11 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
   return {
-    // GitHub Pages用のbase path設定
-    base: mode === 'production' ? '/typeflow/' : '/',
+    // Cloudflare Pagesではルートパスを使用
+    // GitHub Pagesを使用する場合は base: '/typeflow/' に変更
+    base: '/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
@@ -20,6 +21,14 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 5173,
+    },
+    // ビルド設定
+    // 注意: src/server ディレクトリは tsconfig.json で除外されているため、
+    // フロントエンドのビルドには含まれません
+    build: {
+      // ビルドの最適化設定
+      minify: 'esbuild' as const,
+      sourcemap: false,
     },
   }
 })
