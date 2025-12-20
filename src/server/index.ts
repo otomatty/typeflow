@@ -182,6 +182,24 @@ app.use('/*', async (c, next) => {
   await next()
 })
 
+// Root endpoint - API情報を返す
+app.get('/', async c => {
+  return c.json({
+    name: 'TypeFlow API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      auth: '/api/auth/me',
+      words: '/api/words',
+      stats: '/api/stats',
+      scores: '/api/scores',
+      settings: '/api/settings',
+      presets: '/api/presets',
+      userPresets: '/api/user-presets',
+    },
+  })
+})
+
 // Auth API - Clerkを使用するため、ユーザー情報のみ返す
 app.get('/api/auth/me', requireAuth, async c => {
   const auth = c.get('auth')
