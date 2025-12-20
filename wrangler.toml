@@ -23,9 +23,9 @@ dev = { port = 3456 }
 # - CLERK_SECRET_KEY
 # - ALLOWED_ORIGINS (オプション)
 # 
-# 注意: [env.production]セクションは空のままにしてください。
-# 環境変数はCloudflare Dashboardで設定したものが使用されます。
-[env.production]
+# 重要: [env.production]セクションを削除することで、
+# Cloudflare Dashboardで設定した環境変数が使用されます。
+# [env.production]セクションが存在すると、Wranglerが環境変数を上書きする可能性があります。
 
 # 開発環境の環境変数設定
 [env.development.vars]
