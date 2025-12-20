@@ -48,7 +48,7 @@
     "turso:create": "turso db create typeflow-db",
     "turso:list": "turso db list",
     "turso:shell": "turso db shell typeflow-db",
-    "deploy": "bunx wrangler deploy --env production",
+    "deploy": "bunx wrangler deploy",
     "deploy:dev": "bunx wrangler deploy --env development",
     "prepare": "husky install"
   },
