@@ -49,7 +49,7 @@ export function toKunreiDisplay(romaji: string): string {
 
 /**
  * 入力済み部分と未入力部分を分離して返す
- * 入力済み部分はユーザーの入力をそのまま使用
+ * 入力済み部分は初期表示（訓令式）の形式に合わせて変換
  * 未入力部分は初期表示（訓令式）から取得
  */
 export function getDisplayParts(
@@ -74,9 +74,31 @@ export function getDisplayParts(
   // 入力にマッチするバリエーションを取得
   const matchingVariation = getMatchingVariation(wordRomaji, currentInput)
   if (!matchingVariation) {
+    // マッチしない場合、入力部分を訓令式に変換して試す
+    const inputKunrei = toKunreiDisplay(normalizedInput)
+    if (initialDisplay.startsWith(inputKunrei)) {
+      return {
+        inputPart: inputKunrei,
+        remainingPart: initialDisplay.substring(inputKunrei.length),
+      }
+    }
+    // それでも一致しない場合は、入力そのままを使用
     return {
       inputPart: normalizedInput,
       remainingPart: initialDisplay.substring(normalizedInput.length),
+    }
+  }
+
+  // マッチするバリエーションの先頭部分（入力に対応する部分）を取得
+  const inputPartFromVariation = matchingVariation.substring(0, normalizedInput.length)
+  // その部分を訓令式に変換
+  const inputPartKunrei = toKunreiDisplay(inputPartFromVariation)
+
+  // 初期表示が変換後の入力部分で始まるか確認
+  if (initialDisplay.startsWith(inputPartKunrei)) {
+    return {
+      inputPart: inputPartKunrei,
+      remainingPart: initialDisplay.substring(inputPartKunrei.length),
     }
   }
 
@@ -93,15 +115,19 @@ export function getDisplayParts(
       const remainingFromInitial = initialDisplay.substring(startIndex)
       // 訓令式に変換した残りと一致するか確認
       if (remainingFromInitial === remainingKunrei) {
-        return { inputPart: normalizedInput, remainingPart: remainingFromInitial }
+        // 入力部分も訓令式に変換
+        return { inputPart: inputPartKunrei, remainingPart: remainingFromInitial }
       }
     }
   }
 
-  // 入力が音節の途中の場合、またはマッチしない場合はマッチするバリエーションを使用
+  // 入力が音節の途中の場合、またはマッチしない場合は変換後の入力部分を使用
+  const remainingFromVariation = matchingVariation.substring(normalizedInput.length)
+  const remainingKunrei = toKunreiDisplay(remainingFromVariation)
+
   return {
-    inputPart: normalizedInput,
-    remainingPart: matchingVariation.substring(normalizedInput.length),
+    inputPart: inputPartKunrei,
+    remainingPart: remainingKunrei,
   }
 }
 

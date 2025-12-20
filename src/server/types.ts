@@ -426,4 +426,6 @@ export interface Env {
   TURSO_AUTH_TOKEN?: string
   /** CORS許可オリジン（カンマ区切り） */
   ALLOWED_ORIGINS?: string
+  /** Clerk認証のシークレットキー */
+  CLERK_SECRET_KEY?: string
 }

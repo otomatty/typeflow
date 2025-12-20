@@ -26,18 +26,13 @@ export interface AuthContext {
   isAuthenticated: boolean
 }
 
-// Clerkクライアントの初期化
-let clerkClient: ReturnType<typeof createClerkClient> | null = null
-
-function getClerkClient() {
-  if (!clerkClient) {
-    const secretKey = process.env.CLERK_SECRET_KEY
-    if (!secretKey) {
-      throw new Error('CLERK_SECRET_KEY environment variable is required')
-    }
-    clerkClient = createClerkClient({ secretKey })
+// Clerkクライアントの初期化（リクエストごとに初期化）
+function getClerkClient(env: Env) {
+  const secretKey = env.CLERK_SECRET_KEY || process.env.CLERK_SECRET_KEY
+  if (!secretKey) {
+    throw new Error('CLERK_SECRET_KEY environment variable is required')
   }
-  return clerkClient
+  return createClerkClient({ secretKey })
 }
 
 /**
@@ -76,9 +71,13 @@ export async function authMiddleware(
   }
 
   try {
-    const clerk = getClerkClient()
+    const secretKey = c.env.CLERK_SECRET_KEY || process.env.CLERK_SECRET_KEY
+    if (!secretKey) {
+      throw new Error('CLERK_SECRET_KEY environment variable is required')
+    }
+    const clerk = getClerkClient(c.env)
     const payload = await verifyToken(token, {
-      secretKey: process.env.CLERK_SECRET_KEY,
+      secretKey,
     })
 
     if (!payload) {
