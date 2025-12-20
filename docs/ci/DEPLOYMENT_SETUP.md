@@ -51,6 +51,7 @@ GitHubリポジトリに以下のシークレットを設定する必要があ�
      10. 問題がなければ **"Create Token"** をクリック
      11. **重要**: 生成されたトークンは一度しか表示されません。必ず安全な場所にコピーして保存してください
      12. GitHubシークレットに設定
+
    - 参考:
      - [Cloudflare API Tokens - Account-owned tokens](https://developers.cloudflare.com/fundamentals/api/get-started/account-owned-tokens/)
      - [Create API token](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/)
@@ -78,16 +79,41 @@ GitHubリポジトリに以下のシークレットを設定する必要があ�
 
 5. **TURSO_DATABASE_URL**
    - TursoデータベースのURL
-   - 例: `libsql://your-database.turso.io`
+   - 取得方法:
+     1. **Turso CLIを使用する場合（推奨）**:
+        ```bash
+        # データベースURLを取得
+        turso db show your-database-name --url
+        ```
+        出力例: `libsql://your-database-name-your-org.turso.io`
+     2. **Turso Dashboardを使用する場合**:
+        1. [Turso Dashboard](https://turso.tech/)にログイン
+        2. データベース一覧から対象のデータベースを選択
+        3. データベースの詳細ページで **"Connection"** または **"Connect"** セクションを確認
+        4. **"Database URL"** をコピー
+   - 例: `libsql://your-database-name-your-org.turso.io`
    - 本番環境のTursoデータベースURLを設定
+   - 参考: [Turso Documentation](https://docs.turso.tech/)
 
 6. **TURSO_AUTH_TOKEN**
    - Tursoデータベースの認証トークン
    - 取得方法:
-     ```bash
-     turso db tokens create your-database-name
-     ```
+     1. **Turso CLIを使用する場合（推奨）**:
+        ```bash
+        # 認証トークンを作成（読み書き用）
+        turso db tokens create your-database-name
+        ```
+        **重要**: トークンは一度しか表示されません。必ず安全な場所にコピーして保存してください。
+     2. **Turso Dashboardを使用する場合**:
+        1. [Turso Dashboard](https://turso.tech/)にログイン
+        2. データベース一覧から対象のデータベースを選択
+        3. データベースの詳細ページで **"Tokens"** または **"API Tokens"** セクションを確認
+        4. **"Create Token"** をクリック
+        5. トークン名を入力（例: `production-token`）
+        6. 必要に応じて権限を設定（読み書き用または読み取り専用）
+        7. 生成されたトークンをコピーして保存
    - 本番環境用のトークンを設定
+   - 参考: [Turso Documentation](https://docs.turso.tech/)
 
 ### 認証関連
 
@@ -100,8 +126,32 @@ GitHubリポジトリに以下のシークレットを設定する必要があ�
 
 8. **VITE_API_BASE_URL**
    - フロントエンドからアクセスするAPIのベースURL
+   - 取得方法:
+     1. **Cloudflare Workersをデプロイした後**:
+        - WorkersのURLに `/api` を追加したものが `VITE_API_BASE_URL` になります
+        - 例: Workers URLが `https://typeflow-api.your-subdomain.workers.dev` の場合
+        - `VITE_API_BASE_URL` は `https://typeflow-api.your-subdomain.workers.dev/api` になります
+     2. **Wrangler CLIでデプロイした場合**:
+        ```bash
+        wrangler deploy
+        ```
+        デプロイ成功後、出力にWorkersのURLが表示されます（例: `https://typeflow-api.your-subdomain.workers.dev`）
+        このURLに `/api` を追加して `VITE_API_BASE_URL` として設定します
+     3. **Cloudflare Dashboardから確認する場合**:
+        1. [Cloudflare Dashboard](https://dash.cloudflare.com/)にログイン
+        2. **Workers & Pages** → **Workers** に移動
+        3. デプロイしたWorker（例: `typeflow-api`）をクリック
+        4. Workerの詳細ページで **"Trigger"** または **"Quick edit"** セクションを確認
+        5. **"Workers URL"** または **"Route"** に表示されているURLをコピー
+        6. このURLに `/api` を追加して `VITE_API_BASE_URL` として設定
+     4. **wrangler.tomlから推測する場合**:
+        - `wrangler.toml` の `name` フィールド（例: `typeflow-api`）とサブドメインから推測可能
+        - 形式: `https://{name}.{subdomain}.workers.dev/api`
+        - 例: `name = "typeflow-api"` でサブドメインが `your-subdomain` の場合
+        - URL: `https://typeflow-api.your-subdomain.workers.dev/api`
    - 例: `https://typeflow-api.your-subdomain.workers.dev/api`
    - Cloudflare Pagesのビルド時に使用
+   - **注意**: WorkersのURLは初回デプロイ後に確定します。デプロイ前に設定する場合は、予想されるURLを設定してください
 
 ## GitHubシークレットの設定方法
 

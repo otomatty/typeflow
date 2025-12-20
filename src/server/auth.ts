@@ -43,7 +43,9 @@ function getClerkClient() {
 /**
  * リクエストからJWTトークンを取得
  */
-function getTokenFromRequest(c: Context<{ Bindings: Env }>): string | null {
+function getTokenFromRequest(
+  c: Context<{ Bindings: Env; Variables: HonoVariables }>
+): string | null {
   // Authorizationヘッダーから取得
   const authHeader = c.req.header('Authorization')
   if (authHeader?.startsWith('Bearer ')) {
