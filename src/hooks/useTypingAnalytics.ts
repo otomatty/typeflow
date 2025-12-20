@@ -468,8 +468,8 @@ export function useTypingAnalytics() {
           kps: stats.kps,
           totalKeystrokes: stats.totalKeystrokes,
           accuracy: stats.accuracy,
-          correctWords: stats.correctWords,
-          perfectWords: stats.perfectWords,
+          completedWords: stats.completedWords,
+          successfulWords: stats.successfulWords,
           totalWords: stats.totalWords,
           totalTime: stats.totalTime,
         })

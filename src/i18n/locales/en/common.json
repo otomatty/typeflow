@@ -1,6 +1,6 @@
 {
   "app_name": "TypeFlow",
-  "app_tagline": "Developer Typing Trainer",
+  "app_tagline": "Typing practice app to improve typing speed",
   "cancel": "Cancel",
   "save": "Save",
   "delete": "Delete",
@@ -19,5 +19,44 @@
     "words": "Words",
     "stats": "Stats",
     "settings": "Settings"
+  },
+  "userMenu": {
+    "profile": "Edit Profile",
+    "settings": "Settings",
+    "presets": "Presets",
+    "logout": "Logout"
+  },
+  "profile": {
+    "title": "Edit Profile",
+    "description": "You can edit your account information",
+    "name": "Name",
+    "namePlaceholder": "Enter your name",
+    "nameHint": "Used as display name",
+    "email": "Email Address",
+    "emailNote": "Email address can be changed from Clerk settings",
+    "avatarNote": "Profile image can be changed from Clerk settings",
+    "authMethods": "Authentication Methods",
+    "verified": "Verified",
+    "connected": "Connected",
+    "authMethodsNote": "Authentication methods can be added or removed from Clerk settings",
+    "update": "Update",
+    "updateSuccess": "Profile updated successfully",
+    "updateError": "Failed to update profile"
+  },
+  "auth": {
+    "welcome": "Sign in to start typing practice",
+    "signInWithGoogle": "Sign in with Google",
+    "signInWithGithub": "Sign in with GitHub",
+    "signInWithEmail": "Sign in with Email",
+    "or": "or",
+    "email": "Email Address",
+    "password": "Password",
+    "optional": "optional",
+    "passwordPlaceholder": "Password (optional for first time)",
+    "passwordHint": "You can leave password blank on first login. Account will be created automatically.",
+    "signIn": "Sign In",
+    "signInError": "Failed to sign in",
+    "oauthError": "Authentication failed",
+    "additionalSteps": "Additional authentication steps required"
   }
 }

@@ -43,17 +43,22 @@ import type {
   CreateUserPresetInput,
   UpdateUserPresetInput,
 } from './types'
+import { authMiddleware, requireAuth } from './auth'
+import { createClient } from '@libsql/client'
 
-// Honoのコンテキスト変数の型定義
+// Honoのコンテキスト変数の型定義（auth.tsと一致させる）
 type HonoVariables = {
   auth: {
     user: {
       id: string
-      email?: string
-      name?: string
+      username: string | null
+      email: string | null
+      firstName: string | null
+      lastName: string | null
     } | null
     isAuthenticated: boolean
   }
+  tursoToken: string | null
 }
 
 type HonoEnv = {
@@ -80,14 +85,69 @@ app.use('/*', async (c, next) => {
       return allowedOrigins.includes(origin) ? origin : null
     },
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   }
 
   return cors(corsOptions)(c, next)
 })
 
-// Words API
-app.get('/api/words', async c => {
+// 認証ミドルウェアをすべてのリクエストに適用
+app.use('/*', authMiddleware)
+
+// データベースクライアントをリクエストごとに作成（Clerk JWTトークンを使用）
+app.use('/*', async (c, next) => {
+  const tursoToken = c.get('tursoToken')
+  const url = c.env.TURSO_DATABASE_URL
+
+  if (!url) {
+    await next()
+    return
+  }
+
+  // ローカルデータベースの場合は通常のトークンを使用
+  if (url.startsWith('file:')) {
+    const filePath = url.replace(/^file:/, '')
+    c.env.DB = createClient({
+      url: `file:${filePath}`,
+    })
+  } else {
+    // リモートTursoデータベースの場合、ClerkのJWTトークンを使用
+    // TursoはClerkのJWTトークンを直接使用してデータベースアクセスを制御
+    if (tursoToken) {
+      c.env.DB = createClient({
+        url,
+        authToken: tursoToken, // ClerkのJWTトークンを使用
+      })
+    } else {
+      // 認証されていない場合は、通常のトークンを使用（読み取り専用アクセスなど）
+      const fallbackToken = c.env.TURSO_AUTH_TOKEN
+      if (fallbackToken) {
+        c.env.DB = createClient({
+          url,
+          authToken: fallbackToken,
+        })
+      }
+    }
+  }
+
+  await next()
+})
+
+// Auth API - Clerkを使用するため、ユーザー情報のみ返す
+app.get('/api/auth/me', requireAuth, async c => {
+  const auth = c.get('auth')
+  if (!auth || !auth.isAuthenticated || !auth.user) {
+    return c.json({ error: 'Unauthorized' }, 401)
+  }
+
+  return c.json({
+    user: auth.user,
+  })
+})
+
+// Words API - 認証が必要なエンドポイント
+app.get('/api/words', requireAuth, async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')
@@ -101,7 +161,7 @@ app.get('/api/words', async c => {
   }
 })
 
-app.post('/api/words', async c => {
+app.post('/api/words', requireAuth, async c => {
   try {
     if (!c.env.DB) {
       console.error('Database not available')

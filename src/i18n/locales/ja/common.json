@@ -1,6 +1,6 @@
 {
   "app_name": "TypeFlow",
-  "app_tagline": "デベロッパー向けタイピング練習",
+  "app_tagline": "タイピング速度を上げるための練習アプリ",
   "cancel": "キャンセル",
   "save": "保存",
   "delete": "削除",
@@ -19,5 +19,44 @@
     "words": "単語",
     "stats": "統計",
     "settings": "設定"
+  },
+  "userMenu": {
+    "profile": "プロフィール編集",
+    "settings": "設定",
+    "presets": "プリセット",
+    "logout": "ログアウト"
+  },
+  "profile": {
+    "title": "プロフィール編集",
+    "description": "アカウント情報を編集できます",
+    "name": "名前",
+    "namePlaceholder": "名前を入力",
+    "nameHint": "表示名として使用されます",
+    "email": "メールアドレス",
+    "emailNote": "メールアドレスはClerkの設定から変更できます",
+    "avatarNote": "プロフィール画像はClerkの設定から変更できます",
+    "authMethods": "認証方法",
+    "verified": "確認済み",
+    "connected": "接続済み",
+    "authMethodsNote": "認証方法の追加・削除はClerkの設定から行えます",
+    "update": "更新",
+    "updateSuccess": "プロフィールを更新しました",
+    "updateError": "プロフィールの更新に失敗しました"
+  },
+  "auth": {
+    "welcome": "ログインしてタイピング練習を始めましょう",
+    "signInWithGoogle": "Googleでログイン",
+    "signInWithGithub": "GitHubでログイン",
+    "signInWithEmail": "メールアドレスでログイン",
+    "or": "または",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "optional": "任意",
+    "passwordPlaceholder": "パスワード（初回は空欄可）",
+    "passwordHint": "初回ログイン時はパスワードを空欄にできます。アカウントが自動的に作成されます。",
+    "signIn": "ログイン",
+    "signInError": "ログインに失敗しました",
+    "oauthError": "認証に失敗しました",
+    "additionalSteps": "追加の認証ステップが必要です"
   }
 }

@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { Home, List, BarChart3, Settings, Package } from 'lucide-react'
-
-type ViewType = 'menu' | 'words' | 'stats' | 'settings' | 'presets' | 'game' | 'gameover'
+import { Home, List, BarChart3 } from 'lucide-react'
+import { UserMenu } from '@/components/UserMenu'
+import type { ViewType } from '@/hooks/useGame'
 
 interface HeaderProps {
   currentView: ViewType
@@ -55,27 +55,9 @@ export function Header({ currentView, onNavigate }: HeaderProps) {
             <BarChart3 className="w-4 h-4" />
             <span className="hidden sm:inline">{t('header.stats')}</span>
           </Button>
-          <Button
-            variant={currentView === 'presets' ? 'secondary' : 'ghost'}
-            size="sm"
-            onClick={() => onNavigate('presets')}
-            className="gap-2"
-          >
-            <Package className="w-4 h-4" />
-            <span className="hidden sm:inline">
-              {t('header.presets', { defaultValue: 'プリセット' })}
-            </span>
-          </Button>
-          <Button
-            variant={currentView === 'settings' ? 'secondary' : 'ghost'}
-            size="sm"
-            onClick={() => onNavigate('settings')}
-            className="gap-2"
-          >
-            <Settings className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('header.settings')}</span>
-          </Button>
         </nav>
+
+        <UserMenu onNavigate={onNavigate} />
       </div>
     </header>
   )

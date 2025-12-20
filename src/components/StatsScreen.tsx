@@ -51,8 +51,8 @@ interface DailyStats {
   games: number
   totalKeystrokes: number
   totalWords: number
-  correctWords: number
-  perfectWords: number
+  completedWords: number // 入力完了した単語数（時間切れでないもの）
+  successfulWords: number // 成功した単語数（ミスなく完了）
   totalTime: number
   avgKps: number
   avgAccuracy: number
@@ -66,8 +66,8 @@ function calculateDailyStats(gameScores: GameScoreRecord[], locale: string): Dai
       games: number
       totalKeystrokes: number
       totalWords: number
-      correctWords: number
-      perfectWords: number
+      completedWords: number
+      successfulWords: number
       totalTime: number
       kpsSum: number
       accuracySum: number
@@ -82,8 +82,8 @@ function calculateDailyStats(gameScores: GameScoreRecord[], locale: string): Dai
       games: 0,
       totalKeystrokes: 0,
       totalWords: 0,
-      correctWords: 0,
-      perfectWords: 0,
+      completedWords: 0,
+      successfulWords: 0,
       totalTime: 0,
       kpsSum: 0,
       accuracySum: 0,
@@ -92,8 +92,8 @@ function calculateDailyStats(gameScores: GameScoreRecord[], locale: string): Dai
     existing.games++
     existing.totalKeystrokes += score.totalKeystrokes
     existing.totalWords += score.totalWords
-    existing.correctWords += score.correctWords
-    existing.perfectWords += score.perfectWords
+    existing.completedWords += score.completedWords
+    existing.successfulWords += score.successfulWords
     existing.totalTime += score.totalTime
     existing.kpsSum += score.kps
     existing.accuracySum += score.accuracy
@@ -114,8 +114,8 @@ function calculateDailyStats(gameScores: GameScoreRecord[], locale: string): Dai
       games: stats.games,
       totalKeystrokes: stats.totalKeystrokes,
       totalWords: stats.totalWords,
-      correctWords: stats.correctWords,
-      perfectWords: stats.perfectWords,
+      completedWords: stats.completedWords,
+      successfulWords: stats.successfulWords,
       totalTime: stats.totalTime,
       avgKps: Math.round((stats.kpsSum / stats.games) * 10) / 10,
       avgAccuracy: Math.round((stats.accuracySum / stats.games) * 10) / 10,
@@ -323,7 +323,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
       game: index + 1,
       kps: Math.max(0, score.kps),
       accuracy: Math.max(0, score.accuracy),
-      correctWords: Math.max(0, score.correctWords),
+      completedWords: Math.max(0, score.completedWords),
       date: new Date(score.playedAt).toLocaleDateString(locale, {
         month: 'short',
         day: 'numeric',
@@ -343,7 +343,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
       label: t('accuracy'),
       color: 'hsl(var(--chart-2))',
     },
-    correctWords: {
+    completedWords: {
       label: t('words_chart'),
       color: 'hsl(var(--chart-3))',
     },
@@ -554,7 +554,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                       <Line
                         yAxisId="left"
                         type="monotone"
-                        dataKey="correctWords"
+                        dataKey="completedWords"
                         name={t('words_chart')}
                         stroke="hsl(var(--chart-3))"
                         strokeWidth={2}

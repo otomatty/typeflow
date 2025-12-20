@@ -9,6 +9,7 @@
   "keys_per_sec": "打鍵/秒",
   "total_keystrokes": "総打鍵数",
   "perfect_words": "完璧な単語",
+  "successful_words": "成功した単語",
   "total_time": "総時間",
   "retry_weak_words": "苦手な単語を復習",
   "play_again": "もう一度プレイ（全単語）",

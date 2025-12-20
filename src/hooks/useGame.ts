@@ -7,6 +7,7 @@ import {
   AppSettings,
   DifficultyParams,
   WordPerformanceRecord,
+  determineWordResult,
 } from '@/lib/types'
 import { validateRomajiInput, getMatchingVariation, normalizeRomaji } from '@/lib/romaji-utils'
 import { calculateWordTimeLimit } from '@/lib/adaptive-time-utils'
@@ -14,7 +15,15 @@ import { calculateMissPenalty } from '@/lib/difficulty-presets'
 import { GameScoreRecord } from '@/lib/db'
 import { toast } from 'sonner'
 
-export type ViewType = 'menu' | 'words' | 'stats' | 'settings' | 'presets' | 'game' | 'gameover'
+export type ViewType =
+  | 'menu'
+  | 'words'
+  | 'stats'
+  | 'settings'
+  | 'presets'
+  | 'game'
+  | 'gameover'
+  | 'profile'
 
 interface UseGameProps {
   words: Word[]
@@ -69,8 +78,9 @@ export function useGame({
     kps: 0,
     totalKeystrokes: 0,
     accuracy: 100,
-    correctWords: 0,
-    perfectWords: 0,
+    completedWords: 0,
+    successfulWords: 0,
+    failedWords: 0,
     totalWords: 0,
     totalTime: 0,
     avgReactionTime: 0,
@@ -103,6 +113,7 @@ export function useGame({
       // タイムアウト時: 現在の単語のパフォーマンスを記録（未完了として）
       if (!completed && currentWordPerformanceRef.current) {
         const currentPerf = currentWordPerformanceRef.current
+        const isCompleted = false
         const wordPerformance: WordPerformanceRecord = {
           wordId: currentPerf.wordId,
           wordText: currentPerf.wordText,
@@ -115,7 +126,8 @@ export function useGame({
           totalTime: endTime - currentPerf.startTime,
           keystrokeCount: currentPerf.keystrokeCount,
           missCount: currentPerf.missCount,
-          completed: false,
+          completed: isCompleted,
+          result: determineWordResult(isCompleted, currentPerf.missCount), // 時間切れは必ず失敗
         }
         wordPerformancesRef.current.push(wordPerformance)
       }
@@ -123,13 +135,15 @@ export function useGame({
       // wordPerformancesから実際の統計を計算
       const performances = wordPerformancesRef.current
       // 実際にやった問題数 = wordPerformancesの数（タイムアウトした問題も含む）
-      const wordsCompleted = performances.length
-      // 完璧な単語数 = ミスがなく、完了した単語数
-      const perfectWords = performances.filter(p => p.missCount === 0 && p.completed).length
-      // ミスがあった単語のIDを抽出（ミスがあった、または未完了の単語）
-      const mistakeWordIds = performances
-        .filter(p => p.missCount > 0 || !p.completed)
-        .map(p => p.wordId)
+      const totalAttempted = performances.length
+      // 入力完了した単語数（時間切れでないもの）
+      const completedWords = performances.filter(p => p.completed).length
+      // 成功した単語数 = ミスなく完了（result === 'success'）
+      const successfulWords = performances.filter(p => p.result === 'success').length
+      // 失敗した単語数 = ミスありまたは時間切れ（result === 'failed'）
+      const failedWords = performances.filter(p => p.result === 'failed').length
+      // 失敗した単語のIDを抽出（復習用）
+      const mistakeWordIds = performances.filter(p => p.result === 'failed').map(p => p.wordId)
 
       // やり直しモード中にタイムアウトした場合、mistakeWords をやり直し開始時の状態に復元
       // 完了時は、wordPerformancesから抽出したmistakeWordIdsを使用
@@ -147,22 +161,23 @@ export function useGame({
         finalMistakeWords = mistakeWordIds
       }
 
-      // 復習モード中に全ての単語を正解したかどうかをwordPerformancesで判定
-      const allWordsPerfect =
+      // 復習モード中に全ての単語を成功したかどうかをwordPerformancesで判定
+      const allWordsSuccessful =
         isRetryModeRef.current &&
         completed &&
         performances.length > 0 &&
-        performances.every(p => p.missCount === 0 && p.completed)
+        performances.every(p => p.result === 'success')
 
-      // やり直しモード中に全ての単語を正解した場合、新しいゲームを自動的に開始
-      const shouldStartNewGame = completed && isRetryModeRef.current && allWordsPerfect
+      // やり直しモード中に全ての単語を成功した場合、新しいゲームを自動的に開始
+      const shouldStartNewGame = completed && isRetryModeRef.current && allWordsSuccessful
 
       // KPS = 総打鍵数 / 総時間（秒）
       const kps =
         totalSeconds > 0 ? Math.round((gameState.totalKeystrokes / totalSeconds) * 10) / 10 : 0
 
-      // 正確率 = ノーミスワード数 / 完了ワード数 * 100
-      const accuracy = wordsCompleted > 0 ? Math.round((perfectWords / wordsCompleted) * 100) : 100
+      // 正確率 = 成功ワード数 / 試行ワード数 * 100
+      const accuracy =
+        totalAttempted > 0 ? Math.round((successfulWords / totalAttempted) * 100) : 100
 
       // 初動統計を計算（performancesは既に上で取得済み）
       const performancesWithReaction = performances.filter(p => p.reactionTime > 0)
@@ -185,8 +200,9 @@ export function useGame({
         kps,
         totalKeystrokes: gameState.totalKeystrokes,
         accuracy,
-        correctWords: wordsCompleted,
-        perfectWords: Math.max(0, perfectWords),
+        completedWords,
+        successfulWords,
+        failedWords,
         totalWords: gameState.words.length,
         totalTime: totalSeconds,
         avgReactionTime,
@@ -348,10 +364,10 @@ export function useGame({
       if (view === 'gameover') {
         if (e.key === ' ') {
           e.preventDefault()
-          // 間違った問題がある時は復習、ない時は新しいゲームを開始
-          // gameStats.wordPerformancesを使って実際のミスを判定
-          const hasMistakes = gameStats.wordPerformances.some(p => p.missCount > 0 || !p.completed)
-          if (hasMistakes) {
+          // 失敗した問題がある時は復習、ない時は新しいゲームを開始
+          // gameStats.wordPerformancesを使って実際の失敗を判定
+          const hasFailedWords = gameStats.wordPerformances.some(p => p.result === 'failed')
+          if (hasFailedWords) {
             retryWeakWords()
           } else {
             startGame() // Uses getGameWords callback if provided to apply settings
@@ -497,6 +513,7 @@ export function useGame({
           // 現在の単語のパフォーマンスを記録
           if (currentWordPerformanceRef.current) {
             const currentPerf = currentWordPerformanceRef.current
+            const isCompleted = true
             const wordPerformance: WordPerformanceRecord = {
               wordId: currentPerf.wordId,
               wordText: currentPerf.wordText,
@@ -509,14 +526,17 @@ export function useGame({
               totalTime: completionTime - currentPerf.startTime,
               keystrokeCount: currentPerf.keystrokeCount,
               missCount: currentPerf.missCount,
-              completed: true,
+              completed: isCompleted,
+              result: determineWordResult(isCompleted, currentPerf.missCount),
             }
             wordPerformancesRef.current.push(wordPerformance)
           }
 
-          // やり直しモード中で、ミスなく正しく入力できた単語は mistakeWords から削除
+          // やり直しモード中で、成功した単語（ミスなく完了）は mistakeWords から削除
           const shouldRemoveFromMistakes =
-            isRetryModeRef.current && currentWordPerformanceRef.current?.missCount === 0
+            isRetryModeRef.current &&
+            determineWordResult(true, currentWordPerformanceRef.current?.missCount ?? 0) ===
+              'success'
 
           if (gameState.currentWordIndex + 1 >= gameState.words.length) {
             // 最後の単語が完了した場合も、mistakeWords から削除
@@ -590,10 +610,13 @@ export function useGame({
     // KPS = 総打鍵数 / 経過時間（秒）
     const kps = elapsed > 0 ? Math.round((gameState.totalKeystrokes / elapsed) * 10) / 10 : 0
 
-    // 正確率 = ノーミスワード数 / 完了ワード数 * 100
-    const perfectWords = gameState.correctCount - gameState.mistakeWords.length
+    // 正確率 = 成功ワード数（ミスなし完了）/ 完了ワード数 * 100
+    // 成功ワード数 = 完了数 - 失敗（ミスあり）した単語数
+    const successfulWords = gameState.correctCount - gameState.mistakeWords.length
     const accuracy =
-      gameState.correctCount > 0 ? Math.round((perfectWords / gameState.correctCount) * 100) : 100
+      gameState.correctCount > 0
+        ? Math.round((successfulWords / gameState.correctCount) * 100)
+        : 100
 
     return { kps, accuracy }
   }, [
@@ -628,22 +651,6 @@ export function useGame({
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [handleKeyPress])
-
-  // やり直しモード中に全ての単語を正解した場合、新しいゲームを自動的に開始
-  useEffect(() => {
-    if (
-      view === 'gameover' &&
-      shouldAutoStartNewGameRef.current &&
-      gameState.mistakeWords.length === 0
-    ) {
-      shouldAutoStartNewGameRef.current = false
-      // 少し遅延を入れてから新しいゲームを開始（統計表示を一瞬見せるため）
-      const timer = setTimeout(() => {
-        startGame()
-      }, 100)
-      return () => clearTimeout(timer)
-    }
-  }, [view, gameState.mistakeWords.length, startGame])
 
   return {
     view,

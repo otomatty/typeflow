@@ -9,6 +9,7 @@
   "keys_per_sec": "Keys/Sec",
   "total_keystrokes": "Total Keystrokes",
   "perfect_words": "Perfect Words",
+  "successful_words": "Successful Words",
   "total_time": "Total Time",
   "retry_weak_words": "Retry Weak Words",
   "play_again": "Play Again (All Words)",

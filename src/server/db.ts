@@ -26,6 +26,9 @@ import type {
   UserPresetRecord,
   CreateUserPresetInput,
   UpdateUserPresetInput,
+  UserRow,
+  UserRecord,
+  CreateUserInput,
 } from './types'
 
 // snake_case → camelCase 変換
@@ -409,8 +412,8 @@ export async function getAllGameScores(db: Client): Promise<GameScoreRecord[]> {
       kps: r.kps,
       totalKeystrokes: r.total_keystrokes,
       accuracy: r.accuracy,
-      correctWords: r.correct_words,
-      perfectWords: r.perfect_words,
+      completedWords: r.correct_words, // DBカラム名はcorrect_words
+      successfulWords: r.perfect_words, // DBカラム名はperfect_words
       totalWords: r.total_words,
       totalTime: r.total_time,
       playedAt: r.played_at,
@@ -426,8 +429,8 @@ export async function createGameScore(db: Client, input: CreateGameScoreInput): 
       input.kps,
       input.totalKeystrokes,
       input.accuracy,
-      input.correctWords,
-      input.perfectWords,
+      input.completedWords, // DBカラム名はcorrect_words
+      input.successfulWords, // DBカラム名はperfect_words
       input.totalWords,
       input.totalTime,
       Date.now(),
@@ -841,4 +844,81 @@ export async function deleteUserPreset(db: Client, id: string): Promise<void> {
 export async function deleteAllUserPresets(db: Client): Promise<void> {
   // 外部キー制約により、user_preset_wordsも自動的に削除される
   await db.execute('DELETE FROM user_presets')
+}
+
+// Users操作
+export function userRowToRecord(row: UserRow): UserRecord {
+  return {
+    id: row.id,
+    username: row.username,
+    email: row.email,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    lastLoginAt: row.last_login_at,
+  }
+}
+
+export async function getUserById(db: Client, id: string): Promise<UserRecord | null> {
+  const result = await db.execute({
+    sql: 'SELECT * FROM users WHERE id = ?',
+    args: [id],
+  })
+  const row = result.rows[0] as unknown as UserRow | undefined
+  return row ? userRowToRecord(row) : null
+}
+
+export async function getUserByUsername(db: Client, username: string): Promise<UserRecord | null> {
+  const result = await db.execute({
+    sql: 'SELECT * FROM users WHERE username = ?',
+    args: [username],
+  })
+  const row = result.rows[0] as unknown as UserRow | undefined
+  return row ? userRowToRecord(row) : null
+}
+
+export async function getUserByEmail(db: Client, email: string): Promise<UserRecord | null> {
+  const result = await db.execute({
+    sql: 'SELECT * FROM users WHERE email = ?',
+    args: [email],
+  })
+  const row = result.rows[0] as unknown as UserRow | undefined
+  return row ? userRowToRecord(row) : null
+}
+
+export async function getUserByUsernameOrEmail(
+  db: Client,
+  usernameOrEmail: string
+): Promise<(UserRecord & { passwordHash: string }) | null> {
+  const result = await db.execute({
+    sql: 'SELECT * FROM users WHERE username = ? OR email = ?',
+    args: [usernameOrEmail, usernameOrEmail],
+  })
+  const row = result.rows[0] as unknown as UserRow | undefined
+  if (!row) {
+    return null
+  }
+  return {
+    ...userRowToRecord(row),
+    passwordHash: row.password_hash,
+  }
+}
+
+export async function createUser(db: Client, input: CreateUserInput): Promise<string> {
+  const id = crypto.randomUUID()
+  const now = Date.now()
+
+  await db.execute({
+    sql: `INSERT INTO users (id, username, email, password_hash, created_at, updated_at, last_login_at)
+       VALUES (?, ?, ?, ?, ?, ?, NULL)`,
+    args: [id, input.username, input.email, input.passwordHash, now, now],
+  })
+
+  return id
+}
+
+export async function updateUserLastLogin(db: Client, id: string): Promise<void> {
+  await db.execute({
+    sql: 'UPDATE users SET last_login_at = ?, updated_at = ? WHERE id = ?',
+    args: [Date.now(), Date.now(), id],
+  })
 }

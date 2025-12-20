@@ -1,26 +1,24 @@
 import type { Context } from 'hono'
 import type { Env } from './types'
+import { createClerkClient, verifyToken } from '@clerk/backend'
 
 // Honoのコンテキスト変数の型定義（index.tsと一致させる）
 type HonoVariables = {
   auth: AuthContext
+  tursoToken: string | null
 }
 
 /**
- * 認証ミドルウェア（将来の拡張用）
- *
- * 現在はスケルトンのみ実装されています。
- * 将来的に以下の認証方式を実装可能：
- * - JWT認証
- * - APIキー認証
- * - OAuth認証
- * - セッション認証
+ * 認証ミドルウェア
+ * Clerk JWT認証を実装
  */
 
 export interface AuthUser {
   id: string
-  email?: string
-  name?: string
+  username: string | null
+  email: string | null
+  firstName: string | null
+  lastName: string | null
 }
 
 export interface AuthContext {
@@ -28,22 +26,95 @@ export interface AuthContext {
   isAuthenticated: boolean
 }
 
+// Clerkクライアントの初期化
+let clerkClient: ReturnType<typeof createClerkClient> | null = null
+
+function getClerkClient() {
+  if (!clerkClient) {
+    const secretKey = process.env.CLERK_SECRET_KEY
+    if (!secretKey) {
+      throw new Error('CLERK_SECRET_KEY environment variable is required')
+    }
+    clerkClient = createClerkClient({ secretKey })
+  }
+  return clerkClient
+}
+
+/**
+ * リクエストからJWTトークンを取得
+ */
+function getTokenFromRequest(c: Context<{ Bindings: Env }>): string | null {
+  // Authorizationヘッダーから取得
+  const authHeader = c.req.header('Authorization')
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.substring(7)
+  }
+
+  return null
+}
+
 /**
  * 認証ミドルウェア
- * リクエストから認証情報を取得し、コンテキストに追加
+ * Clerk JWTトークンを検証し、Tursoクライアントに渡す
  */
 export async function authMiddleware(
   c: Context<{ Bindings: Env; Variables: HonoVariables }>,
   next: () => Promise<void>
 ): Promise<void> {
-  // TODO: 認証ロジックを実装
-  // 例: JWTトークンの検証、APIキーの確認など
+  const token = getTokenFromRequest(c)
 
-  // 現時点では認証なしで通過
-  c.set('auth', {
-    user: null,
-    isAuthenticated: false,
-  })
+  if (!token) {
+    c.set('auth', {
+      user: null,
+      isAuthenticated: false,
+    })
+    c.set('tursoToken', null)
+    await next()
+    return
+  }
+
+  try {
+    const clerk = getClerkClient()
+    const payload = await verifyToken(token, {
+      secretKey: process.env.CLERK_SECRET_KEY,
+    })
+
+    if (!payload) {
+      c.set('auth', {
+        user: null,
+        isAuthenticated: false,
+      })
+      c.set('tursoToken', null)
+      await next()
+      return
+    }
+
+    // Clerkのユーザー情報を取得
+    const userId = payload.sub
+    const user = await clerk.users.getUser(userId)
+
+    c.set('auth', {
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.emailAddresses[0]?.emailAddress || null,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+      isAuthenticated: true,
+    })
+
+    // TursoクライアントにClerkのJWTトークンを渡す
+    // TursoはClerkのJWTトークンを直接使用してデータベースアクセスを制御
+    c.set('tursoToken', token)
+  } catch (error) {
+    console.error('Failed to verify Clerk token:', error)
+    c.set('auth', {
+      user: null,
+      isAuthenticated: false,
+    })
+    c.set('tursoToken', null)
+  }
 
   await next()
 }

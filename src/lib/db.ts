@@ -12,6 +12,13 @@ import type {
 // APIベースURL（環境変数から取得、デフォルトはローカル）
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3456/api'
 
+// Clerkトークンを取得する関数（動的にインポート）
+let getClerkToken: (() => Promise<string | null>) | null = null
+
+export function setClerkTokenGetter(fn: () => Promise<string | null>) {
+  getClerkToken = fn
+}
+
 // Word interface for database
 export interface WordRecord {
   id: number
@@ -68,8 +75,8 @@ export interface GameScoreRecord {
   kps: number
   totalKeystrokes: number
   accuracy: number
-  correctWords: number
-  perfectWords: number
+  completedWords: number // 入力完了した単語数（時間切れでないもの）
+  successfulWords: number // 成功した単語数（ミスなく完了）
   totalWords: number
   totalTime: number
   playedAt: number
@@ -77,12 +84,22 @@ export interface GameScoreRecord {
 
 // API helper
 async function api<T>(path: string, options?: RequestInit): Promise<T> {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...options?.headers,
+  }
+
+  // ClerkのJWTトークンを取得してヘッダーに追加
+  if (getClerkToken) {
+    const token = await getClerkToken()
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+  }
+
   const response = await fetch(`${API_BASE}${path}`, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
+    headers,
   })
 
   if (!response.ok) {

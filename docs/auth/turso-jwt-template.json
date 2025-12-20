@@ -1,0 +1,39 @@
+{
+  "a": "rw",
+  "id": "1d998095-2388-4f69-be00-16fc0614e313",
+  "perm": [
+    {
+      "t": ["words"],
+      "a": ["data_read", "data_add", "data_update", "data_delete"]
+    },
+    {
+      "t": ["aggregated_stats"],
+      "a": ["data_read", "data_update"]
+    },
+    {
+      "t": ["settings"],
+      "a": ["data_read", "data_update"]
+    },
+    {
+      "t": ["game_scores"],
+      "a": ["data_read", "data_add"]
+    },
+    {
+      "t": ["user_presets"],
+      "a": ["data_read", "data_add", "data_update", "data_delete"]
+    },
+    {
+      "t": ["user_preset_words"],
+      "a": ["data_read", "data_add", "data_update", "data_delete"]
+    },
+    {
+      "t": ["presets"],
+      "a": ["data_read"]
+    },
+    {
+      "t": ["preset_words"],
+      "a": ["data_read"]
+    }
+  ],
+  "rid": "d54214ca-4d03-4aea-a505-f20eec1ddad5"
+}

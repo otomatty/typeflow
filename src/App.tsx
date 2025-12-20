@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { SignedIn, SignedOut } from '@clerk/clerk-react'
 import { Toaster } from '@/components/ui/sonner'
 import { Header } from '@/components/Header'
 import { MenuScreen } from '@/components/MenuScreen'
@@ -8,7 +9,9 @@ import { WordManagementScreen } from '@/components/WordManagementScreen'
 import { StatsScreen } from '@/components/StatsScreen'
 import { SettingsScreen } from '@/components/SettingsScreen'
 import { PresetScreen } from '@/components/PresetScreen'
+import { ProfileScreen } from '@/components/ProfileScreen'
 import { AddWordDialog } from '@/components/AddWordDialog'
+import { AuthScreen } from '@/components/AuthScreen'
 import { useWords } from '@/hooks/useWords'
 import { useGame, ViewType } from '@/hooks/useGame'
 import { useTypingAnalytics } from '@/hooks/useTypingAnalytics'
@@ -16,11 +19,33 @@ import { useSettings } from '@/hooks/useSettings'
 import { shuffleArray } from '@/lib/utils'
 import { usePresets } from '@/hooks/usePresets'
 import { useUserPresets } from '@/hooks/useUserPresets'
+import { useAuth } from '@/hooks/useAuth'
+import { setClerkTokenGetter } from '@/lib/db'
 import { toast } from 'sonner'
 import type { PresetWord } from '@/lib/types'
 import type { UserPresetWord } from '@/lib/db'
 
 function App() {
+  const { getToken } = useAuth()
+
+  // Clerkトークン取得関数を設定
+  useEffect(() => {
+    setClerkTokenGetter(getToken)
+  }, [getToken])
+
+  return (
+    <>
+      <SignedOut>
+        <AuthScreen />
+      </SignedOut>
+      <SignedIn>
+        <AppContent />
+      </SignedIn>
+    </>
+  )
+}
+
+function AppContent() {
   const {
     words,
     addWord,
@@ -410,6 +435,21 @@ function App() {
           isLoading={false}
           isAfterQuickStart={isQuickStartMode}
         />
+      </>
+    )
+  }
+
+  if (view === 'profile') {
+    return (
+      <>
+        <Toaster />
+        <AddWordDialog
+          onAddWord={addWord}
+          open={isAddWordDialogOpen}
+          onOpenChange={setIsAddWordDialogOpen}
+          showTrigger={false}
+        />
+        <ProfileScreen onNavigate={handleNavigate} />
       </>
     )
   }

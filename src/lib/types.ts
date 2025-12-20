@@ -16,6 +16,11 @@ export interface Word {
   }
 }
 
+// 単語の成功/失敗判定
+// - success: ミスなく入力完了
+// - failed: ミスタッチまたは時間切れ
+export type WordResult = 'success' | 'failed'
+
 // 単語ごとのパフォーマンス記録（初動計測用）
 export interface WordPerformanceRecord {
   wordId: string // 単語ID
@@ -34,6 +39,33 @@ export interface WordPerformanceRecord {
   keystrokeCount: number // 総キーストローク数
   missCount: number // ミス数
   completed: boolean // 完了したか（タイムアウトでない）
+
+  // 成功/失敗判定結果
+  result: WordResult // 'success' = ミスなく完了, 'failed' = ミスありまたは時間切れ
+}
+
+/**
+ * 単語の成功/失敗を判定するヘルパー関数
+ * @param completed 単語を入力完了したか（時間切れでないか）
+ * @param missCount ミスタッチの回数
+ * @returns 'success' if ミスなく完了, 'failed' if ミスありまたは時間切れ
+ */
+export function determineWordResult(completed: boolean, missCount: number): WordResult {
+  return completed && missCount === 0 ? 'success' : 'failed'
+}
+
+/**
+ * WordPerformanceRecordから成功/失敗を判定
+ */
+export function isWordSuccess(record: WordPerformanceRecord): boolean {
+  return record.result === 'success'
+}
+
+/**
+ * WordPerformanceRecordから失敗を判定
+ */
+export function isWordFailed(record: WordPerformanceRecord): boolean {
+  return record.result === 'failed'
 }
 
 export interface GameState {
@@ -54,9 +86,10 @@ export interface GameState {
 export interface GameStats {
   kps: number // Keys Per Second (打鍵/秒)
   totalKeystrokes: number // 総打鍵数
-  accuracy: number // 正確率 (ノーミスワード数/完了ワード数)
-  correctWords: number // 完了ワード数
-  perfectWords: number // ノーミスで完了したワード数
+  accuracy: number // 正確率 (成功ワード数/完了ワード数)
+  completedWords: number // 入力完了したワード数（時間切れでないもの）
+  successfulWords: number // 成功したワード数（ミスなく完了）
+  failedWords: number // 失敗したワード数（ミスありまたは時間切れ）
   totalWords: number // 総ワード数
   totalTime: number // 総時間（秒）
   // 初動統計

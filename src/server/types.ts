@@ -196,14 +196,16 @@ export interface UpdateSettingsInput {
 
 /**
  * Game Scores - Tursoデータベースの生のレコード型（snake_case）
+ * Note: DBカラム名はcorrect_words/perfect_wordsのままだが、
+ * 意味はcompleted_words/successful_wordsに変更
  */
 export interface GameScoreRow {
   id: number
   kps: number
   total_keystrokes: number
   accuracy: number
-  correct_words: number
-  perfect_words: number
+  correct_words: number // DBカラム名（実際はcompletedWords）
+  perfect_words: number // DBカラム名（実際はsuccessfulWords）
   total_words: number
   total_time: number
   played_at: number
@@ -214,8 +216,8 @@ export interface GameScoreRecord {
   kps: number
   totalKeystrokes: number
   accuracy: number
-  correctWords: number
-  perfectWords: number
+  completedWords: number // 入力完了した単語数（時間切れでないもの）
+  successfulWords: number // 成功した単語数（ミスなく完了）
   totalWords: number
   totalTime: number
   playedAt: number
@@ -225,8 +227,8 @@ export interface CreateGameScoreInput {
   kps: number
   totalKeystrokes: number
   accuracy: number
-  correctWords: number
-  perfectWords: number
+  completedWords: number
+  successfulWords: number
   totalWords: number
   totalTime: number
 }
@@ -368,6 +370,47 @@ export interface UpdateUserPresetInput {
 }
 
 /**
+ * Users - ユーザー認証テーブルの型定義
+ */
+export interface UserRow {
+  id: string
+  username: string
+  email: string
+  password_hash: string
+  created_at: number
+  updated_at: number
+  last_login_at: number | null
+}
+
+export interface UserRecord {
+  id: string
+  username: string
+  email: string
+  createdAt: number
+  updatedAt: number
+  lastLoginAt: number | null
+}
+
+export interface CreateUserInput {
+  username: string
+  email: string
+  passwordHash: string
+}
+
+export interface SignupInput {
+  username: string
+  email: string
+  password: string
+  passwordConfirm: string
+}
+
+export interface LoginInput {
+  usernameOrEmail: string
+  password: string
+  rememberMe?: boolean
+}
+
+/**
  * サーバー環境変数の型定義（Turso対応）
  *
  * デプロイ先:
@@ -375,11 +418,11 @@ export interface UpdateUserPresetInput {
  * - ローカル開発時はBunサーバー（src/server/server.ts）も使用可能
  */
 export interface Env {
-  /** Tursoクライアント（サーバー起動時に初期化される） */
+  /** Tursoクライアント（リクエストごとに初期化される） */
   DB?: Client
   /** TursoデータベースURL（libsql://... または file:...） */
   TURSO_DATABASE_URL?: string
-  /** Turso認証トークン（リモートデータベースの場合のみ必要） */
+  /** Turso認証トークン（フォールバック用、認証されていないリクエスト用） */
   TURSO_AUTH_TOKEN?: string
   /** CORS許可オリジン（カンマ区切り） */
   ALLOWED_ORIGINS?: string

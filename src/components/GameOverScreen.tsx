@@ -219,9 +219,9 @@ export function GameOverScreen({
                 <span className="font-bold">{stats.totalKeystrokes}</span>
               </div>
               <div className="flex justify-between px-4">
-                <span className="text-muted-foreground">{t('perfect_words')}:</span>
+                <span className="text-muted-foreground">{t('successful_words')}:</span>
                 <span className="font-bold">
-                  {stats.perfectWords} / {stats.correctWords}
+                  {stats.successfulWords} / {stats.completedWords}
                 </span>
               </div>
               <div className="flex justify-between px-4">
@@ -339,11 +339,13 @@ interface WordPerformanceRowProps {
 function WordPerformanceRow({ performance, t, isJapanese }: WordPerformanceRowProps) {
   const reactionTimeColor = getReactionTimeColor(performance.reactionTime)
   const reactionTimeBg = getReactionTimeBgColor(performance.reactionTime)
+  // 失敗した単語（ミスありまたは時間切れ）は赤く表示
+  const isFailed = performance.result === 'failed'
 
   return (
     <div
       className={`grid grid-cols-[1fr_80px_80px_70px_60px] gap-2 px-3 py-2 text-sm items-center ${
-        !performance.completed ? 'bg-red-500/5' : ''
+        isFailed ? 'bg-red-500/5' : ''
       }`}
     >
       {/* Word */}
