@@ -53,8 +53,10 @@ export function AuthScreen() {
     try {
       await signIn.authenticateWithRedirect({
         strategy,
-        redirectUrl: window.location.origin,
-        redirectUrlComplete: window.location.origin,
+        // ClerkがOAuthコールバックを処理するためのURL
+        // Clerkがセッションを作成した後、redirectUrlCompleteにリダイレクトされる
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: '/',
       })
     } catch (error: unknown) {
       console.error('OAuth error:', error)

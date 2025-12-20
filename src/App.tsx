@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { SignedIn, SignedOut } from '@clerk/clerk-react'
+import { SignedIn, SignedOut, AuthenticateWithRedirectCallback } from '@clerk/clerk-react'
 import { Toaster } from '@/components/ui/sonner'
 import { Header } from '@/components/Header'
 import { MenuScreen } from '@/components/MenuScreen'
@@ -32,6 +32,17 @@ function App() {
   useEffect(() => {
     setClerkTokenGetter(getToken)
   }, [getToken])
+
+  // SSOコールバックパスの処理
+  // OAuth認証後、Clerkがこのパスにリダイレクトしてセッションを完了する
+  if (window.location.pathname === '/sso-callback') {
+    return (
+      <AuthenticateWithRedirectCallback
+        signInFallbackRedirectUrl="/"
+        signUpFallbackRedirectUrl="/"
+      />
+    )
+  }
 
   return (
     <>

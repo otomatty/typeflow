@@ -1,0 +1,5 @@
+# Cloudflare Pages SPA fallback
+# 全てのパスをindex.htmlにリダイレクト（静的ファイル以外）
+# これにより/sso-callbackなどのクライアントサイドルーティングが正しく動作する
+/*    /index.html   200
+
