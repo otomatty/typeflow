@@ -51,7 +51,7 @@
     "deploy": "bunx wrangler deploy",
     "deploy:dev": "bunx wrangler deploy --env development",
     "deploy:pages": "bun run build && bunx wrangler pages deploy dist --project-name=typeflow",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "dependencies": {
     "@github/spark": ">=0.43.1 <1",
@@ -126,7 +126,6 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241106.0",
     "@eslint/js": "^9.21.0",
-    "bun-types": "latest",
     "@tailwindcss/postcss": "^4.1.8",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^16.0.1",
@@ -137,6 +136,7 @@
     "@vitejs/plugin-react-swc": "^4.2.2",
     "@vitest/coverage-v8": "^2.0.5",
     "@vitest/ui": "^2.0.5",
+    "bun-types": "latest",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react-hooks": "^5.2.0",
@@ -146,6 +146,7 @@
     "jsdom": "^24.0.0",
     "lint-staged": "^15.2.2",
     "prettier": "^3.2.5",
+    "rollup-plugin-visualizer": "^6.0.5",
     "tailwindcss": "^4.1.11",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.38.0",

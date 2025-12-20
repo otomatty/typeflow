@@ -37,14 +37,15 @@ jobs:
 
       # wrangler.toml を使用してWorkersにデプロイ（バックエンドAPIのみ）
       # フロントエンドは deploy-pages ジョブでデプロイされます
+      # 
+      # --keep-vars: Cloudflare Dashboardで設定した環境変数を保持する
+      # （これがないと、デプロイのたびにDashboardで設定した環境変数がリセットされる）
+      # 注意: シークレットは--keep-varsに関係なく常に保持される
       - name: Deploy to Cloudflare Workers
-        run: bunx wrangler deploy
+        run: bunx wrangler deploy --keep-vars
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
-          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
 
       - name: Health check
         run: |
@@ -110,6 +111,7 @@ jobs:
         env:
           NODE_ENV: production
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
 
       # cloudflare/pages-action を使用してPagesにデプロイ（フロントエンドのみ）
       # wrangler.toml は使用しません

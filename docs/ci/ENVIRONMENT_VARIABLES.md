@@ -305,6 +305,79 @@ Cloudflareで環境変数を設定する際、以下の3つのタイプから選
 
 ## トラブルシューティング
 
+### デプロイのたびに環境変数がリセットされる
+
+**症状**: Cloudflare Dashboardで設定した環境変数が、GitHubへのプッシュ後に削除される
+
+**原因**: `wrangler deploy`コマンドはデフォルトで`--keep-vars=false`のため、デプロイ時にDashboardで設定した環境変数（varsタイプ）をリセットします。
+
+**重要なポイント**:
+
+- **シークレット**（暗号化された環境変数）は削除されません
+- **テキスト**（平文の環境変数）はリセットされます
+
+**解決策**:
+
+1. **`--keep-vars`オプションを使用（推奨）**
+
+   `.github/workflows/deploy.yml`で`wrangler deploy`に`--keep-vars`オプションを追加：
+
+   ```yaml
+   - name: Deploy to Cloudflare Workers
+     run: bunx wrangler deploy --keep-vars
+   ```
+
+   これにより、Dashboardで設定した環境変数が保持されます。
+
+2. **すべてをシークレットとして設定**
+
+   Dashboardで環境変数を設定する際、機密情報でなくても「シークレット」タイプを選択すると、デプロイ時にリセットされません。
+
+**参考**: [Wrangler deploy documentation](https://developers.cloudflare.com/workers/wrangler/commands/#deploy)
+
+---
+
+### Cloudflare Pages Dashboardに環境変数が表示されない
+
+**症状**: フロントエンド（Pages）の環境変数がCloudflare Dashboardで表示されない
+
+**原因**: GitHub ActionsでDirect Upload（`cloudflare/pages-action`）を使用している場合、ビルドはGitHub Actions側で実行されるため、Cloudflare Dashboardで設定した環境変数はビルドプロセスに反映されません。
+
+**仕組みの説明**:
+
+| デプロイ方法                    | ビルド場所       | 環境変数の設定場所   |
+| ------------------------------- | ---------------- | -------------------- |
+| GitHub連携（自動ビルド）        | Cloudflare側     | Cloudflare Dashboard |
+| Direct Upload（`pages-action`） | GitHub Actions側 | GitHub Secrets       |
+
+現在このプロジェクトは**Direct Upload**を使用しているため：
+
+1. **ビルド時環境変数**（`VITE_*`）は**GitHub Secrets**に設定し、ワークフローで渡す必要があります
+2. Cloudflare Dashboardで設定した環境変数は、ビルドには使用されません
+
+**解決策**:
+
+1. **GitHub Secretsに環境変数を設定**
+   - GitHubリポジトリ → Settings → Secrets and variables → Actions
+   - `VITE_API_BASE_URL` と `VITE_CLERK_PUBLISHABLE_KEY` を追加
+
+2. **ワークフローで環境変数を渡す**（すでに設定済み）
+
+   `.github/workflows/deploy.yml`:
+
+   ```yaml
+   - name: Build
+     run: bun run build
+     env:
+       NODE_ENV: production
+       VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+       VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
+   ```
+
+**注意**: `VITE_`プレフィックスの環境変数はビルド時にバンドルに埋め込まれるため、ランタイムでは変更できません。
+
+---
+
 ### 環境変数が反映されない
 
 1. **再デプロイを実行**
