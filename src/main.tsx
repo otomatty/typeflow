@@ -1,7 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ClerkProvider } from '@clerk/clerk-react'
-import '@github/spark/spark'
 
 // i18n初期化（最初にインポート）
 import './i18n'
