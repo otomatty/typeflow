@@ -145,24 +145,14 @@ app.use('/*', async (c, next) => {
   }
 
   // リモートTursoデータベースの場合
-  // X-Turso-TokenヘッダーからClerk JWTを取得（turso-jwtテンプレート使用）
-  const tursoToken = c.req.header('X-Turso-Token')
-
-  if (tursoToken) {
-    // Clerk JWTを使用してTursoに接続（ユーザーレベルアクセス制御）
+  // 常にTURSO_AUTH_TOKENを使用（Clerk JWT統合は後で有効化）
+  // TODO: Clerk JWT統合が安定したら、X-Turso-Tokenを使用するように変更
+  const fallbackToken = c.env.TURSO_AUTH_TOKEN
+  if (fallbackToken) {
     c.env.DB = createClient({
       url,
-      authToken: tursoToken,
+      authToken: fallbackToken,
     })
-  } else {
-    // フォールバック: TURSO_AUTH_TOKENを使用
-    const fallbackToken = c.env.TURSO_AUTH_TOKEN
-    if (fallbackToken && !c.env.DB) {
-      c.env.DB = createClient({
-        url,
-        authToken: fallbackToken,
-      })
-    }
   }
 
   await next()
