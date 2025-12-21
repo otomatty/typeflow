@@ -20,18 +20,20 @@ import { shuffleArray } from '@/lib/utils'
 import { usePresets } from '@/hooks/usePresets'
 import { useUserPresets } from '@/hooks/useUserPresets'
 import { useAuth } from '@/hooks/useAuth'
-import { setClerkTokenGetter } from '@/lib/db'
+import { setClerkTokenGetter, setTursoTokenGetter } from '@/lib/db'
 import { toast } from 'sonner'
 import type { PresetWord } from '@/lib/types'
 import type { UserPresetWord } from '@/lib/db'
 
 function App() {
-  const { getToken } = useAuth()
+  const { getToken, getTursoToken } = useAuth()
 
   // Clerkトークン取得関数を設定
   useEffect(() => {
     setClerkTokenGetter(getToken)
-  }, [getToken])
+    // Turso用のJWTトークン取得関数を設定（turso-jwtテンプレート使用）
+    setTursoTokenGetter(getTursoToken)
+  }, [getToken, getTursoToken])
 
   // SSOコールバックパスの処理
   // OAuth認証後、Clerkがこのパスにリダイレクトしてセッションを完了する

@@ -1,6 +1,6 @@
 {
   "a": "rw",
-  "id": "1d998095-2388-4f69-be00-16fc0614e313",
+  "id": "{{user.id}}",
   "perm": [
     {
       "t": ["words"],
@@ -35,5 +35,5 @@
       "a": ["data_read"]
     }
   ],
-  "rid": "d54214ca-4d03-4aea-a505-f20eec1ddad5"
+  "rid": "{{user.id}}"
 }

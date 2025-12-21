@@ -122,7 +122,8 @@ app.use('/*', async (c, next) => {
 })
 
 // データベースクライアントをリクエストごとに作成
-// 認証はClerkで行い、データベースアクセスはTURSO_AUTH_TOKENを使用
+// Clerk JWT（turso-jwtテンプレート）を使用してTursoに接続
+// フォールバックとしてTURSO_AUTH_TOKENを使用
 app.use('/*', async (c, next) => {
   const url = c.env.TURSO_DATABASE_URL
 
@@ -131,23 +132,36 @@ app.use('/*', async (c, next) => {
     return
   }
 
-  // データベースクライアントが未設定の場合のみ作成
-  if (!c.env.DB) {
-    // ローカルデータベースの場合
-    if (url.startsWith('file:')) {
+  // ローカルデータベースの場合
+  if (url.startsWith('file:')) {
+    if (!c.env.DB) {
       const filePath = url.replace(/^file:/, '')
       c.env.DB = createClient({
         url: `file:${filePath}`,
       })
-    } else {
-      // リモートTursoデータベースの場合、TURSO_AUTH_TOKENを使用
-      const authToken = c.env.TURSO_AUTH_TOKEN
-      if (authToken) {
-        c.env.DB = createClient({
-          url,
-          authToken,
-        })
-      }
+    }
+    await next()
+    return
+  }
+
+  // リモートTursoデータベースの場合
+  // X-Turso-TokenヘッダーからClerk JWTを取得（turso-jwtテンプレート使用）
+  const tursoToken = c.req.header('X-Turso-Token')
+
+  if (tursoToken) {
+    // Clerk JWTを使用してTursoに接続（ユーザーレベルアクセス制御）
+    c.env.DB = createClient({
+      url,
+      authToken: tursoToken,
+    })
+  } else {
+    // フォールバック: TURSO_AUTH_TOKENを使用
+    const fallbackToken = c.env.TURSO_AUTH_TOKEN
+    if (fallbackToken && !c.env.DB) {
+      c.env.DB = createClient({
+        url,
+        authToken: fallbackToken,
+      })
     }
   }
 

@@ -19,6 +19,13 @@ export function setClerkTokenGetter(fn: () => Promise<string | null>) {
   getClerkToken = fn
 }
 
+// Turso用のJWTトークンを取得する関数（turso-jwtテンプレート使用）
+let getTursoToken: (() => Promise<string | null>) | null = null
+
+export function setTursoTokenGetter(fn: () => Promise<string | null>) {
+  getTursoToken = fn
+}
+
 // Word interface for database
 export interface WordRecord {
   id: number
@@ -89,11 +96,19 @@ async function api<T>(path: string, options?: RequestInit): Promise<T> {
     ...options?.headers,
   }
 
-  // ClerkのJWTトークンを取得してヘッダーに追加
+  // ClerkのJWTトークンを取得してヘッダーに追加（認証用）
   if (getClerkToken) {
     const token = await getClerkToken()
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
+    }
+  }
+
+  // Turso用のJWTトークンを取得してヘッダーに追加（データベースアクセス用）
+  if (getTursoToken) {
+    const tursoToken = await getTursoToken()
+    if (tursoToken) {
+      headers['X-Turso-Token'] = tursoToken
     }
   }
 

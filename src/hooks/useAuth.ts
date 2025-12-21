@@ -13,6 +13,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   getToken: () => Promise<string | null>
+  getTursoToken: () => Promise<string | null>
 }
 
 /**
@@ -46,6 +47,15 @@ export function useAuth(): AuthContextType {
         return await getToken()
       } catch (error) {
         console.error('Failed to get token:', error)
+        return null
+      }
+    },
+    // Turso用のJWTトークンを取得（turso-jwtテンプレートを使用）
+    getTursoToken: async () => {
+      try {
+        return await getToken({ template: 'turso-jwt' })
+      } catch (error) {
+        console.error('Failed to get Turso token:', error)
         return null
       }
     },
