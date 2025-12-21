@@ -84,7 +84,7 @@ app.use('/*', async (c, next) => {
       return allowedOrigins.includes(origin) ? origin : null
     },
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
+    allowHeaders: ['Content-Type', 'Authorization', 'X-Turso-Token'],
     credentials: true,
   }
 
