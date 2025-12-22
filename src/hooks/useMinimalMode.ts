@@ -5,10 +5,7 @@ import { MinimalModeType } from '@/lib/types'
  * ミニマルモードの状態を管理するカスタムフック
  * 設定と画面サイズに基づいてミニマルモードを有効/無効にする
  */
-export function useMinimalMode(
-  minimalMode: MinimalModeType,
-  breakpoint: number = 600
-): boolean {
+export function useMinimalMode(minimalMode: MinimalModeType, breakpoint: number = 600): boolean {
   const [isMinimal, setIsMinimal] = useState(false)
 
   useEffect(() => {

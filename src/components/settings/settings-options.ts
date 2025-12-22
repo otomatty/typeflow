@@ -1,5 +1,15 @@
 import { ThemeType, PracticeMode, DifficultyPreset, MinimalModeType } from '@/lib/types'
-import { Target, Shuffle, History, Flame, Trophy, Skull, Monitor, Smartphone, Eye } from 'lucide-react'
+import {
+  Target,
+  Shuffle,
+  History,
+  Flame,
+  Trophy,
+  Skull,
+  Monitor,
+  Smartphone,
+  Eye,
+} from 'lucide-react'
 
 export const MIN_WORD_COUNT = 5
 export const MAX_WORD_COUNT = 100

@@ -31,13 +31,13 @@ export function MinimalTypingDisplay({ word, currentInput, showError }: MinimalT
       <div className="flex items-baseline gap-0.5">
         {/* プロンプト風の装飾（コードエディタっぽく） */}
         <span className="text-muted-foreground/40 select-none mr-2">&gt;</span>
-        
+
         {/* 入力済み部分 */}
         <span className="text-primary">{inputPart}</span>
-        
+
         {/* カーソル */}
         <span className="inline-block w-[2px] h-4 bg-primary animate-pulse" />
-        
+
         {/* 未入力部分 */}
         <span className="text-muted-foreground/50">{remainingPart}</span>
       </div>

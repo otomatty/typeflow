@@ -1,4 +1,10 @@
-import { WordCountPreset, ThemeType, PracticeMode, DifficultyPreset, MinimalModeType } from '@/lib/types'
+import {
+  WordCountPreset,
+  ThemeType,
+  PracticeMode,
+  DifficultyPreset,
+  MinimalModeType,
+} from '@/lib/types'
 import { GameScoreRecord } from '@/lib/db'
 import { DifficultyParams } from '@/lib/types'
 
