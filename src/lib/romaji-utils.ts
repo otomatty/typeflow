@@ -279,7 +279,7 @@ function generateAllVariations(target: string): string[] {
     // Check if this 'n' could be ん (followed by consonant, not vowel/y/n/')
     // Note: 'na', 'ni', 'nu', 'ne', 'no' are regular n+vowel, not ん
     if (!VOWELS_AND_SPECIAL.has(nextChar.toLowerCase())) {
-      // This 'n' before consonant could be ん - allow both 'n' and 'xn'
+      // This 'n' before consonant could be ん - allow 'n', 'xn', and 'nn'
       const rest = target.substring(1)
       const restVariations = generateAllVariations(rest)
       const result: string[] = []
@@ -287,6 +287,7 @@ function generateAllVariations(target: string): string[] {
       for (const restVar of restVariations) {
         result.push('n' + restVar) // n alone is acceptable before consonant
         result.push('xn' + restVar) // xn is also acceptable
+        result.push('nn' + restVar) // nn is also acceptable
       }
 
       return result

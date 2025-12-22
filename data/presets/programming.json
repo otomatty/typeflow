@@ -1,0 +1,133 @@
+{
+  "id": "programming",
+  "name": "プログラミング用語",
+  "description": "エンジニア向けのプログラミング関連用語",
+  "difficulty": "normal",
+  "words": [
+    {
+      "text": "コンポーネント",
+      "reading": "こんぽーねんと",
+      "romaji": "konpo-nento"
+    },
+    {
+      "text": "インターフェース",
+      "reading": "いんたーふぇーす",
+      "romaji": "inta-fe-su"
+    },
+    {
+      "text": "データベース",
+      "reading": "でーたべーす",
+      "romaji": "de-tabe-su"
+    },
+    {
+      "text": "アルゴリズム",
+      "reading": "あるごりずむ",
+      "romaji": "arugorizumu"
+    },
+    {
+      "text": "フレームワーク",
+      "reading": "ふれーむわーく",
+      "romaji": "fure-muwa-ku"
+    },
+    {
+      "text": "ライブラリ",
+      "reading": "らいぶらり",
+      "romaji": "raiburari"
+    },
+    {
+      "text": "リファクタリング",
+      "reading": "りふぁくたりんぐ",
+      "romaji": "rifakutaringu"
+    },
+    {
+      "text": "デバッグ",
+      "reading": "でばっぐ",
+      "romaji": "debaggu"
+    },
+    {
+      "text": "コンパイル",
+      "reading": "こんぱいる",
+      "romaji": "konpairu"
+    },
+    {
+      "text": "インスタンス",
+      "reading": "いんすたんす",
+      "romaji": "insutansu"
+    },
+    {
+      "text": "非同期処理",
+      "reading": "ひどうきしょり",
+      "romaji": "hidoukishori"
+    },
+    {
+      "text": "再帰関数",
+      "reading": "さいきかんすう",
+      "romaji": "saikikanusuu"
+    },
+    {
+      "text": "変数宣言",
+      "reading": "へんすうせんげん",
+      "romaji": "hensuusengen"
+    },
+    {
+      "text": "条件分岐",
+      "reading": "じょうけんぶんき",
+      "romaji": "joukenbunki"
+    },
+    {
+      "text": "ループ処理",
+      "reading": "るーぷしょり",
+      "romaji": "ru-pushori"
+    },
+    {
+      "text": "オブジェクト指向",
+      "reading": "おぶじぇくとしこう",
+      "romaji": "obujiekutoshikou"
+    },
+    {
+      "text": "継承",
+      "reading": "けいしょう",
+      "romaji": "keishou"
+    },
+    {
+      "text": "カプセル化",
+      "reading": "かぷせるか",
+      "romaji": "kapuseruka"
+    },
+    {
+      "text": "ポリモーフィズム",
+      "reading": "ぽりもーふぃずむ",
+      "romaji": "porimo-fizumu"
+    },
+    {
+      "text": "バージョン管理",
+      "reading": "ばーじょんかんり",
+      "romaji": "ba-jonkanri"
+    },
+    {
+      "text": "プルリクエスト",
+      "reading": "ぷるりくえすと",
+      "romaji": "pururikuesuto"
+    },
+    {
+      "text": "マージコンフリクト",
+      "reading": "まーじこんふりくと",
+      "romaji": "ma-jikonhurikuto"
+    },
+    {
+      "text": "テスト駆動開発",
+      "reading": "てすとくどうかいはつ",
+      "romaji": "tesutokudoukaihatsu"
+    },
+    {
+      "text": "単体テスト",
+      "reading": "たんたいてすと",
+      "romaji": "tantaitesuto"
+    },
+    {
+      "text": "結合テスト",
+      "reading": "けつごうてすと",
+      "romaji": "ketsugoutesuto"
+    }
+  ]
+}

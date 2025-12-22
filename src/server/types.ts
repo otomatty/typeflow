@@ -65,6 +65,9 @@ export interface CreateWordInput {
 
 // Word更新用の型
 export interface UpdateWordInput {
+  text?: string
+  reading?: string
+  romaji?: string
   correct?: number
   miss?: number
   lastPlayed?: number
