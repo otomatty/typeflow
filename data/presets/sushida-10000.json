@@ -1,0 +1,2783 @@
+{
+  "id": "sushida-10000",
+  "name": "寿司打 1万円コース相当",
+  "description": "寿司打の1万円コース相当の長文フレーズ（555語）",
+  "difficulty": "hard",
+  "words": [
+    {
+      "text": "ああ言えばこう言う",
+      "reading": "ああいえばこういう",
+      "romaji": "aaiebakouiu"
+    },
+    {
+      "text": "開いた口がふさがらない",
+      "reading": "あいたくちがふさがらない",
+      "romaji": "aitakutigafusagaranai"
+    },
+    {
+      "text": "愛に国境はない",
+      "reading": "あいにこっきょうはない",
+      "romaji": "ainikokkyouhanai"
+    },
+    {
+      "text": "青い空、白い雲",
+      "reading": "あおいそら、しろいくも",
+      "romaji": "aoisora,siroikumo"
+    },
+    {
+      "text": "赤いチューリップ",
+      "reading": "あかいちゅーりっぷ",
+      "romaji": "akaityu-rippu"
+    },
+    {
+      "text": "赤ちゃんから目が離せない",
+      "reading": "あかちゃんからめがはなせない",
+      "romaji": "akatyankaramegahanasenai"
+    },
+    {
+      "text": "アカデミー賞受賞",
+      "reading": "あかでみーしょうじゅしょう",
+      "romaji": "akademi-shoujushou"
+    },
+    {
+      "text": "あけましておめでとう",
+      "reading": "あけましておめでとう",
+      "romaji": "akemasiteomedetou"
+    },
+    {
+      "text": "あこがれのセーラー服",
+      "reading": "あこがれのせーらーふく",
+      "romaji": "akogarenose-ra-fuku"
+    },
+    {
+      "text": "アサリのお味噌汁",
+      "reading": "あさりのおみそしる",
+      "romaji": "asarinoomisosiru"
+    },
+    {
+      "text": "足がしびれました",
+      "reading": "あしがしびれました",
+      "romaji": "asigasibiremasita"
+    },
+    {
+      "text": "あしたからダイエット",
+      "reading": "あしたからだいえっと",
+      "romaji": "asitakaradaietto"
+    },
+    {
+      "text": "あした天気になーれ",
+      "reading": "あしたてんきになーれ",
+      "romaji": "asitatenkinina-re"
+    },
+    {
+      "text": "あしたはあしたの風が吹く",
+      "reading": "あしたはあしたのかぜがふく",
+      "romaji": "asitahaasitanokazegafuku"
+    },
+    {
+      "text": "あすの天気予報は雨です",
+      "reading": "あすのてんきよほうはあめです",
+      "romaji": "asunotenkiyohou"
+    },
+    {
+      "text": "あせると間違えますよ",
+      "reading": "あせるとまちがえますよ",
+      "romaji": "aserutomatigaemasuyo"
+    },
+    {
+      "text": "新しいゲームソフト",
+      "reading": "あたらしいげーむそふと",
+      "romaji": "atarasiige-musofuto"
+    },
+    {
+      "text": "アップルパイを焼きました",
+      "reading": "あっぷるぱいをやきました",
+      "romaji": "appurupaiwoyakimasita"
+    },
+    {
+      "text": "あとは野となれ山となれ",
+      "reading": "あとはのとなれやまとなれ",
+      "romaji": "atohanotonareyamatonare"
+    },
+    {
+      "text": "アナゴ一本握り",
+      "reading": "あなごいっぽんにぎり",
+      "romaji": "anagoippoxnnigiri"
+    },
+    {
+      "text": "あなたに一目ぼれ",
+      "reading": "あなたにひとめぼれ",
+      "romaji": "anatanihitomebore"
+    },
+    {
+      "text": "あの夕日に向かってダッシュだ",
+      "reading": "あのゆうひにむかってだっしゅだ",
+      "romaji": "anoyuuhinimukattedasshuda"
+    },
+    {
+      "text": "アプリケーションエラーです",
+      "reading": "あぷりけーしょんえらーです",
+      "romaji": "apurike-shoxnera-desu"
+    },
+    {
+      "text": "甘いものは別腹",
+      "reading": "あまいものはべつばら",
+      "romaji": "amaimonohabetubara"
+    },
+    {
+      "text": "甘酸っぱい思い出",
+      "reading": "あまずっぱいおもいで",
+      "romaji": "amazuppaiomoide"
+    },
+    {
+      "text": "雨上がりの夜空",
+      "reading": "あめあがりのよぞら",
+      "romaji": "ameagarinoyozora"
+    },
+    {
+      "text": "雨がやんだら虹が出た",
+      "reading": "あめがやんだらにじがでた",
+      "romaji": "amegayandaranijigadeta"
+    },
+    {
+      "text": "アメリカ連邦捜査局",
+      "reading": "あめりかれんぽうそうさきょく",
+      "romaji": "amerikarenpousousakyoku"
+    },
+    {
+      "text": "アメリカンショートヘアー",
+      "reading": "あめりかんしょーとへあー",
+      "romaji": "amerikansho-tohea-"
+    },
+    {
+      "text": "アメリカンフットボール",
+      "reading": "あめりかんふっとぼーる",
+      "romaji": "amerikanfuttobo-ru"
+    },
+    {
+      "text": "ありがとうございました",
+      "reading": "ありがとうございました",
+      "romaji": "arigatougozaimasita"
+    },
+    {
+      "text": "アリの巣の観察",
+      "reading": "ありのすのかんさつ",
+      "romaji": "arinosunokansatu"
+    },
+    {
+      "text": "アルバイト募集中",
+      "reading": "あるばいとぼしゅうちゅう",
+      "romaji": "arubaitoboshuutyuu"
+    },
+    {
+      "text": "暗証番号",
+      "reading": "あんしょうばんごう",
+      "romaji": "anshoubangou"
+    },
+    {
+      "text": "いいニュースと悪いニュース",
+      "reading": "いいにゅーすとわるいにゅーす",
+      "romaji": "iinyu-sutowaruinyu-su"
+    },
+    {
+      "text": "家に帰るまでが遠足",
+      "reading": "いえにかえるまでがえんそく",
+      "romaji": "ienikaerumadegaensoku"
+    },
+    {
+      "text": "いざ尋常に勝負",
+      "reading": "いざじんじょうにしょうぶ",
+      "romaji": "izajinjounishoubu"
+    },
+    {
+      "text": "石の上にも三年",
+      "reading": "いしのうえにもさんねん",
+      "romaji": "isinouenimosaxnnexn"
+    },
+    {
+      "text": "伊勢海老食べ放題",
+      "reading": "いせえびたべほうだい",
+      "romaji": "iseebitabehoudai"
+    },
+    {
+      "text": "イソップ物語",
+      "reading": "いそっぷものがたり",
+      "romaji": "isoppumonogatari"
+    },
+    {
+      "text": "痛いの痛いの飛んで行け",
+      "reading": "いたいのいたいのとんでいけ",
+      "romaji": "itainoitainotondeike"
+    },
+    {
+      "text": "痛かったら右手を上げてください",
+      "reading": "いたかったらみぎてをあげてください",
+      "romaji": "itakattaramigitewoagetekudasai"
+    },
+    {
+      "text": "イチゴショートケーキ",
+      "reading": "いちごしょーとけーき",
+      "romaji": "itigosho-toke-ki"
+    },
+    {
+      "text": "いつからそこにいたんですか？",
+      "reading": "いつからそこにいたんですか？",
+      "romaji": "itukarasokoniitandesuka?"
+    },
+    {
+      "text": "一球入魂",
+      "reading": "いっきゅうにゅうこん",
+      "romaji": "ikkyuunyuukoxn"
+    },
+    {
+      "text": "いつ見てもきれいだね",
+      "reading": "いつみてもきれいだね",
+      "romaji": "itumitemokireidane"
+    },
+    {
+      "text": "犬は英語でドッグです",
+      "reading": "いぬはえいごでどっぐです",
+      "romaji": "inuhaeigodedoggudesu"
+    },
+    {
+      "text": "イヌも歩けば棒にあたる",
+      "reading": "いぬもあるけばぼうにあたる",
+      "romaji": "inumoarukebabouniataru"
+    },
+    {
+      "text": "犬用シャンプー",
+      "reading": "いぬようしゃんぷー",
+      "romaji": "inuyoushanpu-"
+    },
+    {
+      "text": "今何時ですか？",
+      "reading": "いまなんじですか？",
+      "romaji": "imananjidesuka?"
+    },
+    {
+      "text": "今まで本当にお世話になりました",
+      "reading": "いままでほんとうにおせわになりました",
+      "romaji": "imamadehontouniosewaninarimasita"
+    },
+    {
+      "text": "言われた通りにやったのに",
+      "reading": "いわれたとおりにやったのに",
+      "romaji": "iwaretatooriniyattanoni"
+    },
+    {
+      "text": "インクジェットプリンター",
+      "reading": "いんくじぇっとぷりんたー",
+      "romaji": "inkujettopurinta-"
+    },
+    {
+      "text": "インスピレーション",
+      "reading": "いんすぴれーしょん",
+      "romaji": "insupire-shoxn"
+    },
+    {
+      "text": "インターナショナル",
+      "reading": "いんたーなしょなる",
+      "romaji": "inta-nashonaru"
+    },
+    {
+      "text": "インターネットの仕組み",
+      "reading": "いんたーねっとのしくみ",
+      "romaji": "inta-nettonosikumi"
+    },
+    {
+      "text": "インテリアコーディネーター",
+      "reading": "いんてりあこーでぃねーたー",
+      "romaji": "interiako-dhine-ta-"
+    },
+    {
+      "text": "ウイスキーをオンザロックで",
+      "reading": "ういすきーをおんざろっくで",
+      "romaji": "uisuki-woonzarokkude"
+    },
+    {
+      "text": "上から読んでも新聞紙",
+      "reading": "うえからよんでもしんぶんし",
+      "romaji": "uekarayondemosinbunsi"
+    },
+    {
+      "text": "ウクレレ教室",
+      "reading": "うくれれきょうしつ",
+      "romaji": "ukurerekyousitu"
+    },
+    {
+      "text": "ウサギをモフモフする",
+      "reading": "うさぎをもふもふする",
+      "romaji": "usagiwomofumofusuru"
+    },
+    {
+      "text": "嘘ついたら針千本飲ーます",
+      "reading": "うそついたらはりせんぼんのーます",
+      "romaji": "usotuitaraharisenboxnno-masu"
+    },
+    {
+      "text": "嘘つきは泥棒の始まり",
+      "reading": "うそつきはどろぼうのはじまり",
+      "romaji": "usotukihadorobounohajimari"
+    },
+    {
+      "text": "宇宙人に会いましたよ",
+      "reading": "うちゅうじんにあいましたよ",
+      "romaji": "utyuujixnniaimasitayo"
+    },
+    {
+      "text": "宇宙船地球号",
+      "reading": "うちゅうせんちきゅうごう",
+      "romaji": "utyuusentikyuugou"
+    },
+    {
+      "text": "美しい日本語",
+      "reading": "うつくしいにほんご",
+      "romaji": "utukusiinihongo"
+    },
+    {
+      "text": "馬の耳に念仏",
+      "reading": "うまのみみにねんぶつ",
+      "romaji": "umanomimininenbutu"
+    },
+    {
+      "text": "生まれ変わった僕を見てください",
+      "reading": "うまれかわったぼくをみてください",
+      "romaji": "umarekawattabokuwomitekudasai"
+    },
+    {
+      "text": "運命なんて信じない",
+      "reading": "うんめいなんてしんじない",
+      "romaji": "unmeinantesinjinai"
+    },
+    {
+      "text": "運命の赤い糸",
+      "reading": "うんめいのあかいいと",
+      "romaji": "unmeinoakaiito"
+    },
+    {
+      "text": "運も実力のうち",
+      "reading": "うんもじつりょくのうち",
+      "romaji": "unmojituryokunouti"
+    },
+    {
+      "text": "英会話教室",
+      "reading": "えいかいわきょうしつ",
+      "romaji": "eikaiwakyousitu"
+    },
+    {
+      "text": "英会話レッスン",
+      "reading": "えいかいわれっすん",
+      "romaji": "eikaiwaressuxn"
+    },
+    {
+      "text": "映画館で昼寝",
+      "reading": "えいがかんでひるね",
+      "romaji": "eigakandehirune"
+    },
+    {
+      "text": "エイリアンがやってきた",
+      "reading": "えいりあんがやってきた",
+      "romaji": "eiriangayattekita"
+    },
+    {
+      "text": "液晶ディスプレイ",
+      "reading": "えきしょうでぃすぷれい",
+      "romaji": "ekishoudhisupurei"
+    },
+    {
+      "text": "エサを与えないで下さい",
+      "reading": "えさをあたえないでください",
+      "romaji": "esawoataenaidekudasai"
+    },
+    {
+      "text": "枝毛が増えて気になります",
+      "reading": "えだげがふえてきになります",
+      "romaji": "edagegafuetekininarimasu"
+    },
+    {
+      "text": "エネルギー節約",
+      "reading": "えねるぎーせつやく",
+      "romaji": "enerugi-setuyaku"
+    },
+    {
+      "text": "エビフライ定食",
+      "reading": "えびふらいていしょく",
+      "romaji": "ebifuraiteishoku"
+    },
+    {
+      "text": "エルニーニョ現象",
+      "reading": "えるにーにょげんしょう",
+      "romaji": "eruni-nyogenshou"
+    },
+    {
+      "text": "遠距離恋愛",
+      "reading": "えんきょりれんあい",
+      "romaji": "enkyorirexnai"
+    },
+    {
+      "text": "エンゼルフィッシュ",
+      "reading": "えんぜるふぃっしゅ",
+      "romaji": "enzerufisshu"
+    },
+    {
+      "text": "縁の下の力持ち",
+      "reading": "えんのしたのちからもち",
+      "romaji": "exnnositanotikaramoti"
+    },
+    {
+      "text": "遠慮しないでたくさん食べてね",
+      "reading": "えんりょしないでたくさんたべてね",
+      "romaji": "enryosinaidetakusantabetene"
+    },
+    {
+      "text": "お遊びはここまでだ",
+      "reading": "おあそびはここまでだ",
+      "romaji": "oasobihakokomadeda"
+    },
+    {
+      "text": "おいしいお肉が食べたいな",
+      "reading": "おいしいおにくがたべたいな",
+      "romaji": "oisiionikugatabetaina"
+    },
+    {
+      "text": "大食い選手権",
+      "reading": "おおぐいせんしゅけん",
+      "romaji": "ooguisenshukexn"
+    },
+    {
+      "text": "大化けの可能性あり",
+      "reading": "おおばけのかのうせいあり",
+      "romaji": "oobakenokanouseiari"
+    },
+    {
+      "text": "おかげ様で元気です",
+      "reading": "おかげさまでげんきです",
+      "romaji": "okagesamadegenkidesu"
+    },
+    {
+      "text": "お気に入りに登録",
+      "reading": "おきにいりにとうろく",
+      "romaji": "okiniirinitouroku"
+    },
+    {
+      "text": "お酒は大人になってから",
+      "reading": "おさけはおとなになってから",
+      "romaji": "osakehaotonaninattekara"
+    },
+    {
+      "text": "おじいさんは山へ柴刈りに",
+      "reading": "おじいさんはやまへしばかりに",
+      "romaji": "ojiisanhayamahesibakarini"
+    },
+    {
+      "text": "おしゃれなデザイン",
+      "reading": "おしゃれなでざいん",
+      "romaji": "osharenadezaixn"
+    },
+    {
+      "text": "お醤油取って下さい",
+      "reading": "おしょうゆとってください",
+      "romaji": "oshouyutottekudasai"
+    },
+    {
+      "text": "お中元の季節",
+      "reading": "おちゅうげんのきせつ",
+      "romaji": "otyuugexnnokisetu"
+    },
+    {
+      "text": "お疲れ様でした",
+      "reading": "おつかれさまでした",
+      "romaji": "otukaresamadesita"
+    },
+    {
+      "text": "お手洗いはあちらです",
+      "reading": "おてあらいはあちらです",
+      "romaji": "otearaihaatiradesu"
+    },
+    {
+      "text": "男ばっかり三兄弟",
+      "reading": "おとこばっかりさんきょうだい",
+      "romaji": "otokobakkarisankyoudai"
+    },
+    {
+      "text": "お年玉ちょうだい",
+      "reading": "おとしだまちょうだい",
+      "romaji": "otosidamatyoudai"
+    },
+    {
+      "text": "鬼の居ぬ間に洗濯",
+      "reading": "おにのいぬまにせんたく",
+      "romaji": "oninoinumanisentaku"
+    },
+    {
+      "text": "鬼は外、福は内",
+      "reading": "おにはそと、ふくはうち",
+      "romaji": "onihasoto,fukuhauti"
+    },
+    {
+      "text": "おばあさんは川へ洗濯に",
+      "reading": "おばあさんはかわへせんたくに",
+      "romaji": "obaasanhakawahesentakuni"
+    },
+    {
+      "text": "主な登場人物",
+      "reading": "おもなとうじょうじんぶつ",
+      "romaji": "omonatoujoujinbutu"
+    },
+    {
+      "text": "おやつは戸棚に入っています",
+      "reading": "おやつはとだなにはいっています",
+      "romaji": "oyatuhatodananihaitteimasu"
+    },
+    {
+      "text": "お料理教室",
+      "reading": "おりょうりきょうしつ",
+      "romaji": "oryourikyousitu"
+    },
+    {
+      "text": "温泉に行きたいな",
+      "reading": "おんせんにいきたいな",
+      "romaji": "onsexnniikitaina"
+    },
+    {
+      "text": "女心と秋の空",
+      "reading": "おんなごころとあきのそら",
+      "romaji": "oxnnagokorotoakinosora"
+    },
+    {
+      "text": "オンラインショッピング",
+      "reading": "おんらいんしょっぴんぐ",
+      "romaji": "onrainshoppingu"
+    },
+    {
+      "text": "恩を仇で返す",
+      "reading": "おんをあだでかえす",
+      "romaji": "onwoadadekaesu"
+    },
+    {
+      "text": "ガーデニングが趣味です",
+      "reading": "がーでにんぐがしゅみです",
+      "romaji": "ga-deningugashumidesu"
+    },
+    {
+      "text": "飼い犬に手を咬まれる",
+      "reading": "かいいぬにてをかまれる",
+      "romaji": "kaiinunitewokamareru"
+    },
+    {
+      "text": "海水浴でスイカ割り",
+      "reading": "かいすいよくですいかわり",
+      "romaji": "kaisuiyokudesuikawari"
+    },
+    {
+      "text": "懐中電灯",
+      "reading": "かいちゅうでんとう",
+      "romaji": "kaityuudentou"
+    },
+    {
+      "text": "解答欄に記入してください",
+      "reading": "かいとうらんにきにゅうしてください",
+      "romaji": "kaitouraxnnikinyuusitekudasai"
+    },
+    {
+      "text": "海洋深層水",
+      "reading": "かいようしんそうすい",
+      "romaji": "kaiyousinsousui"
+    },
+    {
+      "text": "カエルの子はカエル",
+      "reading": "かえるのこはかえる",
+      "romaji": "kaerunokohakaeru"
+    },
+    {
+      "text": "カキ氷始めました",
+      "reading": "かきごおりはじめました",
+      "romaji": "kakigoorihajimemasita"
+    },
+    {
+      "text": "隠し味はお醤油",
+      "reading": "かくしあじはおしょうゆ",
+      "romaji": "kakusiajihaoshouyu"
+    },
+    {
+      "text": "隠れても無駄だ！",
+      "reading": "かくれてもむだだ！",
+      "romaji": "kakuretemomudada!"
+    },
+    {
+      "text": "駆け込み乗車はおやめください",
+      "reading": "かけこみじょうしゃはおやめください",
+      "romaji": "kakekomijoushahaoyamekudasai"
+    },
+    {
+      "text": "傘でゴルフの練習",
+      "reading": "かさでごるふのれんしゅう",
+      "romaji": "kasadegorufunorenshuu"
+    },
+    {
+      "text": "貸切露天風呂",
+      "reading": "かしきりろてんぶろ",
+      "romaji": "kasikirirotenburo"
+    },
+    {
+      "text": "火星人襲来",
+      "reading": "かせいじんしゅうらい",
+      "romaji": "kaseijinshuurai"
+    },
+    {
+      "text": "学校給食",
+      "reading": "がっこうきゅうしょく",
+      "romaji": "gakkoukyuushoku"
+    },
+    {
+      "text": "学校の七不思議",
+      "reading": "がっこうのななふしぎ",
+      "romaji": "gakkounonanafusigi"
+    },
+    {
+      "text": "果肉入りオレンジジュース",
+      "reading": "かにくいりおれんじじゅーす",
+      "romaji": "kanikuiriorenjiju-su"
+    },
+    {
+      "text": "カブトムシ対クワガタムシ",
+      "reading": "かぶとむしたいくわがたむし",
+      "romaji": "kabutomusitaikuwagatamusi"
+    },
+    {
+      "text": "壁に耳あり障子に目あり",
+      "reading": "かべにみみありしょうじにめあり",
+      "romaji": "kabenimimiarishoujinimeari"
+    },
+    {
+      "text": "亀の甲より年の功",
+      "reading": "かめのこうよりとしのこう",
+      "romaji": "kamenokouyoritosinokou"
+    },
+    {
+      "text": "火曜日は定休日です",
+      "reading": "かようびはていきゅうびです",
+      "romaji": "kayoubihateikyuubidesu"
+    },
+    {
+      "text": "カラクリ人形",
+      "reading": "からくりにんぎょう",
+      "romaji": "karakuriningyou"
+    },
+    {
+      "text": "辛子明太子おにぎり",
+      "reading": "からしめんたいこおにぎり",
+      "romaji": "karasimentaikoonigiri"
+    },
+    {
+      "text": "カリフォルニアロール",
+      "reading": "かりふぉるにあろーる",
+      "romaji": "kariforuniaro-ru"
+    },
+    {
+      "text": "カルシウムが足りない",
+      "reading": "かるしうむがたりない",
+      "romaji": "karusiumugatarinai"
+    },
+    {
+      "text": "カレーライスとハンバーグが好きです",
+      "reading": "かれーらいすとはんばーぐがすきです",
+      "romaji": "kare-raisutohanba-gugasukidesu"
+    },
+    {
+      "text": "可愛いチワワですね",
+      "reading": "かわいいちわわですね",
+      "romaji": "kawaiitiwawadesune"
+    },
+    {
+      "text": "変わった趣味をお持ちですね",
+      "reading": "かわったしゅみをおもちですね",
+      "romaji": "kawattashumiwoomotidesune"
+    },
+    {
+      "text": "関西国際空港",
+      "reading": "かんさいこくさいくうこう",
+      "romaji": "kansaikokusaikuukou"
+    },
+    {
+      "text": "完全燃焼",
+      "reading": "かんぜんねんしょう",
+      "romaji": "kanzexnnenshou"
+    },
+    {
+      "text": "感動的な再会",
+      "reading": "かんどうてきなさいかい",
+      "romaji": "kandoutekinasaikai"
+    },
+    {
+      "text": "カンヌ国際映画祭",
+      "reading": "かんぬこくさいえいがさい",
+      "romaji": "kaxnnukokusaieigasai"
+    },
+    {
+      "text": "頑張ってください",
+      "reading": "がんばってください",
+      "romaji": "ganbattekudasai"
+    },
+    {
+      "text": "観葉植物",
+      "reading": "かんようしょくぶつ",
+      "romaji": "kaxnyoushokubutu"
+    },
+    {
+      "text": "記憶にございません",
+      "reading": "きおくにございません",
+      "romaji": "kiokunigozaimasexn"
+    },
+    {
+      "text": "期待して損した",
+      "reading": "きたいしてそんした",
+      "romaji": "kitaisitesonsita"
+    },
+    {
+      "text": "キツネとタヌキの化かし合い",
+      "reading": "きつねとたぬきのばかしあい",
+      "romaji": "kitunetotanukinobakasiai"
+    },
+    {
+      "text": "昨日のことは覚えていません",
+      "reading": "きのうのことはおぼえていません",
+      "romaji": "kinounokotohaoboeteimasexn"
+    },
+    {
+      "text": "昨日の敵は今日の友",
+      "reading": "きのうのてきはきょうのとも",
+      "romaji": "kinounotekihakyounotomo"
+    },
+    {
+      "text": "逆転サヨナラ満塁ホームラン",
+      "reading": "ぎゃくてんさよならまんるいほーむらん",
+      "romaji": "gyakutensayonaramanruiho-muraxn"
+    },
+    {
+      "text": "キャビアはチョウザメの卵",
+      "reading": "きゃびあはちょうざめのたまご",
+      "romaji": "kyabiahatyouzamenotamago"
+    },
+    {
+      "text": "キャラメルポップコーン",
+      "reading": "きゃらめるぽっぷこーん",
+      "romaji": "kyaramerupoppuko-xn"
+    },
+    {
+      "text": "キャンプファイヤー",
+      "reading": "きゃんぷふぁいやー",
+      "romaji": "kyanpufaiya-"
+    },
+    {
+      "text": "キャンペーン実施中",
+      "reading": "きゃんぺーんじっしちゅう",
+      "romaji": "kyanpe-njissityuu"
+    },
+    {
+      "text": "究極の選択",
+      "reading": "きゅうきょくのせんたく",
+      "romaji": "kyuukyokunosentaku"
+    },
+    {
+      "text": "給食当番",
+      "reading": "きゅうしょくとうばん",
+      "romaji": "kyuushokutoubaxn"
+    },
+    {
+      "text": "牛肉のカルパッチョ",
+      "reading": "ぎゅうにくのかるぱっちょ",
+      "romaji": "gyuunikunokarupattyo"
+    },
+    {
+      "text": "驚愕の事実",
+      "reading": "きょうがくのじじつ",
+      "romaji": "kyougakunojijitu"
+    },
+    {
+      "text": "強制終了",
+      "reading": "きょうせいしゅうりょう",
+      "romaji": "kyouseishuuryou"
+    },
+    {
+      "text": "今日のおすすめ品",
+      "reading": "きょうのおすすめひん",
+      "romaji": "kyounoosusumehixn"
+    },
+    {
+      "text": "今日はいい天気ですね",
+      "reading": "きょうはいいてんきですね",
+      "romaji": "kyouhaiitenkidesune"
+    },
+    {
+      "text": "今日は楽しかったよ",
+      "reading": "きょうはたのしかったよ",
+      "romaji": "kyouhatanosikattayo"
+    },
+    {
+      "text": "行列の絶えない人気店",
+      "reading": "ぎょうれつのたえないにんきてん",
+      "romaji": "gyouretunotaenaininkitexn"
+    },
+    {
+      "text": "きれいな花にはトゲがある",
+      "reading": "きれいなはなにはとげがある",
+      "romaji": "kireinahananihatogegaaru"
+    },
+    {
+      "text": "キンキンに冷えたビール",
+      "reading": "きんきんにひえたびーる",
+      "romaji": "kinkixnnihietabi-ru"
+    },
+    {
+      "text": "禁断の魔術",
+      "reading": "きんだんのまじゅつ",
+      "romaji": "kindaxnnomajutu"
+    },
+    {
+      "text": "筋肉は裏切らない",
+      "reading": "きんにくはうらぎらない",
+      "romaji": "kixnnikuhauragiranai"
+    },
+    {
+      "text": "金の斧ですか銀の斧ですか",
+      "reading": "きんのおのですかぎんのおのですか",
+      "romaji": "kixnnoonodesukagixnnoonodesuka"
+    },
+    {
+      "text": "グアムとサイパンは近い",
+      "reading": "ぐあむとさいぱんはちかい",
+      "romaji": "guamutosaipanhatikai"
+    },
+    {
+      "text": "空気清浄機",
+      "reading": "くうきせいじょうき",
+      "romaji": "kuukiseijouki"
+    },
+    {
+      "text": "空中ブランコ",
+      "reading": "くうちゅうぶらんこ",
+      "romaji": "kuutyuuburanko"
+    },
+    {
+      "text": "雲行きが怪しい",
+      "reading": "くもゆきがあやしい",
+      "romaji": "kumoyukigaayasii"
+    },
+    {
+      "text": "クラシック音楽",
+      "reading": "くらしっくおんがく",
+      "romaji": "kurasikkuongaku"
+    },
+    {
+      "text": "グラフィックデザイナー",
+      "reading": "ぐらふぃっくでざいなー",
+      "romaji": "gurafikkudezaina-"
+    },
+    {
+      "text": "クリスマスツリー点灯",
+      "reading": "くりすますつりーてんとう",
+      "romaji": "kurisumasuturi-tentou"
+    },
+    {
+      "text": "クリスマスパーティー",
+      "reading": "くりすますぱーてぃー",
+      "romaji": "kurisumasupa-thi-"
+    },
+    {
+      "text": "くるみ割り人形",
+      "reading": "くるみわりにんぎょう",
+      "romaji": "kurumiwariningyou"
+    },
+    {
+      "text": "経営コンサルタント",
+      "reading": "けいえいこんさるたんと",
+      "romaji": "keieikonsarutanto"
+    },
+    {
+      "text": "継続は力なり",
+      "reading": "けいぞくはちからなり",
+      "romaji": "keizokuhatikaranari"
+    },
+    {
+      "text": "携帯の電源をお切り下さい",
+      "reading": "けいたいのでんげんをおきりください",
+      "romaji": "keitainodengenwookirikudasai"
+    },
+    {
+      "text": "血液型占い",
+      "reading": "けつえきがたうらない",
+      "romaji": "ketuekigatauranai"
+    },
+    {
+      "text": "結婚おめでとう",
+      "reading": "けっこんおめでとう",
+      "romaji": "kekkoxnomedetou"
+    },
+    {
+      "text": "決定的瞬間",
+      "reading": "けっていてきしゅんかん",
+      "romaji": "ketteitekishunkaxn"
+    },
+    {
+      "text": "ゲルマン民族の大移動",
+      "reading": "げるまんみんぞくのだいいどう",
+      "romaji": "gerumanminzokunodaiidou"
+    },
+    {
+      "text": "後悔先に立たず",
+      "reading": "こうかいさきにたたず",
+      "romaji": "koukaisakinitatazu"
+    },
+    {
+      "text": "合格発表",
+      "reading": "ごうかくはっぴょう",
+      "romaji": "goukakuhappyou"
+    },
+    {
+      "text": "高級チョコレート",
+      "reading": "こうきゅうちょこれーと",
+      "romaji": "koukyuutyokore-to"
+    },
+    {
+      "text": "甲子園球場",
+      "reading": "こうしえんきゅうじょう",
+      "romaji": "kousienkyuujou"
+    },
+    {
+      "text": "紅茶専門店",
+      "reading": "こうちゃせんもんてん",
+      "romaji": "koutyasenmontexn"
+    },
+    {
+      "text": "交通ルールを守りましょう",
+      "reading": "こうつうるーるをまもりましょう",
+      "romaji": "koutuuru-ruwomamorimashou"
+    },
+    {
+      "text": "コウモリは哺乳類です",
+      "reading": "こうもりはほにゅうるいです",
+      "romaji": "koumorihahonyuuruidesu"
+    },
+    {
+      "text": "コーヒー牛乳",
+      "reading": "こーひーぎゅうにゅう",
+      "romaji": "ko-hi-gyuunyuu"
+    },
+    {
+      "text": "コーヒーにミルク入れる？",
+      "reading": "こーひーにみるくいれる？",
+      "romaji": "ko-hi-nimirukuireru?"
+    },
+    {
+      "text": "ご活躍をお祈りします",
+      "reading": "ごかつやくをおいのりします",
+      "romaji": "gokatuyakuwooinorisimasu"
+    },
+    {
+      "text": "極秘プロジェクト始動",
+      "reading": "ごくひぷろじぇくとしどう",
+      "romaji": "gokuhipurojekutosidou"
+    },
+    {
+      "text": "国民健康保険",
+      "reading": "こくみんけんこうほけん",
+      "romaji": "kokuminkenkouhokexn"
+    },
+    {
+      "text": "ここからが本番です",
+      "reading": "ここからがほんばんです",
+      "romaji": "kokokaragahonbandesu"
+    },
+    {
+      "text": "ここだけの話ですが",
+      "reading": "ここだけのはなしですが",
+      "romaji": "kokodakenohanasidesuga"
+    },
+    {
+      "text": "ここで会ったが百年目",
+      "reading": "ここであったがひゃくねんめ",
+      "romaji": "kokodeattagahyakunenme"
+    },
+    {
+      "text": "ここは俺が食い止める！",
+      "reading": "ここはおれがくいとめる！",
+      "romaji": "kokohaoregakuitomeru!"
+    },
+    {
+      "text": "ここはどこ、私は誰",
+      "reading": "ここはどこ、わたしはだれ",
+      "romaji": "kokohadoko,watasihadare"
+    },
+    {
+      "text": "ご自由にお持ち下さい",
+      "reading": "ごじゆうにおもちください",
+      "romaji": "gojiyuuniomotikudasai"
+    },
+    {
+      "text": "こたつから出られない",
+      "reading": "こたつからでられない",
+      "romaji": "kotatukaraderarenai"
+    },
+    {
+      "text": "こたつでみかんを食べる",
+      "reading": "こたつでみかんをたべる",
+      "romaji": "kotatudemikanwotaberu"
+    },
+    {
+      "text": "ごちそうさまでした",
+      "reading": "ごちそうさまでした",
+      "romaji": "gotisousamadesita"
+    },
+    {
+      "text": "言葉の魔術師",
+      "reading": "ことばのまじゅつし",
+      "romaji": "kotobanomajutusi"
+    },
+    {
+      "text": "子供の頃からの夢でした",
+      "reading": "こどものころからのゆめでした",
+      "romaji": "kodomonokorokaranoyumedesita"
+    },
+    {
+      "text": "子猫の肉球",
+      "reading": "こねこのにくきゅう",
+      "romaji": "konekononikukyuu"
+    },
+    {
+      "text": "コラーゲン配合",
+      "reading": "こらーげんはいごう",
+      "romaji": "kora-genhaigou"
+    },
+    {
+      "text": "ご利用は計画的に",
+      "reading": "ごりようはけいかくてきに",
+      "romaji": "goriyouhakeikakutekini"
+    },
+    {
+      "text": "これは訓練ではない",
+      "reading": "これはくんれんではない",
+      "romaji": "korehakunrendehanai"
+    },
+    {
+      "text": "これはペンですか？",
+      "reading": "これはぺんですか？",
+      "romaji": "korehapendesuka?"
+    },
+    {
+      "text": "怖い話しようぜ",
+      "reading": "こわいはなししようぜ",
+      "romaji": "kowaihanasisiyouze"
+    },
+    {
+      "text": "今週のベストセラー",
+      "reading": "こんしゅうのべすとせらー",
+      "romaji": "konshuunobesutosera-"
+    },
+    {
+      "text": "今度は大丈夫です",
+      "reading": "こんどはだいじょうぶです",
+      "romaji": "kondohadaijoubudesu"
+    },
+    {
+      "text": "コンビニエンスストア",
+      "reading": "こんびにえんすすとあ",
+      "romaji": "konbiniensusutoa"
+    },
+    {
+      "text": "今夜はカレーライスよ",
+      "reading": "こんやはかれーらいすよ",
+      "romaji": "koxnyahakare-raisuyo"
+    },
+    {
+      "text": "今夜はロールキャベツです",
+      "reading": "こんやはろーるきゃべつです",
+      "romaji": "koxnyaharo-rukyabetudesu"
+    },
+    {
+      "text": "サービス残業",
+      "reading": "さーびすざんぎょう",
+      "romaji": "sa-bisuzangyou"
+    },
+    {
+      "text": "再起動が必要です",
+      "reading": "さいきどうがひつようです",
+      "romaji": "saikidougahituyoudesu"
+    },
+    {
+      "text": "最高級食材",
+      "reading": "さいこうきゅうしょくざい",
+      "romaji": "saikoukyuushokuzai"
+    },
+    {
+      "text": "最高級のおもてなし",
+      "reading": "さいこうきゅうのおもてなし",
+      "romaji": "saikoukyuunoomotenasi"
+    },
+    {
+      "text": "最高新記録",
+      "reading": "さいこうしんきろく",
+      "romaji": "saikousinkiroku"
+    },
+    {
+      "text": "最高の雪景色",
+      "reading": "さいこうのゆきげしき",
+      "romaji": "saikounoyukigesiki"
+    },
+    {
+      "text": "再就職先",
+      "reading": "さいしゅうしょくさき",
+      "romaji": "saishuushokusaki"
+    },
+    {
+      "text": "財布が小銭でパンパンです",
+      "reading": "さいふがこぜにでぱんぱんです",
+      "romaji": "saifugakozenidepanpandesu"
+    },
+    {
+      "text": "桜前線北上中",
+      "reading": "さくらぜんせんほくじょうちゅう",
+      "romaji": "sakurazensenhokujoutyuu"
+    },
+    {
+      "text": "鮭とイクラの親子丼",
+      "reading": "さけといくらのおやこどん",
+      "romaji": "saketoikuranooyakodoxn"
+    },
+    {
+      "text": "酒は飲んでも飲まれるな",
+      "reading": "さけはのんでものまれるな",
+      "romaji": "sakehanondemonomareruna"
+    },
+    {
+      "text": "砂糖と塩を間違えた",
+      "reading": "さとうとしおをまちがえた",
+      "romaji": "satoutosiowomatigaeta"
+    },
+    {
+      "text": "寒い日が続いています",
+      "reading": "さむいひがつづいています",
+      "romaji": "samuihigatuduiteimasu"
+    },
+    {
+      "text": "三角関数の応用",
+      "reading": "さんかくかんすうのおうよう",
+      "romaji": "sankakukansuunoouyou"
+    },
+    {
+      "text": "産業革命",
+      "reading": "さんぎょうかくめい",
+      "romaji": "sangyoukakumei"
+    },
+    {
+      "text": "残念なお知らせがあります",
+      "reading": "ざんねんなおしらせがあります",
+      "romaji": "zaxnnexnnaosirasegaarimasu"
+    },
+    {
+      "text": "サンマが安いですよ",
+      "reading": "さんまがやすいですよ",
+      "romaji": "sanmagayasuidesuyo"
+    },
+    {
+      "text": "ジェットコースター",
+      "reading": "じぇっとこーすたー",
+      "romaji": "jettoko-suta-"
+    },
+    {
+      "text": "シェフの気まぐれサラダ",
+      "reading": "しぇふのきまぐれさらだ",
+      "romaji": "shefunokimaguresarada"
+    },
+    {
+      "text": "四角い畳を丸く掃く",
+      "reading": "しかくいたたみをまるくはく",
+      "romaji": "sikakuitatamiwomarukuhaku"
+    },
+    {
+      "text": "自己紹介をしてください",
+      "reading": "じこしょうかいをしてください",
+      "romaji": "jikoshoukaiwositekudasai"
+    },
+    {
+      "text": "獅子座流星群",
+      "reading": "ししざりゅうせいぐん",
+      "romaji": "sisizaryuuseiguxn"
+    },
+    {
+      "text": "下から読んでも新聞紙",
+      "reading": "したからよんでもしんぶんし",
+      "romaji": "sitakarayondemosinbunsi"
+    },
+    {
+      "text": "ジブラルタル海峡",
+      "reading": "じぶらるたるかいきょう",
+      "romaji": "jiburarutarukaikyou"
+    },
+    {
+      "text": "自分に対するご褒美",
+      "reading": "じぶんにたいするごほうび",
+      "romaji": "jibuxnnitaisurugohoubi"
+    },
+    {
+      "text": "しまった、寝過ごした！",
+      "reading": "しまった、ねすごした！",
+      "romaji": "simatta,nesugosita!"
+    },
+    {
+      "text": "社会の歯車",
+      "reading": "しゃかいのはぐるま",
+      "romaji": "shakainohaguruma"
+    },
+    {
+      "text": "弱点が丸見え",
+      "reading": "じゃくてんがまるみえ",
+      "romaji": "jakutengamarumie"
+    },
+    {
+      "text": "弱肉強食",
+      "reading": "じゃくにくきょうしょく",
+      "romaji": "jakunikukyoushoku"
+    },
+    {
+      "text": "シャッターチャンス",
+      "reading": "しゃったーちゃんす",
+      "romaji": "shatta-tyansu"
+    },
+    {
+      "text": "修学旅行",
+      "reading": "しゅうがくりょこう",
+      "romaji": "shuugakuryokou"
+    },
+    {
+      "text": "集合写真",
+      "reading": "しゅうごうしゃしん",
+      "romaji": "shuugoushasin"
+    },
+    {
+      "text": "集中豪雨",
+      "reading": "しゅうちゅうごうう",
+      "romaji": "shuutyuugouu"
+    },
+    {
+      "text": "シューティングゲーム",
+      "reading": "しゅーてぃんぐげーむ",
+      "romaji": "shu-thinguge-mu"
+    },
+    {
+      "text": "宿題を忘れました",
+      "reading": "しゅくだいをわすれました",
+      "romaji": "shukudaiwowasuremasita"
+    },
+    {
+      "text": "受験勉強",
+      "reading": "じゅけんべんきょう",
+      "romaji": "jukenbenkyou"
+    },
+    {
+      "text": "出血大サービス",
+      "reading": "しゅっけつだいさーびす",
+      "romaji": "shukketudaisa-bisu"
+    },
+    {
+      "text": "趣味はお茶とお花とお琴です",
+      "reading": "しゅみはおちゃとおはなとおことです",
+      "romaji": "shumihaotyatoohanatookotodesu"
+    },
+    {
+      "text": "需要と供給",
+      "reading": "じゅようときょうきゅう",
+      "romaji": "juyoutokyoukyuu"
+    },
+    {
+      "text": "障害物競走",
+      "reading": "しょうがいぶつきょうそう",
+      "romaji": "shougaibutukyousou"
+    },
+    {
+      "text": "場外ホームラン",
+      "reading": "じょうがいほーむらん",
+      "romaji": "jougaiho-muraxn"
+    },
+    {
+      "text": "上昇気流",
+      "reading": "じょうしょうきりゅう",
+      "romaji": "joushoukiryuu"
+    },
+    {
+      "text": "使用上の注意",
+      "reading": "しようじょうのちゅうい",
+      "romaji": "siyoujounotyuui"
+    },
+    {
+      "text": "少年よ大志を抱け",
+      "reading": "しょうねんよたいしをいだけ",
+      "romaji": "shounexnyotaisiwoidake"
+    },
+    {
+      "text": "商売繁盛",
+      "reading": "しょうばいはんじょう",
+      "romaji": "shoubaihanjou"
+    },
+    {
+      "text": "少林寺拳法",
+      "reading": "しょうりんじけんぽう",
+      "romaji": "shourinjikenpou"
+    },
+    {
+      "text": "食後のコーヒー",
+      "reading": "しょくごのこーひー",
+      "romaji": "shokugonoko-hi-"
+    },
+    {
+      "text": "食虫植物",
+      "reading": "しょくちゅうしょくぶつ",
+      "romaji": "shokutyuushokubutu"
+    },
+    {
+      "text": "ショッピングセンター",
+      "reading": "しょっぴんぐせんたー",
+      "romaji": "shoppingusenta-"
+    },
+    {
+      "text": "処理速度を高速化",
+      "reading": "しょりそくどをこうそくか",
+      "romaji": "shorisokudowokousokuka"
+    },
+    {
+      "text": "書類にハンコを押してください",
+      "reading": "しょるいにはんこをおしてください",
+      "romaji": "shoruinihankowoositekudasai"
+    },
+    {
+      "text": "シルバーアクセサリー",
+      "reading": "しるばーあくせさりー",
+      "romaji": "siruba-akusesari-"
+    },
+    {
+      "text": "白いご飯が食べたい",
+      "reading": "しろいごはんがたべたい",
+      "romaji": "siroigohangatabetai"
+    },
+    {
+      "text": "真珠のネックレス",
+      "reading": "しんじゅのねっくれす",
+      "romaji": "sinjunonekkuresu"
+    },
+    {
+      "text": "人生の分岐点",
+      "reading": "じんせいのぶんきてん",
+      "romaji": "jinseinobunkitexn"
+    },
+    {
+      "text": "人生山あり谷あり",
+      "reading": "じんせいやまありたにあり",
+      "romaji": "jinseiyamaaritaniari"
+    },
+    {
+      "text": "心臓に毛が生えている",
+      "reading": "しんぞうにけがはえている",
+      "romaji": "sinzounikegahaeteiru"
+    },
+    {
+      "text": "新築マンション",
+      "reading": "しんちくまんしょん",
+      "romaji": "sintikumanshoxn"
+    },
+    {
+      "text": "シンデレラストーリー",
+      "reading": "しんでれらすとーりー",
+      "romaji": "sindererasuto-ri-"
+    },
+    {
+      "text": "新東京国際空港",
+      "reading": "しんとうきょうこくさいくうこう",
+      "romaji": "sintoukyoukokusaikuukou"
+    },
+    {
+      "text": "新入社員",
+      "reading": "しんにゅうしゃいん",
+      "romaji": "sixnnyuushaixn"
+    },
+    {
+      "text": "新入生歓迎会",
+      "reading": "しんにゅうせいかんげいかい",
+      "romaji": "sixnnyuuseikangeikai"
+    },
+    {
+      "text": "心理学を専攻する",
+      "reading": "しんりがくをせんこうする",
+      "romaji": "sinrigakuwosenkousuru"
+    },
+    {
+      "text": "スイーツ食べ放題",
+      "reading": "すいーつたべほうだい",
+      "romaji": "sui-tutabehoudai"
+    },
+    {
+      "text": "水酸化ナトリウム水溶液",
+      "reading": "すいさんかなとりうむすいようえき",
+      "romaji": "suisankanatoriumusuiyoueki"
+    },
+    {
+      "text": "ずいずいずっころばし",
+      "reading": "ずいずいずっころばし",
+      "romaji": "zuizuizukkorobasi"
+    },
+    {
+      "text": "睡魔には勝てなかった",
+      "reading": "すいまにはかてなかった",
+      "romaji": "suimanihakatenakatta"
+    },
+    {
+      "text": "素顔は見せられない",
+      "reading": "すがおはみせられない",
+      "romaji": "sugaohamiserarenai"
+    },
+    {
+      "text": "隙間に入っちゃった",
+      "reading": "すきまにはいっちゃった",
+      "romaji": "sukimanihaittyatta"
+    },
+    {
+      "text": "スキューバダイビング",
+      "reading": "すきゅーばだいびんぐ",
+      "romaji": "sukyu-badaibingu"
+    },
+    {
+      "text": "スクランブル交差点",
+      "reading": "すくらんぶるこうさてん",
+      "romaji": "sukuranburukousatexn"
+    },
+    {
+      "text": "ずっと遊んで暮らしたい",
+      "reading": "ずっとあそんでくらしたい",
+      "romaji": "zuttoasondekurasitai"
+    },
+    {
+      "text": "ずっとこのまま寝ていたい",
+      "reading": "ずっとこのままねていたい",
+      "romaji": "zuttokonomamaneteitai"
+    },
+    {
+      "text": "ストレス解消",
+      "reading": "すとれすかいしょう",
+      "romaji": "sutoresukaishou"
+    },
+    {
+      "text": "スペースキーを連打",
+      "reading": "すぺーすきーをれんだ",
+      "romaji": "supe-suki-worenda"
+    },
+    {
+      "text": "スペシャルサンクス",
+      "reading": "すぺしゃるさんくす",
+      "romaji": "supesharusankusu"
+    },
+    {
+      "text": "スペシャルプライス",
+      "reading": "すぺしゃるぷらいす",
+      "romaji": "supesharupuraisu"
+    },
+    {
+      "text": "スモモも桃も桃のうち",
+      "reading": "すもももももももものうち",
+      "romaji": "sumomomomomomomomonouti"
+    },
+    {
+      "text": "生死の境をさまよう",
+      "reading": "せいしのさかいをさまよう",
+      "romaji": "seisinosakaiwosamayou"
+    },
+    {
+      "text": "世界一周旅行",
+      "reading": "せかいいっしゅうりょこう",
+      "romaji": "sekaiisshuuryokou"
+    },
+    {
+      "text": "石油ファンヒーター",
+      "reading": "せきゆふぁんひーたー",
+      "romaji": "sekiyufanhi-ta-"
+    },
+    {
+      "text": "赤裸々な告白",
+      "reading": "せきららなこくはく",
+      "romaji": "sekiraranakokuhaku"
+    },
+    {
+      "text": "絶体絶命の大ピンチ",
+      "reading": "ぜったいぜつめいのだいぴんち",
+      "romaji": "zettaizetumeinodaipinti"
+    },
+    {
+      "text": "選挙管理委員会",
+      "reading": "せんきょかんりいいんかい",
+      "romaji": "senkyokanriiinkai"
+    },
+    {
+      "text": "先行試写会",
+      "reading": "せんこうししゃかい",
+      "romaji": "senkousishakai"
+    },
+    {
+      "text": "戦国大名",
+      "reading": "せんごくだいみょう",
+      "romaji": "sengokudaimyou"
+    },
+    {
+      "text": "全財産をつぎ込む",
+      "reading": "ぜんざいさんをつぎこむ",
+      "romaji": "zenzaisanwotugikomu"
+    },
+    {
+      "text": "全自動皿洗い機",
+      "reading": "ぜんじどうさらあらいき",
+      "romaji": "zenjidousaraaraiki"
+    },
+    {
+      "text": "全自動洗濯機",
+      "reading": "ぜんじどうせんたくき",
+      "romaji": "zenjidousentakuki"
+    },
+    {
+      "text": "先進国首脳会議",
+      "reading": "せんしんこくしゅのうかいぎ",
+      "romaji": "sensinkokushunoukaigi"
+    },
+    {
+      "text": "先生の口癖",
+      "reading": "せんせいのくちぐせ",
+      "romaji": "senseinokutiguse"
+    },
+    {
+      "text": "戦闘を開始してください",
+      "reading": "せんとうをかいししてください",
+      "romaji": "sentouwokaisisitekudasai"
+    },
+    {
+      "text": "全力を尽くします",
+      "reading": "ぜんりょくをつくします",
+      "romaji": "zenryokuwotukusimasu"
+    },
+    {
+      "text": "相対性理論",
+      "reading": "そうたいせいりろん",
+      "romaji": "soutaiseiriroxn"
+    },
+    {
+      "text": "早朝ランニング",
+      "reading": "そうちょうらんにんぐ",
+      "romaji": "soutyouraxnningu"
+    },
+    {
+      "text": "そこを右折してください",
+      "reading": "そこをうせつしてください",
+      "romaji": "sokowousetusitekudasai"
+    },
+    {
+      "text": "そこをまっすぐ行ってください",
+      "reading": "そこをまっすぐいってください",
+      "romaji": "sokowomassuguittekudasai"
+    },
+    {
+      "text": "卒業写真",
+      "reading": "そつぎょうしゃしん",
+      "romaji": "sotugyoushasixn"
+    },
+    {
+      "text": "卒業文集",
+      "reading": "そつぎょうぶんしゅう",
+      "romaji": "sotugyoubunshuu"
+    },
+    {
+      "text": "そっくりそのまま返す",
+      "reading": "そっくりそのままかえす",
+      "romaji": "sokkurisonomamakaesu"
+    },
+    {
+      "text": "そっちは行き止まりだ！",
+      "reading": "そっちはいきどまりだ！",
+      "romaji": "sottihaikidomarida!"
+    },
+    {
+      "text": "それでも地球は回っている",
+      "reading": "それでもちきゅうはまわっている",
+      "romaji": "soredemotikyuuhamawatteiru"
+    },
+    {
+      "text": "そろそろ心が折れそうです",
+      "reading": "そろそろこころがおれそうです",
+      "romaji": "sorosorokokorogaoresoudesu"
+    },
+    {
+      "text": "そんな恐い顔するなって",
+      "reading": "そんなこわいかおするなって",
+      "romaji": "soxnnakowaikaosurunatte"
+    },
+    {
+      "text": "体育館に集合",
+      "reading": "たいいくかんにしゅうごう",
+      "romaji": "taiikukaxnnishuugou"
+    },
+    {
+      "text": "大切な書類",
+      "reading": "たいせつなしょるい",
+      "romaji": "taisetunashorui"
+    },
+    {
+      "text": "代表取締役",
+      "reading": "だいひょうとりしまりやく",
+      "romaji": "daihyoutorisimariyaku"
+    },
+    {
+      "text": "台風接近中",
+      "reading": "たいふうせっきんちゅう",
+      "romaji": "taifuusekkintyuu"
+    },
+    {
+      "text": "タイムパラドックス",
+      "reading": "たいむぱらどっくす",
+      "romaji": "taimuparadokkusu"
+    },
+    {
+      "text": "太陽系第三惑星地球",
+      "reading": "たいようけいだいさんわくせいちきゅう",
+      "romaji": "taiyoukeidaisanwakuseitikyuu"
+    },
+    {
+      "text": "体力測定",
+      "reading": "たいりょくそくてい",
+      "romaji": "tairyokusokutei"
+    },
+    {
+      "text": "ダウンロードを開始します",
+      "reading": "だうんろーどをかいしします",
+      "romaji": "daunro-dowokaisisimasu"
+    },
+    {
+      "text": "ただ今準備中です",
+      "reading": "ただいまじゅんびちゅうです",
+      "romaji": "tadaimajunbityuudesu"
+    },
+    {
+      "text": "畳にキノコが生えました",
+      "reading": "たたみにきのこがはえました",
+      "romaji": "tataminikinokogahaemasita"
+    },
+    {
+      "text": "タダより高いものは無い",
+      "reading": "ただよりたかいものはない",
+      "romaji": "tadayoritakaimonohanai"
+    },
+    {
+      "text": "卓球で脱臼",
+      "reading": "たっきゅうでだっきゅう",
+      "romaji": "takkyuudedakkyuu"
+    },
+    {
+      "text": "脱出成功！",
+      "reading": "だっしゅつせいこう！",
+      "romaji": "dasshutuseikou!"
+    },
+    {
+      "text": "立つ鳥跡を濁さず",
+      "reading": "たつとりあとをにごさず",
+      "romaji": "tatutoriatowonigosazu"
+    },
+    {
+      "text": "タバコがやめられない",
+      "reading": "たばこがやめられない",
+      "romaji": "tabakogayamerarenai"
+    },
+    {
+      "text": "タピオカミルクティー",
+      "reading": "たぴおかみるくてぃー",
+      "romaji": "tapiokamirukuthi-"
+    },
+    {
+      "text": "旅に出たい気分",
+      "reading": "たびにでたいきぶん",
+      "romaji": "tabinidetaikibuxn"
+    },
+    {
+      "text": "食べたら歯を磨こうね",
+      "reading": "たべたらはをみがこうね",
+      "romaji": "tabetarahawomigakoune"
+    },
+    {
+      "text": "食べてすぐ寝たら牛になりました",
+      "reading": "たべてすぐねたらうしになりました",
+      "romaji": "tabetesugunetarausininarimasita"
+    },
+    {
+      "text": "魂の一撃",
+      "reading": "たましいのいちげき",
+      "romaji": "tamasiinoitigeki"
+    },
+    {
+      "text": "だるまさんが転んだ",
+      "reading": "だるまさんがころんだ",
+      "romaji": "darumasangakoronda"
+    },
+    {
+      "text": "誰も反応してくれない",
+      "reading": "だれもはんのうしてくれない",
+      "romaji": "daremohaxnnousitekurenai"
+    },
+    {
+      "text": "炭酸飲料",
+      "reading": "たんさんいんりょう",
+      "romaji": "tansaxninryou"
+    },
+    {
+      "text": "誕生日おめでとう",
+      "reading": "たんじょうびおめでとう",
+      "romaji": "tanjoubiomedetou"
+    },
+    {
+      "text": "誕生日プレゼント",
+      "reading": "たんじょうびぷれぜんと",
+      "romaji": "tanjoubipurezento"
+    },
+    {
+      "text": "タンスの角に小指をぶつけた",
+      "reading": "たんすのかどにこゆびをぶつけた",
+      "romaji": "tansunokadonikoyubiwobutuketa"
+    },
+    {
+      "text": "地球外生命体",
+      "reading": "ちきゅうがいせいめいたい",
+      "romaji": "tikyuugaiseimeitai"
+    },
+    {
+      "text": "地球は青かった",
+      "reading": "ちきゅうはあおかった",
+      "romaji": "tikyuuhaaokatta"
+    },
+    {
+      "text": "乳搾り体験",
+      "reading": "ちちしぼりたいけん",
+      "romaji": "titisiboritaikexn"
+    },
+    {
+      "text": "チャレンジ精神",
+      "reading": "ちゃれんじせいしん",
+      "romaji": "tyarenjiseisixn"
+    },
+    {
+      "text": "チューリップが咲きました",
+      "reading": "ちゅーりっぷがさきました",
+      "romaji": "tyu-rippugasakimasita"
+    },
+    {
+      "text": "超高級リゾートホテル",
+      "reading": "ちょうこうきゅうりぞーとほてる",
+      "romaji": "tyoukoukyuurizo-tohoteru"
+    },
+    {
+      "text": "超常現象",
+      "reading": "ちょうじょうげんしょう",
+      "romaji": "tyoujougenshou"
+    },
+    {
+      "text": "調理師免許",
+      "reading": "ちょうりしめんきょ",
+      "romaji": "tyourisimenkyo"
+    },
+    {
+      "text": "チョコレートパフェ",
+      "reading": "ちょこれーとぱふぇ",
+      "romaji": "tyokore-topafe"
+    },
+    {
+      "text": "ちょっと休憩",
+      "reading": "ちょっときゅうけい",
+      "romaji": "tyottokyuukei"
+    },
+    {
+      "text": "ちょっと待ってください",
+      "reading": "ちょっとまってください",
+      "romaji": "tyottomattekudasai"
+    },
+    {
+      "text": "賃貸マンション",
+      "reading": "ちんたいまんしょん",
+      "romaji": "tintaimanshoxn"
+    },
+    {
+      "text": "使い捨てコンタクトレンズ",
+      "reading": "つかいすてこんたくとれんず",
+      "romaji": "tukaisutekontakutorenzu"
+    },
+    {
+      "text": "月がきれいですね",
+      "reading": "つきがきれいですね",
+      "romaji": "tukigakireidesune"
+    },
+    {
+      "text": "低気圧が発達中",
+      "reading": "ていきあつがはったつちゅう",
+      "romaji": "teikiatugahattatutyuu"
+    },
+    {
+      "text": "ディスカウントショップ",
+      "reading": "でぃすかうんとしょっぷ",
+      "romaji": "dhisukauntoshoppu"
+    },
+    {
+      "text": "出口のない迷路",
+      "reading": "でぐちのないめいろ",
+      "romaji": "degutinonaimeiro"
+    },
+    {
+      "text": "テスト期間まであと一週間",
+      "reading": "てすときかんまであといっしゅうかん",
+      "romaji": "tesutokikanmadeatoisshuukaxn"
+    },
+    {
+      "text": "電気を大切に",
+      "reading": "でんきをたいせつに",
+      "romaji": "denkiwotaisetuni"
+    },
+    {
+      "text": "天井裏になにかいる",
+      "reading": "てんじょううらになにかいる",
+      "romaji": "tenjouuraninanikairu"
+    },
+    {
+      "text": "伝説の勇者",
+      "reading": "でんせつのゆうしゃ",
+      "romaji": "densetunoyuusha"
+    },
+    {
+      "text": "ドアノブが取れました",
+      "reading": "どあのぶがとれました",
+      "romaji": "doanobugatoremasita"
+    },
+    {
+      "text": "トイレはどこですか？",
+      "reading": "といれはどこですか？",
+      "romaji": "toirehadokodesuka?"
+    },
+    {
+      "text": "東京と京都",
+      "reading": "とうきょうときょうと",
+      "romaji": "toukyoutokyouto"
+    },
+    {
+      "text": "どうしても思い出せない",
+      "reading": "どうしてもおもいだせない",
+      "romaji": "dousitemoomoidasenai"
+    },
+    {
+      "text": "東北新幹線",
+      "reading": "とうほくしんかんせん",
+      "romaji": "touhokusinkansexn"
+    },
+    {
+      "text": "特賞はハワイ旅行",
+      "reading": "とくしょうははわいりょこう",
+      "romaji": "tokushouhahawairyokou"
+    },
+    {
+      "text": "読書感想文",
+      "reading": "どくしょかんそうぶん",
+      "romaji": "dokushokansoubuxn"
+    },
+    {
+      "text": "匿名希望さん",
+      "reading": "とくめいきぼうさん",
+      "romaji": "tokumeikibousaxn"
+    },
+    {
+      "text": "時計が壊れたんです",
+      "reading": "とけいがこわれたんです",
+      "romaji": "tokeigakowaretandesu"
+    },
+    {
+      "text": "どこかでお会いしませんでしたか？",
+      "reading": "どこかでおあいしませんでしたか？",
+      "romaji": "dokokadeoaisimasendesitaka?"
+    },
+    {
+      "text": "どこからか視線を感じる",
+      "reading": "どこからかしせんをかんじる",
+      "romaji": "dokokarakasisenwokanjiru"
+    },
+    {
+      "text": "特許出願中",
+      "reading": "とっきょしゅつがんちゅう",
+      "romaji": "tokkyoshutugantyuu"
+    },
+    {
+      "text": "隣の客はよく柿食う客だ",
+      "reading": "となりのきゃくはよくかきくうきゃくだ",
+      "romaji": "tonarinokyakuhayokukakikuukyakuda"
+    },
+    {
+      "text": "ドラゴン退治に出発だ",
+      "reading": "どらごんたいじにしゅっぱつだ",
+      "romaji": "doragontaijinishuppatuda"
+    },
+    {
+      "text": "取らぬ狸の皮算用",
+      "reading": "とらぬたぬきのかわざんよう",
+      "romaji": "toranutanukinokawazaxnyou"
+    },
+    {
+      "text": "トラブルシューティング",
+      "reading": "とらぶるしゅーてぃんぐ",
+      "romaji": "toraburushu-thingu"
+    },
+    {
+      "text": "ドラマチックな出会い",
+      "reading": "どらまちっくなであい",
+      "romaji": "doramatikkunadeai"
+    },
+    {
+      "text": "とりあえずビールちょうだい",
+      "reading": "とりあえずびーるちょうだい",
+      "romaji": "toriaezubi-rutyoudai"
+    },
+    {
+      "text": "ドレミファソラシド",
+      "reading": "どれみふぁそらしど",
+      "romaji": "doremifasorasido"
+    },
+    {
+      "text": "トロピカルフルーツ",
+      "reading": "とろぴかるふるーつ",
+      "romaji": "toropikarufuru-tu"
+    },
+    {
+      "text": "長い夜になりそうです",
+      "reading": "ながいよるになりそうです",
+      "romaji": "nagaiyoruninarisoudesu"
+    },
+    {
+      "text": "仲良しこよしのお友達",
+      "reading": "なかよしこよしのおともだち",
+      "romaji": "nakayosikoyosinootomodati"
+    },
+    {
+      "text": "ナスカの地上絵",
+      "reading": "なすかのちじょうえ",
+      "romaji": "nasukanotijoue"
+    },
+    {
+      "text": "謎の多い人物",
+      "reading": "なぞのおおいじんぶつ",
+      "romaji": "nazonoooijinbutu"
+    },
+    {
+      "text": "夏休みの絵日記",
+      "reading": "なつやすみのえにっき",
+      "romaji": "natuyasuminoenikki"
+    },
+    {
+      "text": "夏休みの宿題終わった？",
+      "reading": "なつやすみのしゅくだいおわった？",
+      "romaji": "natuyasuminoshukudaiowatta?"
+    },
+    {
+      "text": "生むぎ生ごめ生たまご",
+      "reading": "なまむぎなまごめなまたまご",
+      "romaji": "namamuginamagomenamatamago"
+    },
+    {
+      "text": "南極大陸",
+      "reading": "なんきょくたいりく",
+      "romaji": "nankyokutairiku"
+    },
+    {
+      "text": "何だか嫌な予感がする",
+      "reading": "なんだかいやなよかんがする",
+      "romaji": "nandakaiyanayokangasuru"
+    },
+    {
+      "text": "二階から目薬",
+      "reading": "にかいからめぐすり",
+      "romaji": "nikaikaramegusuri"
+    },
+    {
+      "text": "日本国憲法",
+      "reading": "にほんこくけんぽう",
+      "romaji": "nihonkokukenpou"
+    },
+    {
+      "text": "日本の首都は東京",
+      "reading": "にほんのしゅとはとうきょう",
+      "romaji": "nihoxnnoshutohatoukyou"
+    },
+    {
+      "text": "庭には二羽にわとりがいる",
+      "reading": "にわにはにわにわとりがいる",
+      "romaji": "niwanihaniwaniwatorigairu"
+    },
+    {
+      "text": "人気テーマパーク",
+      "reading": "にんきてーまぱーく",
+      "romaji": "ninkite-mapa-ku"
+    },
+    {
+      "text": "脱いだら脱ぎっぱなし",
+      "reading": "ぬいだらぬぎっぱなし",
+      "romaji": "nuidaranugippanasi"
+    },
+    {
+      "text": "抜け道を発見",
+      "reading": "ぬけみちをはっけん",
+      "romaji": "nukemitiwohakkexn"
+    },
+    {
+      "text": "猫の首に鈴をつける",
+      "reading": "ねこのくびにすずをつける",
+      "romaji": "nekonokubinisuzuwotukeru"
+    },
+    {
+      "text": "猫の手も借りたいです",
+      "reading": "ねこのてもかりたいです",
+      "romaji": "nekonotemokaritaidesu"
+    },
+    {
+      "text": "熱狂的サポーター",
+      "reading": "ねっきょうてきさぽーたー",
+      "romaji": "nekkyoutekisapo-ta-"
+    },
+    {
+      "text": "熱帯雨林気候",
+      "reading": "ねったいうりんきこう",
+      "romaji": "nettaiurinkikou"
+    },
+    {
+      "text": "ノーヒットノーラン",
+      "reading": "のーひっとのーらん",
+      "romaji": "no-hittono-raxn"
+    },
+    {
+      "text": "ノンアルコールビール",
+      "reading": "のんあるこーるびーる",
+      "romaji": "noxnaruko-rubi-ru"
+    },
+    {
+      "text": "パーソナルコンピュータ",
+      "reading": "ぱーそなるこんぴゅーた",
+      "romaji": "pa-sonarukonpyu-ta"
+    },
+    {
+      "text": "バイオテクノロジー",
+      "reading": "ばいおてくのろじー",
+      "romaji": "baiotekunoroji-"
+    },
+    {
+      "text": "パイナップルの缶詰",
+      "reading": "ぱいなっぷるのかんづめ",
+      "romaji": "painappurunokandume"
+    },
+    {
+      "text": "爆発的人気",
+      "reading": "ばくはつてきにんき",
+      "romaji": "bakuhatutekininki"
+    },
+    {
+      "text": "白馬に乗った王子様",
+      "reading": "はくばにのったおうじさま",
+      "romaji": "hakubaninottaoujisama"
+    },
+    {
+      "text": "激しいリンボーダンス",
+      "reading": "はげしいりんぼーだんす",
+      "romaji": "hagesiirinbo-dansu"
+    },
+    {
+      "text": "はさみでチョキチョキ",
+      "reading": "はさみでちょきちょき",
+      "romaji": "hasamidetyokityoki"
+    },
+    {
+      "text": "パスワードを入れてください",
+      "reading": "ぱすわーどをいれてください",
+      "romaji": "pasuwa-dowoiretekudasai"
+    },
+    {
+      "text": "パスワードを入力してください",
+      "reading": "ぱすわーどをにゅうりょくしてください",
+      "romaji": "pasuwa-dowonyuuryokusitekudasai"
+    },
+    {
+      "text": "働かざるもの食うべからず",
+      "reading": "はたらかざるものくうべからず",
+      "romaji": "hatarakazarumonokuubekarazu"
+    },
+    {
+      "text": "働くパパはカッコイイ",
+      "reading": "はたらくぱぱはかっこいい",
+      "romaji": "hatarakupapahakakkoii"
+    },
+    {
+      "text": "パパ、ぼく弟ほしい",
+      "reading": "ぱぱ、ぼくおとうとほしい",
+      "romaji": "papa,bokuotoutohosii"
+    },
+    {
+      "text": "バミューダトライアングル",
+      "reading": "ばみゅーだとらいあんぐる",
+      "romaji": "bamyu-datoraianguru"
+    },
+    {
+      "text": "早起きは三文の得",
+      "reading": "はやおきはさんもんのとく",
+      "romaji": "hayaokihasanmoxnnotoku"
+    },
+    {
+      "text": "張りつめた空気が漂う",
+      "reading": "はりつめたくうきがただよう",
+      "romaji": "haritumetakuukigatadayou"
+    },
+    {
+      "text": "はるか遠くの銀河",
+      "reading": "はるかとおくのぎんが",
+      "romaji": "harukatookunoginga"
+    },
+    {
+      "text": "パン食い競争",
+      "reading": "ぱんくいきょうそう",
+      "romaji": "pankuikyousou"
+    },
+    {
+      "text": "犯人はこの中にいる",
+      "reading": "はんにんはこのなかにいる",
+      "romaji": "haxnninhakononakaniiru"
+    },
+    {
+      "text": "ハンバーグステーキ",
+      "reading": "はんばーぐすてーき",
+      "romaji": "hanba-gusute-ki"
+    },
+    {
+      "text": "ハンバーグ定食",
+      "reading": "はんばーぐていしょく",
+      "romaji": "hanba-guteishoku"
+    },
+    {
+      "text": "ピーマンも食べなさい",
+      "reading": "ぴーまんもたべなさい",
+      "romaji": "pi-manmotabenasai"
+    },
+    {
+      "text": "ビールのおいしい季節",
+      "reading": "びーるのおいしいきせつ",
+      "romaji": "bi-runooisiikisetu"
+    },
+    {
+      "text": "非常識にも程がある",
+      "reading": "ひじょうしきにもほどがある",
+      "romaji": "hijousikinimohodogaaru"
+    },
+    {
+      "text": "非常事態発生",
+      "reading": "ひじょうじたいはっせい",
+      "romaji": "hijoujitaihassei"
+    },
+    {
+      "text": "引っ越しの準備",
+      "reading": "ひっこしのじゅんび",
+      "romaji": "hikkosinojunbi"
+    },
+    {
+      "text": "火に油を注ぐ",
+      "reading": "ひにあぶらをそそぐ",
+      "romaji": "hiniaburawososogu"
+    },
+    {
+      "text": "冷やし中華始めました",
+      "reading": "ひやしちゅうかはじめました",
+      "romaji": "hiyasityuukahajimemasita"
+    },
+    {
+      "text": "ヒラメとカレイの見分け方",
+      "reading": "ひらめとかれいのみわけかた",
+      "romaji": "hirametokareinomiwakekata"
+    },
+    {
+      "text": "ファーストクラスに乗ってみたい",
+      "reading": "ふぁーすとくらすにのってみたい",
+      "romaji": "fa-sutokurasuninottemitai"
+    },
+    {
+      "text": "ファーブル昆虫記",
+      "reading": "ふぁーぶるこんちゅうき",
+      "romaji": "fa-burukontyuuki"
+    },
+    {
+      "text": "ファッション雑誌",
+      "reading": "ふぁっしょんざっし",
+      "romaji": "fasshonzassi"
+    },
+    {
+      "text": "ファッションセンスに難あり",
+      "reading": "ふぁっしょんせんすになんあり",
+      "romaji": "fasshonsensuninaxnari"
+    },
+    {
+      "text": "ファミリーレストラン",
+      "reading": "ふぁみりーれすとらん",
+      "romaji": "famiri-resutoraxn"
+    },
+    {
+      "text": "風力発電",
+      "reading": "ふうりょくはつでん",
+      "romaji": "fuuryokuhatudexn"
+    },
+    {
+      "text": "プールサイドで日光浴",
+      "reading": "ぷーるさいどでにっこうよく",
+      "romaji": "pu-rusaidodenikkouyoku"
+    },
+    {
+      "text": "ふかふかのお布団で眠りたい",
+      "reading": "ふかふかのおふとんでねむりたい",
+      "romaji": "fukafukanoofutondenemuritai"
+    },
+    {
+      "text": "普段着はパジャマです",
+      "reading": "ふだんぎはぱじゃまです",
+      "romaji": "fudangihapajamadesu"
+    },
+    {
+      "text": "布団が恋しい季節",
+      "reading": "ふとんがこいしいきせつ",
+      "romaji": "futongakoisiikisetu"
+    },
+    {
+      "text": "布団から出られない",
+      "reading": "ふとんからでられない",
+      "romaji": "futonkaraderarenai"
+    },
+    {
+      "text": "冬将軍の到来",
+      "reading": "ふゆしょうぐんのとうらい",
+      "romaji": "fuyushouguxnnotourai"
+    },
+    {
+      "text": "ブラウザは何を使っていますか？",
+      "reading": "ぶらうざはなにをつかっていますか？",
+      "romaji": "burauzahananiwotukatteimasuka?"
+    },
+    {
+      "text": "鰤と書いてブリと読む",
+      "reading": "ぶりとかいてぶりとよむ",
+      "romaji": "buritokaiteburitoyomu"
+    },
+    {
+      "text": "ブリとハマチは同じ魚",
+      "reading": "ぶりとはまちはおなじさかな",
+      "romaji": "buritohamatihaonajisakana"
+    },
+    {
+      "text": "ブルータス、お前もか",
+      "reading": "ぶるーたす、おまえもか",
+      "romaji": "buru-tasu,omaemoka"
+    },
+    {
+      "text": "フルーツの王様",
+      "reading": "ふるーつのおうさま",
+      "romaji": "furu-tunoousama"
+    },
+    {
+      "text": "フルモデルチェンジ",
+      "reading": "ふるもでるちぇんじ",
+      "romaji": "furumoderutyenji"
+    },
+    {
+      "text": "プレゼンテーション",
+      "reading": "ぷれぜんてーしょん",
+      "romaji": "purezente-shoxn"
+    },
+    {
+      "text": "風呂上りの一杯",
+      "reading": "ふろあがりのいっぱい",
+      "romaji": "furoagarinoippai"
+    },
+    {
+      "text": "プログラミング言語",
+      "reading": "ぷろぐらみんぐげんご",
+      "romaji": "puroguramingugengo"
+    },
+    {
+      "text": "プロフェッショナル",
+      "reading": "ぷろふぇっしょなる",
+      "romaji": "purofesshonaru"
+    },
+    {
+      "text": "ふわふわパンケーキ",
+      "reading": "ふわふわぱんけーき",
+      "romaji": "fuwafuwapanke-ki"
+    },
+    {
+      "text": "平均寿命",
+      "reading": "へいきんじゅみょう",
+      "romaji": "heikinjumyou"
+    },
+    {
+      "text": "ヘッドスライディング",
+      "reading": "へっどすらいでぃんぐ",
+      "romaji": "heddosuraidhingu"
+    },
+    {
+      "text": "豊富なボキャブラリー",
+      "reading": "ほうふなぼきゃぶらりー",
+      "romaji": "houfunabokyaburari-"
+    },
+    {
+      "text": "ホームページ作りました",
+      "reading": "ほーむぺーじつくりました",
+      "romaji": "ho-mupe-jitukurimasita"
+    },
+    {
+      "text": "ホコリでくしゃみ連発",
+      "reading": "ほこりでくしゃみれんぱつ",
+      "romaji": "hokoridekushamirenpatu"
+    },
+    {
+      "text": "星のない夜の空",
+      "reading": "ほしのないよるのそら",
+      "romaji": "hosinonaiyorunosora"
+    },
+    {
+      "text": "母性本能をくすぐる",
+      "reading": "ぼせいほんのうをくすぐる",
+      "romaji": "boseihoxnnouwokusuguru"
+    },
+    {
+      "text": "北海道直送",
+      "reading": "ほっかいどうちょくそう",
+      "romaji": "hokkaidoutyokusou"
+    },
+    {
+      "text": "北極と南極",
+      "reading": "ほっきょくとなんきょく",
+      "romaji": "hokkyokutonankyoku"
+    },
+    {
+      "text": "微笑みの貴公子",
+      "reading": "ほほえみのきこうし",
+      "romaji": "hohoeminokikousi"
+    },
+    {
+      "text": "ホワイトチョコレート",
+      "reading": "ほわいとちょこれーと",
+      "romaji": "howaitotyokore-to"
+    },
+    {
+      "text": "本当にあった怖い話",
+      "reading": "ほんとうにあったこわいはなし",
+      "romaji": "hontouniattakowaihanasi"
+    },
+    {
+      "text": "ほんの出来心だったんです",
+      "reading": "ほんのできごころだったんです",
+      "romaji": "hoxnnodekigokorodattandesu"
+    },
+    {
+      "text": "迷子のご案内",
+      "reading": "まいごのごあんない",
+      "romaji": "maigonogoaxnnai"
+    },
+    {
+      "text": "枕投げしようぜ",
+      "reading": "まくらなげしようぜ",
+      "romaji": "makuranagesiyouze"
+    },
+    {
+      "text": "マサチューセッツ工科大学",
+      "reading": "まさちゅーせっつこうかだいがく",
+      "romaji": "masatyu-settukoukadaigaku"
+    },
+    {
+      "text": "またのお越しをお待ちしております",
+      "reading": "またのおこしをおまちしております",
+      "romaji": "matanookosiwoomatisiteorimasu"
+    },
+    {
+      "text": "全く覚えていない",
+      "reading": "まったくおぼえていない",
+      "romaji": "mattakuoboeteinai"
+    },
+    {
+      "text": "窓の外は冷たい雨",
+      "reading": "まどのそとはつめたいあめ",
+      "romaji": "madonosotohatumetaiame"
+    },
+    {
+      "text": "マヤ文明の遺跡",
+      "reading": "まやぶんめいのいせき",
+      "romaji": "mayabunmeinoiseki"
+    },
+    {
+      "text": "マンションの一室",
+      "reading": "まんしょんのいっしつ",
+      "romaji": "manshoxnnoissitu"
+    },
+    {
+      "text": "ミイラ取りがミイラになる",
+      "reading": "みいらとりがみいらになる",
+      "romaji": "miiratorigamiiraninaru"
+    },
+    {
+      "text": "未確認飛行物体",
+      "reading": "みかくにんひこうぶったい",
+      "romaji": "mikakuninhikoubuttai"
+    },
+    {
+      "text": "ミステリーサークル",
+      "reading": "みすてりーさーくる",
+      "romaji": "misuteri-sa-kuru"
+    },
+    {
+      "text": "味噌バターコーンラーメン",
+      "reading": "みそばたーこーんらーめん",
+      "romaji": "misobata-ko-nra-mexn"
+    },
+    {
+      "text": "味噌ラーメン大盛り",
+      "reading": "みそらーめんおおもり",
+      "romaji": "misora-mexnoomori"
+    },
+    {
+      "text": "未知の生命体",
+      "reading": "みちのせいめいたい",
+      "romaji": "mitinoseimeitai"
+    },
+    {
+      "text": "未知の領域に踏み込む",
+      "reading": "みちのりょういきにふみこむ",
+      "romaji": "mitinoryouikinifumikomu"
+    },
+    {
+      "text": "見つかってしまった",
+      "reading": "みつかってしまった",
+      "romaji": "mitukattesimatta"
+    },
+    {
+      "text": "見逃してください！",
+      "reading": "みのがしてください！",
+      "romaji": "minogasitekudasai!"
+    },
+    {
+      "text": "身分証明書",
+      "reading": "みぶんしょうめいしょ",
+      "romaji": "mibunshoumeisho"
+    },
+    {
+      "text": "魅力的なアイテム",
+      "reading": "みりょくてきなあいてむ",
+      "romaji": "miryokutekinaaitemu"
+    },
+    {
+      "text": "無人島生活",
+      "reading": "むじんとうせいかつ",
+      "romaji": "mujintouseikatu"
+    },
+    {
+      "text": "無人島でサバイバル",
+      "reading": "むじんとうでさばいばる",
+      "romaji": "mujintoudesabaibaru"
+    },
+    {
+      "text": "無人島に漂着",
+      "reading": "むじんとうにひょうちゃく",
+      "romaji": "mujintounihyoutyaku"
+    },
+    {
+      "text": "無遅刻無欠席",
+      "reading": "むちこくむけっせき",
+      "romaji": "mutikokumukesseki"
+    },
+    {
+      "text": "迷惑メールが多すぎる",
+      "reading": "めいわくめーるがおおすぎる",
+      "romaji": "meiwakume-rugaoosugiru"
+    },
+    {
+      "text": "メールアドレスを間違えた",
+      "reading": "めーるあどれすをまちがえた",
+      "romaji": "me-ruadoresuwomatigaeta"
+    },
+    {
+      "text": "目覚まし時計に勝ちました",
+      "reading": "めざましどけいにかちました",
+      "romaji": "mezamasidokeinikatimasita"
+    },
+    {
+      "text": "メジャーリーグへ挑戦",
+      "reading": "めじゃーりーぐへちょうせん",
+      "romaji": "meja-ri-guhetyousexn"
+    },
+    {
+      "text": "珍しく真剣な顔してるね",
+      "reading": "めずらしくしんけんなかおしてるね",
+      "romaji": "mezurasikusinkexnnakaositerune"
+    },
+    {
+      "text": "メンテナンスフリー",
+      "reading": "めんてなんすふりー",
+      "romaji": "mentenansufuri-"
+    },
+    {
+      "text": "もう一度お掛け直し下さい",
+      "reading": "もういちどおかけなおしください",
+      "romaji": "mouitidookakenaosikudasai"
+    },
+    {
+      "text": "もう一度チャンスをください",
+      "reading": "もういちどちゃんすをください",
+      "romaji": "mouitidotyansuwokudasai"
+    },
+    {
+      "text": "もう一度やり直そう",
+      "reading": "もういちどやりなおそう",
+      "romaji": "mouitidoyarinaosou"
+    },
+    {
+      "text": "毛細管現象",
+      "reading": "もうさいかんげんしょう",
+      "romaji": "mousaikangenshou"
+    },
+    {
+      "text": "もう少し待ってください",
+      "reading": "もうすこしまってください",
+      "romaji": "mousukosimattekudasai"
+    },
+    {
+      "text": "もうだめだ、降参しよう",
+      "reading": "もうだめだ、こうさんしよう",
+      "romaji": "moudameda,kousansiyou"
+    },
+    {
+      "text": "もうどうにでもなーれ",
+      "reading": "もうどうにでもなーれ",
+      "romaji": "moudounidemona-re"
+    },
+    {
+      "text": "木工用ボンド",
+      "reading": "もっこうようぼんど",
+      "romaji": "mokkouyoubondo"
+    },
+    {
+      "text": "桃がドンブラコと流れてきました",
+      "reading": "ももがどんぶらことながれてきました",
+      "romaji": "momogadonburakotonagaretekimasita"
+    },
+    {
+      "text": "盛り上がってまいりました",
+      "reading": "もりあがってまいりました",
+      "romaji": "moriagattemairimasita"
+    },
+    {
+      "text": "野球中継",
+      "reading": "やきゅうちゅうけい",
+      "romaji": "yakyuutyuukei"
+    },
+    {
+      "text": "やっぱりやめておけばよかった",
+      "reading": "やっぱりやめておけばよかった",
+      "romaji": "yappariyameteokebayokatta"
+    },
+    {
+      "text": "遊園地でデート",
+      "reading": "ゆうえんちででーと",
+      "romaji": "yuuentide-to"
+    },
+    {
+      "text": "有給休暇",
+      "reading": "ゆうきゅうきゅうか",
+      "romaji": "yuukyuukyuuka"
+    },
+    {
+      "text": "有給休暇を使う",
+      "reading": "ゆうきゅうきゅうかをつかう",
+      "romaji": "yuukyuukyuukawotukau"
+    },
+    {
+      "text": "有効期限が切れました",
+      "reading": "ゆうこうきげんがきれました",
+      "romaji": "yuukoukigengakiremasita"
+    },
+    {
+      "text": "有酸素運動",
+      "reading": "ゆうさんそうんどう",
+      "romaji": "yuusansoundou"
+    },
+    {
+      "text": "優柔不断な人ね",
+      "reading": "ゆうじゅうふだんなひとね",
+      "romaji": "yuujuufudaxnnahitone"
+    },
+    {
+      "text": "優勝おめでとう！",
+      "reading": "ゆうしょうおめでとう！",
+      "romaji": "yuushouomedetou!"
+    },
+    {
+      "text": "優勝トロフィー",
+      "reading": "ゆうしょうとろふぃー",
+      "romaji": "yuushoutorofi-"
+    },
+    {
+      "text": "ユーラシア大陸",
+      "reading": "ゆーらしあたいりく",
+      "romaji": "yu-rasiatairiku"
+    },
+    {
+      "text": "浴衣の綺麗なお姉さん",
+      "reading": "ゆかたのきれいなおねえさん",
+      "romaji": "yukatanokireinaoneesaxn"
+    },
+    {
+      "text": "揺りかごから墓場まで",
+      "reading": "ゆりかごからはかばまで",
+      "romaji": "yurikagokarahakabamade"
+    },
+    {
+      "text": "よろしくお願いします",
+      "reading": "よろしくおねがいします",
+      "romaji": "yorosikuonegaisimasu"
+    },
+    {
+      "text": "来年のカレンダー",
+      "reading": "らいねんのかれんだー",
+      "romaji": "rainexnnokarenda-"
+    },
+    {
+      "text": "リクライニングシート",
+      "reading": "りくらいにんぐしーと",
+      "romaji": "rikurainingusi-to"
+    },
+    {
+      "text": "リモートコントローラー",
+      "reading": "りもーとこんとろーらー",
+      "romaji": "rimo-tokontoro-ra-"
+    },
+    {
+      "text": "リュウグウノツカイ",
+      "reading": "りゅうぐうのつかい",
+      "romaji": "ryuuguunotukai"
+    },
+    {
+      "text": "領収書ください",
+      "reading": "りょうしゅうしょください",
+      "romaji": "ryoushuushokudasai"
+    },
+    {
+      "text": "良薬は口に苦し",
+      "reading": "りょうやくはくちににがし",
+      "romaji": "ryouyakuhakutininigasi"
+    },
+    {
+      "text": "料理のさしすせそ",
+      "reading": "りょうりのさしすせそ",
+      "romaji": "ryourinosasisuseso"
+    },
+    {
+      "text": "料理は愛情",
+      "reading": "りょうりはあいじょう",
+      "romaji": "ryourihaaijou"
+    },
+    {
+      "text": "緑黄色野菜",
+      "reading": "りょくおうしょくやさい",
+      "romaji": "ryokuoushokuyasai"
+    },
+    {
+      "text": "ルールがわかりません",
+      "reading": "るーるがわかりません",
+      "romaji": "ru-rugawakarimasexn"
+    },
+    {
+      "text": "ルールを守りましょう",
+      "reading": "るーるをまもりましょう",
+      "romaji": "ru-ruwomamorimashou"
+    },
+    {
+      "text": "留守番電話サービスです",
+      "reading": "るすばんでんわさーびすです",
+      "romaji": "rusubandenwasa-bisudesu"
+    },
+    {
+      "text": "冷蔵庫のプリン知らない？",
+      "reading": "れいぞうこのぷりんしらない？",
+      "romaji": "reizoukonopurinsiranai?"
+    },
+    {
+      "text": "冷凍食品",
+      "reading": "れいとうしょくひん",
+      "romaji": "reitoushokuhixn"
+    },
+    {
+      "text": "レインボーブリッジ",
+      "reading": "れいんぼーぶりっじ",
+      "romaji": "reinbo-burijji"
+    },
+    {
+      "text": "廊下に立ってなさい",
+      "reading": "ろうかにたってなさい",
+      "romaji": "roukanitattenasai"
+    },
+    {
+      "text": "廊下を走らない",
+      "reading": "ろうかをはしらない",
+      "romaji": "roukawohasiranai"
+    },
+    {
+      "text": "労働基準法",
+      "reading": "ろうどうきじゅんほう",
+      "romaji": "roudoukijunhou"
+    },
+    {
+      "text": "ログインしてください",
+      "reading": "ろぐいんしてください",
+      "romaji": "roguinsitekudasai"
+    },
+    {
+      "text": "六法全書を丸暗記",
+      "reading": "ろっぽうぜんしょをまるあんき",
+      "romaji": "roppouzenshowomaruanki"
+    },
+    {
+      "text": "分かった人は手を挙げて",
+      "reading": "わかったひとはてをあげて",
+      "romaji": "wakattahitohatewoagete"
+    },
+    {
+      "text": "和食か洋食",
+      "reading": "わしょくかようしょく",
+      "romaji": "washokukayoushoku"
+    },
+    {
+      "text": "私英語ワカリマセーン",
+      "reading": "わたしえいごわかりませーん",
+      "romaji": "watasieigowakarimase-xn"
+    },
+    {
+      "text": "ワニ革のハンドバッグ",
+      "reading": "わにがわのはんどばっぐ",
+      "romaji": "wanigawanohandobaggu"
+    },
+    {
+      "text": "和風ドレッシング",
+      "reading": "わふうどれっしんぐ",
+      "romaji": "wafuudoressingu"
+    },
+    {
+      "text": "我思う、故に我あり",
+      "reading": "われおもう、ゆえにわれあり",
+      "romaji": "wareomou,yueniwareari"
+    },
+    {
+      "text": "ワレワレハウチュウジンダ",
+      "reading": "われわれはうちゅうじんだ",
+      "romaji": "warewarehautyuujinda"
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "id": "basic-japanese",
+  "name": "基本日本語",
+  "description": "一般的な日本語の短い単語やフレーズ",
+  "difficulty": "easy",
+  "words": [
+    {
+      "text": "おはよう",
+      "reading": "おはよう",
+      "romaji": "ohayou"
+    },
+    {
+      "text": "ありがとう",
+      "reading": "ありがとう",
+      "romaji": "arigatou"
+    },
+    {
+      "text": "こんにちは",
+      "reading": "こんにちは",
+      "romaji": "konnichiha"
+    },
+    {
+      "text": "さようなら",
+      "reading": "さようなら",
+      "romaji": "sayounara"
+    },
+    {
+      "text": "すみません",
+      "reading": "すみません",
+      "romaji": "sumimasen"
+    },
+    {
+      "text": "お願いします",
+      "reading": "おねがいします",
+      "romaji": "onegaishimasu"
+    },
+    {
+      "text": "ごめんなさい",
+      "reading": "ごめんなさい",
+      "romaji": "gomennasai"
+    },
+    {
+      "text": "いただきます",
+      "reading": "いただきます",
+      "romaji": "itadakimasu"
+    },
+    {
+      "text": "ごちそうさま",
+      "reading": "ごちそうさま",
+      "romaji": "gochisousama"
+    },
+    {
+      "text": "おやすみなさい",
+      "reading": "おやすみなさい",
+      "romaji": "oyasuminasai"
+    },
+    {
+      "text": "はじめまして",
+      "reading": "はじめまして",
+      "romaji": "hajimemashite"
+    },
+    {
+      "text": "よろしく",
+      "reading": "よろしく",
+      "romaji": "yoroshiku"
+    },
+    {
+      "text": "お元気ですか",
+      "reading": "おげんきですか",
+      "romaji": "ogenkidesuka"
+    },
+    {
+      "text": "わかりました",
+      "reading": "わかりました",
+      "romaji": "wakarimashita"
+    },
+    {
+      "text": "ちょっと待って",
+      "reading": "ちょっとまって",
+      "romaji": "chottomatte"
+    },
+    {
+      "text": "大丈夫",
+      "reading": "だいじょうぶ",
+      "romaji": "daijoubu"
+    },
+    {
+      "text": "頑張って",
+      "reading": "がんばって",
+      "romaji": "ganbatte"
+    },
+    {
+      "text": "素晴らしい",
+      "reading": "すばらしい",
+      "romaji": "subarashii"
+    },
+    {
+      "text": "美味しい",
+      "reading": "おいしい",
+      "romaji": "oishii"
+    },
+    {
+      "text": "楽しい",
+      "reading": "たのしい",
+      "romaji": "tanoshii"
+    }
+  ]
+}

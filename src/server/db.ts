@@ -92,6 +92,18 @@ export async function updateWord(db: Client, id: number, input: UpdateWordInput)
   const updates: string[] = []
   const values: InValue[] = []
 
+  if (input.text !== undefined) {
+    updates.push('text = ?')
+    values.push(input.text)
+  }
+  if (input.reading !== undefined) {
+    updates.push('reading = ?')
+    values.push(input.reading)
+  }
+  if (input.romaji !== undefined) {
+    updates.push('romaji = ?')
+    values.push(input.romaji)
+  }
   if (input.correct !== undefined) {
     updates.push('correct = ?')
     values.push(input.correct)

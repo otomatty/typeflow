@@ -116,6 +116,52 @@ describe('romaji-utils', () => {
       const result = validateRomajiInput('shiken', 'shi')
       expect(result.expectedNext.length).toBeGreaterThan(0)
     })
+
+    // Tests for 「ん」 (n) input variations
+    describe('n (ん) input handling', () => {
+      it('should accept nn for ん before consonant', () => {
+        // "anshoubangou" - 「あんしょうばんごう」
+        // User types "ann" for "あん"
+        const result = validateRomajiInput('anshoubangou', 'ann')
+        expect(result.progress).toBeGreaterThan(0)
+        // Should be valid prefix
+        const matching = getMatchingVariation('anshoubangou', 'ann')
+        expect(matching).toBeTruthy()
+        expect(matching).toContain('nn')
+      })
+
+      it('should accept n for ん before consonant', () => {
+        // "anshoubangou" - 「あんしょうばんごう」
+        // User types "an" for "あん"
+        const result = validateRomajiInput('anshoubangou', 'an')
+        expect(result.progress).toBeGreaterThan(0)
+        const matching = getMatchingVariation('anshoubangou', 'an')
+        expect(matching).toBeTruthy()
+      })
+
+      it('should accept xn for ん before consonant', () => {
+        // "anshoubangou" - 「あんしょうばんごう」
+        // User types "axn" for "あん"
+        const result = validateRomajiInput('anshoubangou', 'axn')
+        expect(result.progress).toBeGreaterThan(0)
+        const matching = getMatchingVariation('anshoubangou', 'axn')
+        expect(matching).toBeTruthy()
+      })
+
+      it('should accept nn for ん at end of word', () => {
+        // "nihon" - 「にほん」
+        // User types "nihonn"
+        const result = validateRomajiInput('nihon', 'nihonn')
+        expect(result.isCorrect).toBe(true)
+      })
+
+      it('should accept nn for ん in the middle with nn input', () => {
+        // "tenki" - 「てんき」
+        // User types "tennki"
+        const result = validateRomajiInput('tenki', 'tennki')
+        expect(result.isCorrect).toBe(true)
+      })
+    })
   })
 
   describe('getDisplayParts', () => {

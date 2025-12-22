@@ -41,7 +41,7 @@ export function MenuScreen({
         className="text-center space-y-8 w-full max-w-2xl"
       >
         <div className="space-y-2">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight gradient-text">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
             {tc('app_name')}
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base">{tc('app_tagline')}</p>
