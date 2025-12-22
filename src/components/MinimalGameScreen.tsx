@@ -45,7 +45,7 @@ export function MinimalGameScreen({
         <span>{liveStats.kps.toFixed(1)} k/s</span>
 
         {/* 右側: 正確率 */}
-        <span>{liveStats.accuracy}%</span>
+        <span>{liveStats.accuracy.toFixed(0)}%</span>
       </div>
 
       {/* Escで終了のヒント（超控えめ） */}
