@@ -365,6 +365,8 @@ function AppContent() {
           }}
           isQuickStartMode={isQuickStartMode}
           onApplyRecommendedDifficulty={updateDifficultyPreset}
+          minimalMode={settings.minimalMode}
+          minimalModeBreakpoint={settings.minimalModeBreakpoint}
         />
       </>
     )

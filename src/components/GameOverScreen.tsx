@@ -15,9 +15,11 @@ import {
   Clock,
   Sparkles,
 } from 'lucide-react'
-import { GameStats, WordPerformanceRecord, DifficultyPreset } from '@/lib/types'
+import { GameStats, WordPerformanceRecord, DifficultyPreset, MinimalModeType } from '@/lib/types'
 import { recommendDifficulty, getSkillCheckDescription } from '@/lib/skill-check-utils'
 import { getDifficultyLabel } from '@/lib/difficulty-presets'
+import { MinimalGameOverScreen } from '@/components/MinimalGameOverScreen'
+import { useMinimalMode } from '@/hooks/useMinimalMode'
 
 interface GameOverScreenProps {
   stats: GameStats
@@ -27,6 +29,8 @@ interface GameOverScreenProps {
   onExit: () => void
   isQuickStartMode?: boolean
   onApplyRecommendedDifficulty?: (difficulty: DifficultyPreset) => void
+  minimalMode?: MinimalModeType
+  minimalModeBreakpoint?: number
 }
 
 type SortKey = 'order' | 'reactionTime' | 'missCount' | 'totalTime'
@@ -73,10 +77,13 @@ export function GameOverScreen({
   onExit,
   isQuickStartMode = false,
   onApplyRecommendedDifficulty,
+  minimalMode = 'auto',
+  minimalModeBreakpoint = 600,
 }: GameOverScreenProps) {
   const { t, i18n } = useTranslation('game')
   const [sortKey, setSortKey] = useState<SortKey>('order')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const isMinimal = useMinimalMode(minimalMode, minimalModeBreakpoint)
 
   // 日本語かどうかを判定
   const isJapanese = i18n.language?.startsWith('ja') ?? false
@@ -87,14 +94,7 @@ export function GameOverScreen({
     ? getSkillCheckDescription(stats, recommendedDifficulty, isJapanese)
     : null
 
-  const handleApplyRecommended = () => {
-    if (recommendedDifficulty && onApplyRecommendedDifficulty) {
-      onApplyRecommendedDifficulty(recommendedDifficulty)
-      onExit()
-    }
-  }
-
-  // ソートされた単語パフォーマンスリスト
+  // ソートされた単語パフォーマンスリスト（フックは早期リターンの前に呼び出す必要がある）
   const sortedPerformances = useMemo(() => {
     const performances = stats.wordPerformances.map((p, index) => ({ ...p, originalIndex: index }))
 
@@ -119,6 +119,28 @@ export function GameOverScreen({
       return sortDirection === 'asc' ? comparison : -comparison
     })
   }, [stats.wordPerformances, sortKey, sortDirection])
+
+  // ミニマルモードの場合はシンプルな画面を表示
+  if (isMinimal) {
+    return (
+      <MinimalGameOverScreen
+        stats={stats}
+        hasMistakes={hasMistakes}
+        onRestart={onRestart}
+        onRetryWeak={onRetryWeak}
+        onExit={onExit}
+        isQuickStartMode={isQuickStartMode}
+        onApplyRecommendedDifficulty={onApplyRecommendedDifficulty}
+      />
+    )
+  }
+
+  const handleApplyRecommended = () => {
+    if (recommendedDifficulty && onApplyRecommendedDifficulty) {
+      onApplyRecommendedDifficulty(recommendedDifficulty)
+      onExit()
+    }
+  }
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {

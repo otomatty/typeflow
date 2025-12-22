@@ -115,6 +115,7 @@
 
 - `src/components/MinimalTypingDisplay.tsx`: ミニマル表示用タイピングコンポーネント
 - `src/components/MinimalGameScreen.tsx`: ミニマルモードのゲーム画面
+- `src/components/MinimalGameOverScreen.tsx`: ミニマルモードの結果画面
 - `src/hooks/useMinimalMode.ts`: ミニマルモードの状態管理フック
 - `src/components/settings/MinimalModeSetting.tsx`: 設定画面のコンポーネント
 
@@ -122,8 +123,8 @@
 
 ```typescript
 // デフォルト設定
-minimalMode: 'auto'           // 'off' | 'auto' | 'always'
-minimalModeBreakpoint: 600    // ピクセル値（autoモード用）
+minimalMode: 'auto' // 'off' | 'auto' | 'always'
+minimalModeBreakpoint: 600 // ピクセル値（autoモード用）
 ```
 
 ## FAQ
@@ -142,4 +143,4 @@ A: 当アプリは責任を負いかねます 😅 自己責任でご利用く�
 
 ---
 
-*Happy Stealth Typing! 🥷*
+_Happy Stealth Typing! 🥷_
