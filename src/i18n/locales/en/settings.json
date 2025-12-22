@@ -81,5 +81,18 @@
     "resetting": "Resetting...",
     "success": "All data has been reset. You can start from the quick start.",
     "error": "Failed to reset data"
+  },
+  "minimal_mode": {
+    "title": "Minimal Mode",
+    "description": "A simple text-editor style display for discreet typing practice",
+    "off": "Off",
+    "off_desc": "Normal display",
+    "auto": "Auto",
+    "auto_desc": "Switch automatically when screen is small",
+    "always": "Always On",
+    "always_desc": "Always use minimal mode",
+    "breakpoint": "Auto-switch screen width",
+    "breakpoint_desc": "Minimal mode activates below this width",
+    "pixels": "px"
   }
 }

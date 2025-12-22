@@ -15,6 +15,7 @@ import {
   TimeLimitSetting,
   AdvancedSettings,
   ThemeSetting,
+  MinimalModeSetting,
   ResetAllSetting,
   type SettingsScreenProps,
 } from '@/components/settings'
@@ -31,12 +32,16 @@ export function SettingsScreen({
   minTimeLimit,
   maxTimeLimit,
   gameScores,
+  minimalMode,
+  minimalModeBreakpoint,
   onWordCountChange,
   onThemeChange,
   onPracticeModeChange,
   onSrsEnabledChange,
   onWarmupEnabledChange,
   onDifficultyPresetChange,
+  onMinimalModeChange,
+  onMinimalModeBreakpointChange,
   onResetAll,
 }: SettingsScreenProps) {
   const { t, i18n } = useTranslation('settings')
@@ -106,6 +111,13 @@ export function SettingsScreen({
         />
 
         <ThemeSetting theme={theme} onThemeChange={onThemeChange} />
+
+        <MinimalModeSetting
+          minimalMode={minimalMode}
+          minimalModeBreakpoint={minimalModeBreakpoint}
+          onMinimalModeChange={onMinimalModeChange}
+          onMinimalModeBreakpointChange={onMinimalModeBreakpointChange}
+        />
 
         <ResetAllSetting onResetAll={onResetAll} />
       </div>

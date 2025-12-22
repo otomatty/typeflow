@@ -94,6 +94,9 @@ function AppContent() {
     getEffectiveWordCount,
     // 難易度プリセット
     updateDifficultyPreset,
+    // ミニマルモード設定
+    updateMinimalMode,
+    updateMinimalModeBreakpoint,
     // 設定リセット
     resetSettings,
   } = useSettings()
@@ -379,6 +382,8 @@ function AppContent() {
           gameState={gameState}
           showError={showError}
           liveStats={liveStats}
+          minimalMode={settings.minimalMode}
+          minimalModeBreakpoint={settings.minimalModeBreakpoint}
         />
       </>
     )
@@ -490,6 +495,9 @@ function AppContent() {
           minTimeLimit={settings.minTimeLimit}
           maxTimeLimit={settings.maxTimeLimit}
           gameScores={gameScores}
+          // ミニマルモード設定
+          minimalMode={settings.minimalMode}
+          minimalModeBreakpoint={settings.minimalModeBreakpoint}
           onWordCountChange={updateWordCount}
           onThemeChange={updateTheme}
           onPracticeModeChange={updatePracticeMode}
@@ -497,6 +505,9 @@ function AppContent() {
           onWarmupEnabledChange={updateWarmupEnabled}
           // 難易度設定のコールバック
           onDifficultyPresetChange={updateDifficultyPreset}
+          // ミニマルモード設定のコールバック
+          onMinimalModeChange={updateMinimalMode}
+          onMinimalModeBreakpointChange={updateMinimalModeBreakpoint}
           // 全データリセット
           onResetAll={async () => {
             try {

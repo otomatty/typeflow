@@ -141,6 +141,9 @@ export type WordCountPreset = number | 'all'
 // テーマ設定
 export type ThemeType = 'light' | 'dark' | 'system'
 
+// ミニマルモード設定
+export type MinimalModeType = 'off' | 'auto' | 'always'
+
 // 練習モード
 export type PracticeMode = 'random' | 'weakness-focus' | 'review' | 'balanced'
 
@@ -184,6 +187,9 @@ export interface AppSettings {
   penaltyEscalationFactor: number // ミスごとの倍率
   maxPenaltyPercent: number // 最大ペナルティ割合 (%)
   minTimeAfterPenalty: number // ペナルティ後の最低残り時間（秒）
+  // ミニマルモード設定（ステルスモード）
+  minimalMode: MinimalModeType // ミニマルモード: 'off' | 'auto' | 'always'
+  minimalModeBreakpoint: number // 自動切り替えのブレークポイント（ピクセル）
 }
 
 // プリセット単語データ
