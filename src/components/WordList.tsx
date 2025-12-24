@@ -19,7 +19,14 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from '@/components/ui/pagination'
-import { Trash2, Pencil, Target } from 'lucide-react'
+import { Trash2, Pencil, MoreVertical } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
 import { Word } from '@/lib/types'
 import { AddWordDialog } from '@/components/AddWordDialog'
 
@@ -238,6 +245,7 @@ export function WordList({
           {paginatedWords.map((word, index) => {
             const hasStats = word.stats.correct + word.stats.miss > 0
             const accuracy = Math.round(word.stats.accuracy)
+            const practiceCount = word.stats.correct + word.stats.miss
 
             return (
               <motion.div
@@ -251,6 +259,17 @@ export function WordList({
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <span className="font-medium text-sm truncate">{word.text}</span>
                   <span className="text-sm text-muted-foreground truncate">({word.reading})</span>
+                </div>
+
+                {/* Practice count */}
+                <div className="flex items-center gap-1 w-16 shrink-0 justify-end">
+                  {practiceCount > 0 ? (
+                    <span className="text-xs text-muted-foreground">
+                      {t('word_list.practice_count', { count: practiceCount })}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
                 </div>
 
                 {/* Accuracy with progress bar */}
@@ -278,40 +297,46 @@ export function WordList({
                   )}
                 </div>
 
-                {/* Practice button */}
+                {/* Practice button - text display */}
                 {onStartPractice && (
                   <Button
-                    size="icon"
+                    size="sm"
                     variant="ghost"
                     onClick={() => onStartPractice(word)}
-                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 shrink-0"
-                    title={t('word_list.practice', { defaultValue: '集中練習' })}
+                    className="h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 shrink-0 text-xs"
                   >
-                    <Target className="w-4 h-4" />
+                    {t('word_list.practice')}
                   </Button>
                 )}
 
-                {/* Edit button */}
-                {onEditWord && (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => handleEditClick(word)}
-                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary hover:bg-primary/10 shrink-0"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-                )}
-
-                {/* Delete button */}
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => onDeleteWord(word.id)}
-                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                {/* Actions dropdown menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground shrink-0"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {onEditWord && (
+                      <DropdownMenuItem onClick={() => handleEditClick(word)}>
+                        <Pencil className="w-4 h-4 mr-2" />
+                        {t('word_list.edit')}
+                      </DropdownMenuItem>
+                    )}
+                    {onEditWord && <DropdownMenuSeparator />}
+                    <DropdownMenuItem
+                      onClick={() => onDeleteWord(word.id)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      {t('word_list.delete')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </motion.div>
             )
           })}

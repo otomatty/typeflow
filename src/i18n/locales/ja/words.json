@@ -45,6 +45,10 @@
     "accuracy": "正確率",
     "correct": "正解",
     "miss": "ミス",
-    "mastery": "習熟度"
+    "mastery": "習熟度",
+    "practice": "練習",
+    "edit": "編集",
+    "delete": "削除",
+    "practice_count": "{{count}}回"
   }
 }

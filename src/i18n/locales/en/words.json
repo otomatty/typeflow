@@ -45,6 +45,10 @@
     "accuracy": "Accuracy",
     "correct": "Correct",
     "miss": "Miss",
-    "mastery": "Mastery"
+    "mastery": "Mastery",
+    "practice": "Practice",
+    "edit": "Edit",
+    "delete": "Delete",
+    "practice_count": "{{count}}x"
   }
 }
