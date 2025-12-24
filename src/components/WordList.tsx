@@ -19,8 +19,7 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from '@/components/ui/pagination'
-import { Trash2 } from 'lucide-react'
-import { Pencil } from 'lucide-react'
+import { Trash2, Pencil, Target } from 'lucide-react'
 import { Word } from '@/lib/types'
 import { AddWordDialog } from '@/components/AddWordDialog'
 
@@ -32,6 +31,7 @@ interface WordListProps {
   onEditWord?: (id: string, word: { text: string; reading: string; romaji: string }) => void
   showSortAndPagination?: boolean
   searchQuery?: string
+  onStartPractice?: (word: Word) => void
 }
 
 const WORDS_PER_PAGE = 50
@@ -42,6 +42,7 @@ export function WordList({
   onEditWord,
   showSortAndPagination = true,
   searchQuery = '',
+  onStartPractice,
 }: WordListProps) {
   const { t } = useTranslation('words')
 
@@ -276,6 +277,19 @@ export function WordList({
                     <span className="text-xs text-muted-foreground">—</span>
                   )}
                 </div>
+
+                {/* Practice button */}
+                {onStartPractice && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => onStartPractice(word)}
+                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 shrink-0"
+                    title={t('word_list.practice', { defaultValue: '集中練習' })}
+                  >
+                    <Target className="w-4 h-4" />
+                  </Button>
+                )}
 
                 {/* Edit button */}
                 {onEditWord && (

@@ -10,6 +10,7 @@ import { StatsScreen } from '@/components/StatsScreen'
 import { SettingsScreen } from '@/components/SettingsScreen'
 import { PresetScreen } from '@/components/PresetScreen'
 import { ProfileScreen } from '@/components/ProfileScreen'
+import { WordPracticeScreen } from '@/components/WordPracticeScreen'
 import { AddWordDialog } from '@/components/AddWordDialog'
 import { AuthScreen } from '@/components/AuthScreen'
 import { useWords } from '@/hooks/useWords'
@@ -22,7 +23,7 @@ import { useUserPresets } from '@/hooks/useUserPresets'
 import { useAuth } from '@/hooks/useAuth'
 import { setClerkTokenGetter, setTursoTokenGetter } from '@/lib/db'
 import { toast } from 'sonner'
-import type { PresetWord } from '@/lib/types'
+import type { PresetWord, Word } from '@/lib/types'
 import type { UserPresetWord } from '@/lib/db'
 
 function App() {
@@ -75,6 +76,8 @@ function AppContent() {
   const [isAddWordDialogOpen, setIsAddWordDialogOpen] = useState(false)
   const [isQuickStartMode, setIsQuickStartMode] = useState(false)
   const [quickStartWordIds, setQuickStartWordIds] = useState<Set<string>>(new Set())
+  // 1単語集中練習モード用
+  const [practiceWord, setPracticeWord] = useState<Word | null>(null)
   const {
     updateStats,
     selectWeaknessBasedWords,
@@ -339,6 +342,21 @@ function AppContent() {
     setView(newView)
   }
 
+  // 1単語集中練習モードを開始
+  const handleStartWordPractice = useCallback(
+    (word: Word) => {
+      setPracticeWord(word)
+      setView('word-practice')
+    },
+    [setView]
+  )
+
+  // 1単語集中練習モードを終了
+  const handleExitWordPractice = useCallback(() => {
+    setPracticeWord(null)
+    setView('words')
+  }, [setView])
+
   if (view === 'gameover') {
     return (
       <>
@@ -367,6 +385,8 @@ function AppContent() {
           onApplyRecommendedDifficulty={updateDifficultyPreset}
           minimalMode={settings.minimalMode}
           minimalModeBreakpoint={settings.minimalModeBreakpoint}
+          words={words}
+          onStartWordPractice={handleStartWordPractice}
         />
       </>
     )
@@ -386,6 +406,19 @@ function AppContent() {
           liveStats={liveStats}
           minimalMode={settings.minimalMode}
           minimalModeBreakpoint={settings.minimalModeBreakpoint}
+        />
+      </>
+    )
+  }
+
+  if (view === 'word-practice' && practiceWord) {
+    return (
+      <>
+        <Toaster />
+        <WordPracticeScreen
+          word={practiceWord}
+          onExit={handleExitWordPractice}
+          updateWordStats={updateWordStats}
         />
       </>
     )
@@ -411,6 +444,7 @@ function AppContent() {
           onClearAllWords={clearAllWords}
           onSavePreset={handleSavePreset}
           onNavigate={handleNavigate}
+          onStartPractice={handleStartWordPractice}
         />
       </>
     )

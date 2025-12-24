@@ -44,6 +44,7 @@ interface WordManagementScreenProps {
     difficulty: 'easy' | 'normal' | 'hard'
   ) => Promise<void>
   onNavigate?: (view: 'presets') => void
+  onStartPractice?: (word: Word) => void
 }
 
 export function WordManagementScreen({
@@ -54,6 +55,7 @@ export function WordManagementScreen({
   onClearAllWords,
   onSavePreset,
   onNavigate,
+  onStartPractice,
 }: WordManagementScreenProps) {
   const { t } = useTranslation('words')
   const { t: tc } = useTranslation('common')
@@ -182,6 +184,7 @@ export function WordManagementScreen({
             onDeleteWord={onDeleteWord}
             onEditWord={onEditWord}
             searchQuery={searchQuery}
+            onStartPractice={onStartPractice}
           />
         </>
       )}

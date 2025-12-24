@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { Word } from '@/lib/types'
-import { normalizeRomaji, toKunreiDisplay, getDisplayParts } from '@/lib/romaji-utils'
 
 interface TypingDisplayProps {
   word: Word
@@ -11,33 +10,9 @@ interface TypingDisplayProps {
 
 export function TypingDisplay({ word, currentInput, showError }: TypingDisplayProps) {
   const { t } = useTranslation('game')
-  // 訓令式に変換したローマ字を基準表示として使用
-  const initialDisplay = toKunreiDisplay(normalizeRomaji(word.romaji))
-
-  // 入力済み部分と未入力部分を分離
-  const { inputPart, remainingPart } = getDisplayParts(word.romaji, currentInput, initialDisplay)
 
   // 練習回数を計算
   const practiceCount = word.stats.correct + word.stats.miss
-
-  const renderRomaji = () => {
-    return (
-      <>
-        {/* 入力済み部分 */}
-        {inputPart.split('').map((char, index) => (
-          <span key={`input-${index}`} className="text-primary">
-            {char}
-          </span>
-        ))}
-        {/* 未入力部分（初期表示のまま） */}
-        {remainingPart.split('').map((char, index) => (
-          <span key={`remaining-${index}`} className="text-muted-foreground">
-            {char}
-          </span>
-        ))}
-      </>
-    )
-  }
 
   return (
     <motion.div
@@ -54,7 +29,8 @@ export function TypingDisplay({ word, currentInput, showError }: TypingDisplayPr
       <div className="text-sm sm:text-base text-muted-foreground text-center">{word.reading}</div>
 
       <div className="text-base sm:text-lg md:text-xl font-medium tracking-wider mt-2">
-        {renderRomaji()}
+        <span className="text-primary">{currentInput}</span>
+        <span className="inline-block w-0.5 h-4 bg-primary animate-pulse mx-0.5 align-middle" />
       </div>
 
       {/* 単語の過去統計（正確率・練習回数） */}

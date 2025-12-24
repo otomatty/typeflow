@@ -29,5 +29,11 @@
   "recommended_difficulty": "推奨難易度",
   "apply_recommended": "推奨設定を適用",
   "continue_practicing": "練習を続ける",
-  "select_preset": "プリセットを選択"
+  "select_preset": "プリセットを選択",
+  "practice_recommended": "集中練習がおすすめ",
+  "practice_recommended_desc": "以下の単語でミスが多かったです。集中練習で克服しましょう！",
+  "miss_count_label": "ミス",
+  "start_practice": "練習",
+  "and_more_words": "他 {{count}} 件",
+  "practice_short": "練習"
 }

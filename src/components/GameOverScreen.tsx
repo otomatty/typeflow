@@ -14,12 +14,22 @@ import {
   ChevronDown,
   Clock,
   Sparkles,
+  Crosshair,
 } from 'lucide-react'
-import { GameStats, WordPerformanceRecord, DifficultyPreset, MinimalModeType } from '@/lib/types'
+import {
+  GameStats,
+  WordPerformanceRecord,
+  DifficultyPreset,
+  MinimalModeType,
+  Word,
+} from '@/lib/types'
 import { recommendDifficulty, getSkillCheckDescription } from '@/lib/skill-check-utils'
 import { getDifficultyLabel } from '@/lib/difficulty-presets'
 import { MinimalGameOverScreen } from '@/components/MinimalGameOverScreen'
 import { useMinimalMode } from '@/hooks/useMinimalMode'
+
+// ミスが多い単語の閾値
+const MISS_COUNT_THRESHOLD = 2
 
 interface GameOverScreenProps {
   stats: GameStats
@@ -31,6 +41,8 @@ interface GameOverScreenProps {
   onApplyRecommendedDifficulty?: (difficulty: DifficultyPreset) => void
   minimalMode?: MinimalModeType
   minimalModeBreakpoint?: number
+  words?: Word[]
+  onStartWordPractice?: (word: Word) => void
 }
 
 type SortKey = 'order' | 'reactionTime' | 'missCount' | 'totalTime'
@@ -79,6 +91,8 @@ export function GameOverScreen({
   onApplyRecommendedDifficulty,
   minimalMode = 'auto',
   minimalModeBreakpoint = 600,
+  words = [],
+  onStartWordPractice,
 }: GameOverScreenProps) {
   const { t, i18n } = useTranslation('game')
   const [sortKey, setSortKey] = useState<SortKey>('order')
@@ -93,6 +107,16 @@ export function GameOverScreen({
   const skillCheckDescription = recommendedDifficulty
     ? getSkillCheckDescription(stats, recommendedDifficulty, isJapanese)
     : null
+
+  // 練習を勧める単語（ミスが多い、または時間切れ）
+  const wordsNeedingPractice = useMemo(() => {
+    return stats.wordPerformances.filter(p => p.missCount >= MISS_COUNT_THRESHOLD || !p.completed)
+  }, [stats.wordPerformances])
+
+  // 単語IDからWordオブジェクトを取得
+  const getWordById = (wordId: string): Word | undefined => {
+    return words.find(w => w.id === wordId)
+  }
 
   // ソートされた単語パフォーマンスリスト（フックは早期リターンの前に呼び出す必要がある）
   const sortedPerformances = useMemo(() => {
@@ -265,12 +289,15 @@ export function GameOverScreen({
                 </h3>
                 <div className="border rounded-lg overflow-hidden">
                   {/* Table Header */}
-                  <div className="grid grid-cols-[1fr_80px_80px_70px_60px] gap-2 px-3 py-2 bg-muted/50 border-b text-xs">
+                  <div className="grid grid-cols-[1fr_80px_80px_70px_60px_50px] gap-2 px-3 py-2 bg-muted/50 border-b text-xs">
                     <SortButton sortKeyValue="order">{t('word')}</SortButton>
                     <SortButton sortKeyValue="reactionTime">{t('reaction')}</SortButton>
                     <SortButton sortKeyValue="totalTime">{t('time')}</SortButton>
                     <SortButton sortKeyValue="missCount">{t('miss')}</SortButton>
                     <span className="text-muted-foreground font-medium">{t('first_key')}</span>
+                    <span className="text-muted-foreground font-medium text-center">
+                      {t('practice_short', { defaultValue: '練習' })}
+                    </span>
                   </div>
 
                   {/* Table Body - no longer needs internal ScrollArea */}
@@ -281,10 +308,81 @@ export function GameOverScreen({
                         performance={perf}
                         t={t}
                         isJapanese={isJapanese}
+                        word={getWordById(perf.wordId)}
+                        onStartWordPractice={onStartWordPractice}
                       />
                     ))}
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* 練習を勧めるセクション */}
+            {wordsNeedingPractice.length > 0 && onStartWordPractice && (
+              <div>
+                <Card className="p-4 bg-orange-500/5 border-orange-500/20">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Crosshair className="w-5 h-5 text-orange-500" />
+                      <h3 className="font-semibold text-orange-600 dark:text-orange-400">
+                        {t('practice_recommended', { defaultValue: '集中練習がおすすめ' })}
+                      </h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {t('practice_recommended_desc', {
+                        defaultValue: '以下の単語でミスが多かったです。集中練習で克服しましょう！',
+                      })}
+                    </p>
+                    <div className="space-y-2">
+                      {wordsNeedingPractice.slice(0, 5).map(perf => {
+                        const word = getWordById(perf.wordId)
+                        if (!word) return null
+                        return (
+                          <div
+                            key={perf.wordId}
+                            className="flex items-center justify-between p-2 bg-background rounded-lg border"
+                          >
+                            <div className="flex flex-col min-w-0 flex-1">
+                              <span className="font-medium truncate">{perf.wordText}</span>
+                              <span className="text-xs text-muted-foreground truncate">
+                                {perf.reading}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {!perf.completed && (
+                                <span className="text-xs text-red-500 bg-red-500/10 px-2 py-0.5 rounded">
+                                  {t('timeout', { defaultValue: '時間切れ' })}
+                                </span>
+                              )}
+                              {perf.missCount > 0 && (
+                                <span className="text-xs text-red-500 bg-red-500/10 px-2 py-0.5 rounded">
+                                  {perf.missCount} {t('miss_count_label', { defaultValue: 'ミス' })}
+                                </span>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => onStartWordPractice(word)}
+                                className="gap-1 text-orange-600 hover:text-orange-700 hover:bg-orange-500/10 border-orange-500/30"
+                              >
+                                <Target className="w-3 h-3" />
+                                {t('start_practice', { defaultValue: '練習' })}
+                              </Button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    {wordsNeedingPractice.length > 5 && (
+                      <p className="text-xs text-muted-foreground text-center">
+                        {t('and_more_words', {
+                          count: wordsNeedingPractice.length - 5,
+                          defaultValue: `他 ${wordsNeedingPractice.length - 5} 件`,
+                        })}
+                      </p>
+                    )}
+                  </div>
+                </Card>
               </div>
             )}
           </div>
@@ -356,9 +454,17 @@ interface WordPerformanceRowProps {
   performance: WordPerformanceRecord & { originalIndex: number }
   t: (key: string) => string
   isJapanese: boolean
+  word?: Word
+  onStartWordPractice?: (word: Word) => void
 }
 
-function WordPerformanceRow({ performance, t, isJapanese }: WordPerformanceRowProps) {
+function WordPerformanceRow({
+  performance,
+  t,
+  isJapanese,
+  word,
+  onStartWordPractice,
+}: WordPerformanceRowProps) {
   const reactionTimeColor = getReactionTimeColor(performance.reactionTime)
   const reactionTimeBg = getReactionTimeBgColor(performance.reactionTime)
   // 失敗した単語（ミスありまたは時間切れ）は赤く表示
@@ -366,7 +472,7 @@ function WordPerformanceRow({ performance, t, isJapanese }: WordPerformanceRowPr
 
   return (
     <div
-      className={`grid grid-cols-[1fr_80px_80px_70px_60px] gap-2 px-3 py-2 text-sm items-center ${
+      className={`grid grid-cols-[1fr_80px_80px_70px_60px_50px] gap-2 px-3 py-2 text-sm items-center ${
         isFailed ? 'bg-red-500/5' : ''
       }`}
     >
@@ -418,6 +524,21 @@ function WordPerformanceRow({ performance, t, isJapanese }: WordPerformanceRowPr
               <span className="text-xs font-mono">{performance.firstKeyActual.toUpperCase()}</span>
             </div>
           )
+        ) : (
+          <span className="text-muted-foreground">-</span>
+        )}
+      </div>
+
+      {/* Practice Button */}
+      <div className="flex justify-center">
+        {word && onStartWordPractice ? (
+          <button
+            onClick={() => onStartWordPractice(word)}
+            className="p-1 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+            title={t('start_practice')}
+          >
+            <Target className="w-4 h-4" />
+          </button>
         ) : (
           <span className="text-muted-foreground">-</span>
         )}
