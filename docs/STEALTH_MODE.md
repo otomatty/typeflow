@@ -76,13 +76,135 @@
    - 練習前にメニュー画面を開いておく
    - 開始は「Enter」キー一つで
 
+## 🥷 CLIモード（ターミナル練習）
+
+**最強のステルスモード** - ターミナルで直接タイピング練習ができます。一見するとログ出力やテスト実行に見えるため、開発者にとって最も自然な偽装が可能です。
+
+### 基本的な使い方
+
+```bash
+# CLI練習を開始（サーバー不要！）
+bun run cli:practice
+```
+
+**注意**: ローカルDB（`local.db`）を直接使用するため、サーバー起動は不要です。Web版と同じデータを共有します。
+
+### 偽装モード
+
+5種類の表示モードで、様々な開発作業に偽装できます：
+
+#### 1. Minimal（デフォルト）- シンプル表示
+
+```bash
+bun run cli:practice
+# または
+bun run cli:practice --mode=minimal
+```
+
+```
+taipingu: taip█ [3.2s]
+```
+
+#### 2. Log - ログ出力風
+
+```bash
+bun run cli:practice:log
+```
+
+```
+[2025-12-25 10:30:15] Processing: taipingu [####......] 3.2s
+[2025-12-25 10:30:18] OK: taipingu (1.2s, 0 miss)
+```
+
+#### 3. Test - テスト実行風
+
+```bash
+bun run cli:practice:test
+```
+
+```
+✓ pass: たいぴんぐ → taipingu (1.2s)
+✗ fail: ぷろぐらむ → purogura... (timeout 5.0s)
+○ run:  こーど → ko█ [##....] 2.1s
+
+Tests: 2 passed, 1 failed, 1 running
+```
+
+#### 4. Build - ビルドログ風
+
+```bash
+bun run cli:practice:build
+```
+
+```
+Compiling word 3/50: たいぴんぐ
+  → Transpiling: taipingu [████░░░░] 60%
+  → Input: taipi█
+  → Elapsed: 1.8s / 4.5s
+```
+
+#### 5. Git - git操作風
+
+```bash
+bun run cli:practice:git
+```
+
+```
+$ git commit -m "taipingu"
+hint: Waiting for message...
+> taip█
+[####......] 2.1s remaining
+```
+
+### オプション
+
+```bash
+# 単語数を指定
+bun run cli:practice --count=10
+
+# 全単語で練習
+bun run cli:practice --count=all
+
+# スコアを保存しない
+bun run cli:practice --no-save
+
+# 複数オプション
+bun run cli:practice --mode=log --count=15
+```
+
+### キー操作
+
+| キー      | 動作                     |
+| --------- | ------------------------ |
+| a-z, 0-9  | 文字入力                 |
+| Backspace | 1文字削除                |
+| Escape    | 即座に終了（スコア保存） |
+| Ctrl+C    | 強制終了（スコア未保存） |
+
+### 特徴
+
+- ✅ **通常ゲームと同じデータを使用** - 単語、設定、スコアすべて共有
+- ✅ **同じ時間計算ロジック** - 適応型制限時間、ミスペナルティ
+- ✅ **スコア記録** - Web版と統合されたスコア履歴
+- ✅ **音なし** - ターミナルなので完全サイレント
+- ✅ **即終了** - Escキーで瞬時に終了
+
+### 仕事中のヒント
+
+1. **tmux/screenと併用**: 別のペインで練習、素早く切り替え
+2. **ビルド待ち時間**: コンパイル中に `--mode=build` で自然に
+3. **テスト実行中に偽装**: `--mode=test` でテストが走っているように見せる
+4. **VSCodeターミナル**: 統合ターミナルで実行すれば完璧
+
+---
+
 ## 将来の拡張アイデア
 
 ### 実装検討中の機能
 
-1. **偽装モード**
-   - コードエディタそっくりの表示（行番号、シンタックスハイライト風）
-   - ターミナルエミュレータ風のUI
+1. **偽装モード** ✅ **CLIモードで実装済み**
+   - ~~コードエディタそっくりの表示（行番号、シンタックスハイライト風）~~
+   - ターミナルエミュレータ風のUI ✅
    - Slackやメモ帳に見える表示
 
 2. **パニックボタン**
@@ -113,11 +235,22 @@
 
 ### 関連ファイル
 
+#### Webミニマルモード
+
 - `src/components/MinimalTypingDisplay.tsx`: ミニマル表示用タイピングコンポーネント
 - `src/components/MinimalGameScreen.tsx`: ミニマルモードのゲーム画面
 - `src/components/MinimalGameOverScreen.tsx`: ミニマルモードの結果画面
 - `src/hooks/useMinimalMode.ts`: ミニマルモードの状態管理フック
 - `src/components/settings/MinimalModeSetting.tsx`: 設定画面のコンポーネント
+
+#### CLIモード
+
+- `scripts/cli-practice.ts`: CLIエントリポイント
+- `scripts/cli/types.ts`: 型定義
+- `scripts/cli/game-engine.ts`: ゲームロジック（useGameのCLI版）
+- `scripts/cli/display.ts`: 表示処理（偽装モード含む）
+- `scripts/cli/input.ts`: キー入力処理
+- `scripts/cli/api.ts`: APIサーバーとの通信
 
 ### 設定値
 
