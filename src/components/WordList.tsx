@@ -30,7 +30,7 @@ import {
 import { Word } from '@/lib/types'
 import { AddWordDialog } from '@/components/AddWordDialog'
 
-type SortOrder = 'accuracy' | 'createdAt'
+type SortOrder = 'accuracy' | 'createdAt' | 'practiceCountDesc' | 'practiceCountAsc'
 
 interface WordListProps {
   words: Word[]
@@ -92,9 +92,23 @@ export function WordList({
         }
         return a.stats.accuracy - b.stats.accuracy
       })
-    } else {
+    } else if (sortOrder === 'createdAt') {
       // Sort by createdAt (newest first)
       sorted.sort((a, b) => b.stats.createdAt - a.stats.createdAt)
+    } else if (sortOrder === 'practiceCountDesc') {
+      // Sort by practice count (most practiced first)
+      sorted.sort((a, b) => {
+        const aCount = a.stats.correct + a.stats.miss
+        const bCount = b.stats.correct + b.stats.miss
+        return bCount - aCount
+      })
+    } else if (sortOrder === 'practiceCountAsc') {
+      // Sort by practice count (least practiced first)
+      sorted.sort((a, b) => {
+        const aCount = a.stats.correct + a.stats.miss
+        const bCount = b.stats.correct + b.stats.miss
+        return aCount - bCount
+      })
     }
     return sorted
   }, [filteredWords, sortOrder])
@@ -228,6 +242,12 @@ export function WordList({
                 <SelectContent>
                   <SelectItem value="accuracy">{t('word_list.sort_accuracy')}</SelectItem>
                   <SelectItem value="createdAt">{t('word_list.sort_newest')}</SelectItem>
+                  <SelectItem value="practiceCountDesc">
+                    {t('word_list.sort_practice_count_desc')}
+                  </SelectItem>
+                  <SelectItem value="practiceCountAsc">
+                    {t('word_list.sort_practice_count_asc')}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
