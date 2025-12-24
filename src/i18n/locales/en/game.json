@@ -29,5 +29,11 @@
   "recommended_difficulty": "Recommended Difficulty",
   "apply_recommended": "Apply Recommended Settings",
   "continue_practicing": "Continue Practicing",
-  "select_preset": "Select Preset"
+  "select_preset": "Select Preset",
+  "practice_recommended": "Focus Practice Recommended",
+  "practice_recommended_desc": "You had trouble with the following words. Let's practice them!",
+  "miss_count_label": "misses",
+  "start_practice": "Practice",
+  "and_more_words": "and {{count}} more",
+  "practice_short": "Practice"
 }

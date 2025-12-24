@@ -5,6 +5,7 @@ import {
   ThemeType,
   PracticeMode,
   DifficultyPreset,
+  MinimalModeType,
 } from '@/lib/types'
 import { saveSettings, initializeSettings, DEFAULT_SETTINGS } from '@/lib/db'
 import { DIFFICULTY_PRESETS } from '@/lib/difficulty-presets'
@@ -44,6 +45,10 @@ export function useSettings() {
           maxPenaltyPercent: savedSettings.maxPenaltyPercent ?? DEFAULT_SETTINGS.maxPenaltyPercent,
           minTimeAfterPenalty:
             savedSettings.minTimeAfterPenalty ?? DEFAULT_SETTINGS.minTimeAfterPenalty,
+          // ミニマルモード設定
+          minimalMode: savedSettings.minimalMode ?? DEFAULT_SETTINGS.minimalMode,
+          minimalModeBreakpoint:
+            savedSettings.minimalModeBreakpoint ?? DEFAULT_SETTINGS.minimalModeBreakpoint,
         })
       } catch (error) {
         console.error('Failed to load settings:', error)
@@ -169,6 +174,26 @@ export function useSettings() {
     }
   }, [])
 
+  // Update minimal mode setting
+  const updateMinimalMode = useCallback(async (minimalMode: MinimalModeType) => {
+    try {
+      await saveSettings({ minimalMode })
+      setSettings(prev => ({ ...prev, minimalMode }))
+    } catch (error) {
+      console.error('Failed to save minimal mode setting:', error)
+    }
+  }, [])
+
+  // Update minimal mode breakpoint setting
+  const updateMinimalModeBreakpoint = useCallback(async (minimalModeBreakpoint: number) => {
+    try {
+      await saveSettings({ minimalModeBreakpoint })
+      setSettings(prev => ({ ...prev, minimalModeBreakpoint }))
+    } catch (error) {
+      console.error('Failed to save minimal mode breakpoint setting:', error)
+    }
+  }, [])
+
   return {
     settings,
     isLoading,
@@ -183,6 +208,9 @@ export function useSettings() {
     // 制限時間設定
     updateMinTimeLimit,
     updateMaxTimeLimit,
+    // ミニマルモード設定
+    updateMinimalMode,
+    updateMinimalModeBreakpoint,
     // 設定リセット
     resetSettings,
   }

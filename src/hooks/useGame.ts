@@ -24,6 +24,7 @@ export type ViewType =
   | 'game'
   | 'gameover'
   | 'profile'
+  | 'word-practice'
 
 interface UseGameProps {
   words: Word[]
@@ -145,17 +146,22 @@ export function useGame({
       // 失敗した単語のIDを抽出（復習用）
       const mistakeWordIds = performances.filter(p => p.result === 'failed').map(p => p.wordId)
 
-      // やり直しモード中にタイムアウトした場合、mistakeWords をやり直し開始時の状態に復元
-      // 完了時は、wordPerformancesから抽出したmistakeWordIdsを使用
+      // mistakeWords を計算
+      // やり直しモード中は、復習中に正解した問題を開始時の mistakeWords から除外
+      // 時間切れでも正解した問題は再出題しない
       let finalMistakeWords: string[] = []
       if (isRetryModeRef.current) {
-        if (completed) {
-          // 完了時は、wordPerformancesから抽出したmistakeWordIdsを使用
-          finalMistakeWords = mistakeWordIds
-        } else {
-          // タイムアウトした場合は、やり直し開始時の状態に復元
-          finalMistakeWords = [...retryStartMistakeWordsRef.current]
-        }
+        // 復習中に正解した問題のIDを取得
+        const successfulWordIds = performances
+          .filter(p => p.result === 'success')
+          .map(p => p.wordId)
+        // 開始時の mistakeWords から正解した問題を除外し、今回失敗した問題を追加
+        finalMistakeWords = [
+          ...retryStartMistakeWordsRef.current.filter(id => !successfulWordIds.includes(id)),
+          ...mistakeWordIds.filter(id => !retryStartMistakeWordsRef.current.includes(id)),
+        ]
+        // 重複を除去
+        finalMistakeWords = [...new Set(finalMistakeWords)]
       } else {
         // 通常モードの場合は、wordPerformancesから抽出したmistakeWordIdsを使用
         finalMistakeWords = mistakeWordIds

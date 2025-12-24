@@ -1,4 +1,10 @@
-import { WordCountPreset, ThemeType, PracticeMode, DifficultyPreset } from '@/lib/types'
+import {
+  WordCountPreset,
+  ThemeType,
+  PracticeMode,
+  DifficultyPreset,
+  MinimalModeType,
+} from '@/lib/types'
 import { GameScoreRecord } from '@/lib/db'
 import { DifficultyParams } from '@/lib/types'
 
@@ -14,6 +20,9 @@ export interface SettingsScreenProps {
   minTimeLimit: number
   maxTimeLimit: number
   gameScores: GameScoreRecord[]
+  // ミニマルモード設定
+  minimalMode: MinimalModeType
+  minimalModeBreakpoint: number
   onWordCountChange: (value: WordCountPreset) => void
   onThemeChange: (value: ThemeType) => void
   onPracticeModeChange: (value: PracticeMode) => void
@@ -21,6 +30,9 @@ export interface SettingsScreenProps {
   onWarmupEnabledChange: (value: boolean) => void
   // 難易度設定のコールバック
   onDifficultyPresetChange: (value: DifficultyPreset) => void
+  // ミニマルモード設定のコールバック
+  onMinimalModeChange: (value: MinimalModeType) => void
+  onMinimalModeBreakpointChange: (value: number) => void
   // 全データリセット
   onResetAll: () => Promise<void>
 }
@@ -77,4 +89,11 @@ export interface ThemeSettingProps {
 
 export interface ResetAllSettingProps {
   onResetAll: () => Promise<void>
+}
+
+export interface MinimalModeSettingProps {
+  minimalMode: MinimalModeType
+  minimalModeBreakpoint: number
+  onMinimalModeChange: (value: MinimalModeType) => void
+  onMinimalModeBreakpointChange: (value: number) => void
 }

@@ -39,12 +39,18 @@
     "sort_oldest": "Oldest first",
     "sort_alphabetical": "Alphabetical",
     "sort_accuracy": "By accuracy",
+    "sort_practice_count_desc": "Most practiced",
+    "sort_practice_count_asc": "Least practiced",
     "items_per_page": "{{count}} items",
     "showing": "{{from}}-{{to}} of {{total}}",
     "no_results": "No results found",
     "accuracy": "Accuracy",
     "correct": "Correct",
     "miss": "Miss",
-    "mastery": "Mastery"
+    "mastery": "Mastery",
+    "practice": "Practice",
+    "edit": "Edit",
+    "delete": "Delete",
+    "practice_count": "{{count}}x"
   }
 }

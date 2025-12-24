@@ -141,6 +141,9 @@ export type WordCountPreset = number | 'all'
 // テーマ設定
 export type ThemeType = 'light' | 'dark' | 'system'
 
+// ミニマルモード設定
+export type MinimalModeType = 'off' | 'auto' | 'always'
+
 // 練習モード
 export type PracticeMode = 'random' | 'weakness-focus' | 'review' | 'balanced'
 
@@ -184,6 +187,9 @@ export interface AppSettings {
   penaltyEscalationFactor: number // ミスごとの倍率
   maxPenaltyPercent: number // 最大ペナルティ割合 (%)
   minTimeAfterPenalty: number // ペナルティ後の最低残り時間（秒）
+  // ミニマルモード設定（ステルスモード）
+  minimalMode: MinimalModeType // ミニマルモード: 'off' | 'auto' | 'always'
+  minimalModeBreakpoint: number // 自動切り替えのブレークポイント（ピクセル）
 }
 
 // プリセット単語データ
@@ -238,4 +244,59 @@ export interface ScoringContext {
   practiceMode: PracticeMode
   srsEnabled: boolean
   warmupEnabled: boolean
+}
+
+// 1単語集中練習モードの練習フェーズ
+export type WordPracticePhase = 'accuracy' | 'speed' | 'mastery'
+
+// 1単語集中練習モードの状態
+export interface WordPracticeState {
+  // 現在の単語
+  word: Word | null
+  // 現在のフェーズ
+  phase: WordPracticePhase
+  // 現在の入力
+  currentInput: string
+  // 連続成功数（ミスなし完了）
+  consecutiveSuccess: number
+  // 現在のフェーズでの目標連続成功数
+  targetConsecutive: number
+  // 現在の試行回数
+  attemptCount: number
+  // 現在の試行でのミス数
+  currentMissCount: number
+  // 練習中かどうか
+  isActive: boolean
+  // 現在の試行の開始時刻
+  attemptStartTime: number | null
+  // 時間制限（速度フェーズとマスターフェーズで使用）
+  timeLimit: number | null
+  // 残り時間
+  timeRemaining: number | null
+}
+
+// 1単語集中練習モードの試行結果
+export interface WordPracticeAttempt {
+  // 成功したか（ミスなく完了）
+  success: boolean
+  // 完了までの時間（ms）
+  completionTime: number
+  // ミス数
+  missCount: number
+  // タイムアウトしたか
+  timedOut: boolean
+}
+
+// 1単語集中練習モードの統計
+export interface WordPracticeStats {
+  // 総試行回数
+  totalAttempts: number
+  // 成功回数
+  successCount: number
+  // 最速タイム（ms）
+  bestTime: number | null
+  // 平均タイム（ms）
+  averageTime: number | null
+  // 試行履歴
+  attempts: WordPracticeAttempt[]
 }

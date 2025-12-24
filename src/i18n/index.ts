@@ -9,6 +9,7 @@ import jaGame from './locales/ja/game.json'
 import jaSettings from './locales/ja/settings.json'
 import jaStats from './locales/ja/stats.json'
 import jaWords from './locales/ja/words.json'
+import jaPractice from './locales/ja/practice.json'
 
 import enCommon from './locales/en/common.json'
 import enMenu from './locales/en/menu.json'
@@ -16,6 +17,7 @@ import enGame from './locales/en/game.json'
 import enSettings from './locales/en/settings.json'
 import enStats from './locales/en/stats.json'
 import enWords from './locales/en/words.json'
+import enPractice from './locales/en/practice.json'
 
 const resources = {
   ja: {
@@ -25,6 +27,7 @@ const resources = {
     settings: jaSettings,
     stats: jaStats,
     words: jaWords,
+    practice: jaPractice,
   },
   en: {
     common: enCommon,
@@ -33,6 +36,7 @@ const resources = {
     settings: enSettings,
     stats: enStats,
     words: enWords,
+    practice: enPractice,
   },
 }
 
@@ -43,7 +47,7 @@ i18n
     resources,
     fallbackLng: 'ja',
     defaultNS: 'common',
-    ns: ['common', 'menu', 'game', 'settings', 'stats', 'words'],
+    ns: ['common', 'menu', 'game', 'settings', 'stats', 'words', 'practice'],
     interpolation: {
       escapeValue: false,
     },

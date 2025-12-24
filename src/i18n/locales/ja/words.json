@@ -39,12 +39,18 @@
     "sort_oldest": "古い順",
     "sort_alphabetical": "アルファベット順",
     "sort_accuracy": "正確率順",
+    "sort_practice_count_desc": "練習回数が多い順",
+    "sort_practice_count_asc": "練習回数が少ない順",
     "items_per_page": "{{count}} 件表示",
     "showing": "{{from}}-{{to}} / {{total}} 件",
     "no_results": "検索結果がありません",
     "accuracy": "正確率",
     "correct": "正解",
     "miss": "ミス",
-    "mastery": "習熟度"
+    "mastery": "習熟度",
+    "practice": "練習",
+    "edit": "編集",
+    "delete": "削除",
+    "practice_count": "{{count}}回"
   }
 }

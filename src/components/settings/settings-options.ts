@@ -1,5 +1,15 @@
-import { ThemeType, PracticeMode, DifficultyPreset } from '@/lib/types'
-import { Target, Shuffle, History, Flame, Trophy, Skull } from 'lucide-react'
+import { ThemeType, PracticeMode, DifficultyPreset, MinimalModeType } from '@/lib/types'
+import {
+  Target,
+  Shuffle,
+  History,
+  Flame,
+  Trophy,
+  Skull,
+  Monitor,
+  Smartphone,
+  Eye,
+} from 'lucide-react'
 
 export const MIN_WORD_COUNT = 5
 export const MAX_WORD_COUNT = 100
@@ -71,5 +81,31 @@ export const DIFFICULTY_OPTIONS: {
     descKey: 'difficulty.expert_desc',
     icon: Skull,
     color: 'text-red-500',
+  },
+]
+
+export const MINIMAL_MODE_OPTIONS: {
+  value: MinimalModeType
+  labelKey: string
+  descKey: string
+  icon: typeof Monitor
+}[] = [
+  {
+    value: 'off',
+    labelKey: 'minimal_mode.off',
+    descKey: 'minimal_mode.off_desc',
+    icon: Monitor,
+  },
+  {
+    value: 'auto',
+    labelKey: 'minimal_mode.auto',
+    descKey: 'minimal_mode.auto_desc',
+    icon: Smartphone,
+  },
+  {
+    value: 'always',
+    labelKey: 'minimal_mode.always',
+    descKey: 'minimal_mode.always_desc',
+    icon: Eye,
   },
 ]

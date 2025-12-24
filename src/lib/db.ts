@@ -7,6 +7,7 @@ import type {
   PresetWord,
   PracticeMode,
   DifficultyPreset,
+  MinimalModeType,
 } from './types'
 
 // APIベースURL（環境変数から取得、デフォルトはローカル）
@@ -73,6 +74,9 @@ export interface SettingsRecord {
   penaltyEscalationFactor: number
   maxPenaltyPercent: number
   minTimeAfterPenalty: number
+  // ミニマルモード設定
+  minimalMode: MinimalModeType
+  minimalModeBreakpoint: number
   updatedAt: number
 }
 
@@ -279,6 +283,9 @@ export const DEFAULT_SETTINGS: AppSettings = {
   penaltyEscalationFactor: 2.2, // ミスごとに2.2倍
   maxPenaltyPercent: 55, // 最大55%
   minTimeAfterPenalty: 0.15, // 最低0.15秒は残す
+  // ミニマルモード設定
+  minimalMode: 'auto', // デフォルトは自動（画面サイズで切り替え）
+  minimalModeBreakpoint: 600, // 600px以下でミニマルモードに自動切り替え
 }
 
 // Settings helper functions
