@@ -317,74 +317,130 @@ export function GameOverScreen({
               </div>
             )}
 
-            {/* 練習を勧めるセクション */}
-            {wordsNeedingPractice.length > 0 && onStartWordPractice && (
+            {/* 復習ラウンド上限に達した場合の特別メッセージ */}
+            {stats.reviewRoundLimitReached && stats.unresolvedWordIds && onStartWordPractice && (
               <div>
-                <Card className="p-4 bg-orange-500/5 border-orange-500/20">
+                <Card className="p-4 bg-red-500/10 border-red-500/30">
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <Crosshair className="w-5 h-5 text-orange-500" />
-                      <h3 className="font-semibold text-orange-600 dark:text-orange-400">
-                        {t('practice_recommended', { defaultValue: '集中練習がおすすめ' })}
+                      <RotateCcw className="w-5 h-5 text-red-500" />
+                      <h3 className="font-semibold text-red-600 dark:text-red-400">
+                        {t('review_limit_reached', {
+                          defaultValue: '復習ラウンド上限に達しました',
+                        })}
                       </h3>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {t('practice_recommended_desc', {
-                        defaultValue: '以下の単語でミスが多かったです。集中練習で克服しましょう！',
+                      {t('review_limit_reached_desc', {
+                        defaultValue:
+                          '以下の単語は5回の復習でも成功できませんでした。単語練習モードで集中的に練習することをおすすめします。',
                       })}
                     </p>
                     <div className="space-y-2">
-                      {wordsNeedingPractice.slice(0, 5).map(perf => {
-                        const word = getWordById(perf.wordId)
+                      {stats.unresolvedWordIds.map(wordId => {
+                        const word = getWordById(wordId)
                         if (!word) return null
                         return (
                           <div
-                            key={perf.wordId}
-                            className="flex items-center justify-between p-2 bg-background rounded-lg border"
+                            key={wordId}
+                            className="flex items-center justify-between p-2 bg-background rounded-lg border border-red-500/20"
                           >
                             <div className="flex flex-col min-w-0 flex-1">
-                              <span className="font-medium truncate">{perf.wordText}</span>
+                              <span className="font-medium truncate">{word.text}</span>
                               <span className="text-xs text-muted-foreground truncate">
-                                {perf.reading}
+                                {word.reading}
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              {!perf.completed && (
-                                <span className="text-xs text-red-500 bg-red-500/10 px-2 py-0.5 rounded">
-                                  {t('timeout', { defaultValue: '時間切れ' })}
-                                </span>
-                              )}
-                              {perf.missCount > 0 && (
-                                <span className="text-xs text-red-500 bg-red-500/10 px-2 py-0.5 rounded">
-                                  {perf.missCount} {t('miss_count_label', { defaultValue: 'ミス' })}
-                                </span>
-                              )}
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => onStartWordPractice(word)}
-                                className="gap-1 text-orange-600 hover:text-orange-700 hover:bg-orange-500/10 border-orange-500/30"
-                              >
-                                <Target className="w-3 h-3" />
-                                {t('start_practice', { defaultValue: '練習' })}
-                              </Button>
-                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => onStartWordPractice(word)}
+                              className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-500/10 border-red-500/30"
+                            >
+                              <Target className="w-3 h-3" />
+                              {t('start_word_practice', { defaultValue: '単語練習' })}
+                            </Button>
                           </div>
                         )
                       })}
                     </div>
-                    {wordsNeedingPractice.length > 5 && (
-                      <p className="text-xs text-muted-foreground text-center">
-                        {t('and_more_words', {
-                          count: wordsNeedingPractice.length - 5,
-                          defaultValue: `他 ${wordsNeedingPractice.length - 5} 件`,
-                        })}
-                      </p>
-                    )}
                   </div>
                 </Card>
               </div>
             )}
+
+            {/* 練習を勧めるセクション（ラウンド上限に達していない場合のみ表示） */}
+            {!stats.reviewRoundLimitReached &&
+              wordsNeedingPractice.length > 0 &&
+              onStartWordPractice && (
+                <div>
+                  <Card className="p-4 bg-orange-500/5 border-orange-500/20">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Crosshair className="w-5 h-5 text-orange-500" />
+                        <h3 className="font-semibold text-orange-600 dark:text-orange-400">
+                          {t('practice_recommended', { defaultValue: '集中練習がおすすめ' })}
+                        </h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {t('practice_recommended_desc', {
+                          defaultValue:
+                            '以下の単語でミスが多かったです。集中練習で克服しましょう！',
+                        })}
+                      </p>
+                      <div className="space-y-2">
+                        {wordsNeedingPractice.slice(0, 5).map(perf => {
+                          const word = getWordById(perf.wordId)
+                          if (!word) return null
+                          return (
+                            <div
+                              key={perf.wordId}
+                              className="flex items-center justify-between p-2 bg-background rounded-lg border"
+                            >
+                              <div className="flex flex-col min-w-0 flex-1">
+                                <span className="font-medium truncate">{perf.wordText}</span>
+                                <span className="text-xs text-muted-foreground truncate">
+                                  {perf.reading}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {!perf.completed && (
+                                  <span className="text-xs text-red-500 bg-red-500/10 px-2 py-0.5 rounded">
+                                    {t('timeout', { defaultValue: '時間切れ' })}
+                                  </span>
+                                )}
+                                {perf.missCount > 0 && (
+                                  <span className="text-xs text-red-500 bg-red-500/10 px-2 py-0.5 rounded">
+                                    {perf.missCount}{' '}
+                                    {t('miss_count_label', { defaultValue: 'ミス' })}
+                                  </span>
+                                )}
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => onStartWordPractice(word)}
+                                  className="gap-1 text-orange-600 hover:text-orange-700 hover:bg-orange-500/10 border-orange-500/30"
+                                >
+                                  <Target className="w-3 h-3" />
+                                  {t('start_practice', { defaultValue: '練習' })}
+                                </Button>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                      {wordsNeedingPractice.length > 5 && (
+                        <p className="text-xs text-muted-foreground text-center">
+                          {t('and_more_words', {
+                            count: wordsNeedingPractice.length - 5,
+                            defaultValue: `他 ${wordsNeedingPractice.length - 5} 件`,
+                          })}
+                        </p>
+                      )}
+                    </div>
+                  </Card>
+                </div>
+              )}
           </div>
         </div>
 
@@ -418,7 +474,16 @@ export function GameOverScreen({
 
         {/* Fixed Footer - Action Buttons */}
         <div className="space-y-2 pt-6 shrink-0">
-          {hasMistakes && !isQuickStartMode ? (
+          {stats.reviewRoundLimitReached && !isQuickStartMode ? (
+            // 復習ラウンド上限に達した場合は新しいゲームを開始するボタンを表示
+            <Button onClick={onRestart} variant="secondary" className="w-full gap-2">
+              <Play className="w-4 h-4" />
+              {t('play_again')}
+              <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">
+                Space
+              </kbd>
+            </Button>
+          ) : hasMistakes && !isQuickStartMode ? (
             // 間違った問題がある時は復習するボタンのみ表示
             <Button onClick={onRetryWeak} className="w-full gap-2">
               <RotateCcw className="w-4 h-4" />

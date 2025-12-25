@@ -73,6 +73,9 @@ export function useGame({
     startTime: null,
     wordStartTime: null,
     currentWordMissCount: 0, // 現在の単語でのミス数（ペナルティ計算用）
+    gamePhase: 'main', // 現在のゲームフェーズ
+    reviewWords: [], // 復習対象の単語リスト
+    reviewRound: 0, // 復習ラウンド
   })
   const [showError, setShowError] = useState(false)
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -202,6 +205,9 @@ export function useGame({
           ? Math.round((firstKeyCorrectCount / performancesWithFirstKey.length) * 100)
           : 100
 
+      // 復習ラウンド上限に達したかどうか
+      const reviewRoundLimitReached = unresolvedWordIdsRef.current.length > 0
+
       setGameStats({
         kps,
         totalKeystrokes: gameState.totalKeystrokes,
@@ -214,6 +220,8 @@ export function useGame({
         avgReactionTime,
         firstKeyAccuracy,
         wordPerformances: [...performances],
+        reviewRoundLimitReached,
+        unresolvedWordIds: reviewRoundLimitReached ? [...unresolvedWordIdsRef.current] : undefined,
       })
 
       // セッション終了時にキーストローク記録を渡す
@@ -278,6 +286,8 @@ export function useGame({
 
       // 単語パフォーマンス記録をリセット
       wordPerformancesRef.current = []
+      // 未解決単語リストをリセット
+      unresolvedWordIdsRef.current = []
 
       // やり直しモードかどうかを判定（wordsToPlay が提供されている場合はやり直しモード）
       const isRetryMode = wordsToPlay !== undefined
@@ -329,6 +339,9 @@ export function useGame({
         startTime: now,
         wordStartTime: now,
         currentWordMissCount: 0,
+        gamePhase: 'main',
+        reviewWords: [],
+        reviewRound: 0,
       })
       setView('game')
     },
@@ -348,6 +361,185 @@ export function useGame({
     setView('menu')
     setGameState(prev => ({ ...prev, isPlaying: false }))
   }, [])
+
+  // 復習ラウンドごとの制限時間ボーナス（5%ずつ増加）
+  const REVIEW_TIME_BONUS_PER_ROUND = 0.05
+  // 復習ラウンドの上限
+  const MAX_REVIEW_ROUNDS = 5
+
+  // 未解決の単語IDを保存するref（ラウンド上限で終了した場合）
+  const unresolvedWordIdsRef = useRef<string[]>([])
+
+  // 復習フェーズを開始
+  const startReviewPhase = useCallback(
+    (failedWordIds: string[]) => {
+      // 失敗した単語を元のwordsリストから取得
+      const reviewWords = words.filter(w => failedWordIds.includes(w.id))
+
+      if (reviewWords.length === 0) {
+        // 復習対象がなければゲーム終了
+        unresolvedWordIdsRef.current = []
+        endGame(true)
+        return
+      }
+
+      // 次のラウンド番号を計算
+      const nextRound = gameState.reviewRound + 1
+
+      // ラウンド上限チェック
+      if (nextRound > MAX_REVIEW_ROUNDS) {
+        // 上限に達した - 未解決の単語を保存してゲーム終了
+        unresolvedWordIdsRef.current = failedWordIds
+        endGame(true)
+        return
+      }
+
+      // 新しい復習ラウンドのためにパフォーマンス記録をリセット
+      wordPerformancesRef.current = []
+
+      const now = Date.now()
+      const firstWord = reviewWords[0]
+      // ラウンドごとに5%ずつ制限時間を増加
+      const timeBonus = 1 + nextRound * REVIEW_TIME_BONUS_PER_ROUND
+      const baseTimeLimit =
+        settings && firstWord ? calculateWordTimeLimit(firstWord, gameScores, settings) : 10
+      const initialTimeLimit = baseTimeLimit * timeBonus
+
+      // 最初の復習単語のパフォーマンス追跡を開始
+      currentWordPerformanceRef.current = {
+        wordId: firstWord.id,
+        wordText: firstWord.text,
+        reading: firstWord.reading,
+        romaji: firstWord.romaji,
+        startTime: now,
+        firstKeyExpected: null,
+        firstKeyActual: null,
+        firstKeyCorrect: null,
+        reactionTime: null,
+        keystrokeCount: 0,
+        missCount: 0,
+      }
+
+      setGameState(prev => ({
+        ...prev,
+        currentWordIndex: 0,
+        currentInput: '',
+        timeRemaining: initialTimeLimit,
+        totalTime: initialTimeLimit,
+        wordStartTime: now,
+        currentWordMissCount: 0,
+        gamePhase: 'review',
+        reviewWords,
+        words: reviewWords,
+        reviewRound: nextRound,
+        mistakeWords: [], // 復習フェーズ開始時にリセット
+      }))
+    },
+    [words, settings, gameScores, endGame, gameState.reviewRound]
+  )
+
+  // 時間切れ時に次の単語に進む
+  const handleTimeout = useCallback(() => {
+    const currentWord = gameState.words[gameState.currentWordIndex]
+    const now = Date.now()
+
+    // 現在の単語のパフォーマンスを記録（時間切れとして）
+    if (currentWordPerformanceRef.current) {
+      const currentPerf = currentWordPerformanceRef.current
+      const wordPerformance: WordPerformanceRecord = {
+        wordId: currentPerf.wordId,
+        wordText: currentPerf.wordText,
+        reading: currentPerf.reading,
+        romaji: currentPerf.romaji,
+        firstKeyExpected: currentPerf.firstKeyExpected || '',
+        firstKeyActual: currentPerf.firstKeyActual || '',
+        firstKeyCorrect: currentPerf.firstKeyCorrect ?? false,
+        reactionTime: currentPerf.reactionTime ?? 0,
+        totalTime: now - currentPerf.startTime,
+        keystrokeCount: currentPerf.keystrokeCount,
+        missCount: currentPerf.missCount,
+        completed: false, // 時間切れは未完了
+        result: 'failed', // 時間切れは失敗
+      }
+      wordPerformancesRef.current.push(wordPerformance)
+    }
+
+    // 単語の統計を更新（失敗として）
+    updateWordStats(currentWord.id, false)
+
+    // 次の単語があるかチェック
+    if (gameState.currentWordIndex + 1 >= gameState.words.length) {
+      // メインフェーズ完了 - 失敗した単語があれば復習フェーズへ
+      const failedWordIds = wordPerformancesRef.current
+        .filter(p => p.result === 'failed')
+        .map(p => p.wordId)
+
+      if (failedWordIds.length > 0 && gameState.gamePhase === 'main') {
+        // 復習フェーズに移行
+        startReviewPhase([...new Set(failedWordIds)])
+      } else if (gameState.gamePhase === 'review') {
+        // 復習フェーズ中の場合、まだ失敗した単語があれば継続
+        const currentRoundFailedIds = wordPerformancesRef.current
+          .filter(p => p.result === 'failed')
+          .map(p => p.wordId)
+
+        if (currentRoundFailedIds.length > 0) {
+          // 新しい復習ラウンド
+          startReviewPhase([...new Set(currentRoundFailedIds)])
+        } else {
+          // 全て成功したらゲーム終了
+          endGame(true)
+        }
+      } else {
+        // 失敗なしでゲーム終了
+        endGame(true)
+      }
+    } else {
+      // 次の単語に進む
+      const nextWord = gameState.words[gameState.currentWordIndex + 1]
+      const baseTimeLimit =
+        settings && nextWord ? calculateWordTimeLimit(nextWord, gameScores, settings) : 10
+      // 復習フェーズ中はラウンドに応じて制限時間を増加
+      const timeBonus =
+        gameState.gamePhase === 'review'
+          ? 1 + gameState.reviewRound * REVIEW_TIME_BONUS_PER_ROUND
+          : 1
+      const nextTimeLimit = baseTimeLimit * timeBonus
+
+      // 次の単語のパフォーマンス追跡を開始
+      currentWordPerformanceRef.current = {
+        wordId: nextWord.id,
+        wordText: nextWord.text,
+        reading: nextWord.reading,
+        romaji: nextWord.romaji,
+        startTime: now,
+        firstKeyExpected: null,
+        firstKeyActual: null,
+        firstKeyCorrect: null,
+        reactionTime: null,
+        keystrokeCount: 0,
+        missCount: 0,
+      }
+
+      // previousKeyをリセット
+      previousKeyRef.current = null
+      lastKeystrokeTimeRef.current = now
+
+      setGameState(prev => ({
+        ...prev,
+        currentWordIndex: prev.currentWordIndex + 1,
+        currentInput: '',
+        timeRemaining: nextTimeLimit,
+        totalTime: nextTimeLimit,
+        wordStartTime: now,
+        currentWordMissCount: 0,
+        // 時間切れの単語をmistakeWordsに追加
+        mistakeWords: prev.mistakeWords.includes(currentWord.id)
+          ? prev.mistakeWords
+          : [...prev.mistakeWords, currentWord.id],
+      }))
+    }
+  }, [gameState, settings, gameScores, updateWordStats, startReviewPhase, endGame])
 
   const handleKeyPress = useCallback(
     (e: KeyboardEvent) => {
@@ -370,13 +562,18 @@ export function useGame({
       if (view === 'gameover') {
         if (e.key === ' ') {
           e.preventDefault()
-          // 失敗した問題がある時は復習、ない時は新しいゲームを開始
-          // gameStats.wordPerformancesを使って実際の失敗を判定
-          const hasFailedWords = gameStats.wordPerformances.some(p => p.result === 'failed')
-          if (hasFailedWords) {
-            retryWeakWords()
-          } else {
+          // 復習ラウンド上限に達した場合は新しいゲームを開始
+          if (gameStats.reviewRoundLimitReached) {
             startGame() // Uses getGameWords callback if provided to apply settings
+          } else {
+            // 失敗した問題がある時は復習、ない時は新しいゲームを開始
+            // gameStats.wordPerformancesを使って実際の失敗を判定
+            const hasFailedWords = gameStats.wordPerformances.some(p => p.result === 'failed')
+            if (hasFailedWords) {
+              retryWeakWords()
+            } else {
+              startGame() // Uses getGameWords callback if provided to apply settings
+            }
           }
         } else if (e.key === 'Escape') {
           e.preventDefault()
@@ -545,20 +742,62 @@ export function useGame({
               'success'
 
           if (gameState.currentWordIndex + 1 >= gameState.words.length) {
-            // 最後の単語が完了した場合も、mistakeWords から削除
-            if (shouldRemoveFromMistakes) {
-              setGameState(prev => ({
-                ...prev,
-                mistakeWords: prev.mistakeWords.filter(id => id !== currentWord.id),
-              }))
+            // 最後の単語が完了
+            // メインフェーズで失敗した単語があれば復習フェーズへ
+            const failedWordIds = wordPerformancesRef.current
+              .filter(p => p.result === 'failed')
+              .map(p => p.wordId)
+
+            if (failedWordIds.length > 0 && gameState.gamePhase === 'main') {
+              // 最後の単語の mistakeWords 更新後に復習フェーズに移行
+              if (shouldRemoveFromMistakes) {
+                setGameState(prev => ({
+                  ...prev,
+                  mistakeWords: prev.mistakeWords.filter(id => id !== currentWord.id),
+                }))
+              }
+              startReviewPhase([...new Set(failedWordIds)])
+            } else if (gameState.gamePhase === 'review') {
+              // 復習フェーズ中の場合
+              const currentRoundFailedIds = wordPerformancesRef.current
+                .filter(p => p.result === 'failed')
+                .map(p => p.wordId)
+
+              if (currentRoundFailedIds.length > 0) {
+                // まだ失敗した単語がある - 新しい復習ラウンド
+                startReviewPhase([...new Set(currentRoundFailedIds)])
+              } else {
+                // 全て成功したらゲーム終了
+                if (shouldRemoveFromMistakes) {
+                  setGameState(prev => ({
+                    ...prev,
+                    mistakeWords: prev.mistakeWords.filter(id => id !== currentWord.id),
+                  }))
+                }
+                endGame(true)
+              }
+            } else {
+              // 失敗なしでゲーム終了
+              if (shouldRemoveFromMistakes) {
+                setGameState(prev => ({
+                  ...prev,
+                  mistakeWords: prev.mistakeWords.filter(id => id !== currentWord.id),
+                }))
+              }
+              endGame(true)
             }
-            endGame(true)
           } else {
             const nextWord = gameState.words[gameState.currentWordIndex + 1]
 
             // 次の単語の制限時間を計算（問題ごとにリセット）
-            const nextTimeLimit =
+            const baseTimeLimit =
               settings && nextWord ? calculateWordTimeLimit(nextWord, gameScores, settings) : 10
+            // 復習フェーズ中はラウンドに応じて制限時間を増加
+            const timeBonus =
+              gameState.gamePhase === 'review'
+                ? 1 + gameState.reviewRound * REVIEW_TIME_BONUS_PER_ROUND
+                : 1
+            const nextTimeLimit = baseTimeLimit * timeBonus
 
             // 次の単語のパフォーマンス追跡を開始
             currentWordPerformanceRef.current = {
@@ -603,6 +842,7 @@ export function useGame({
       retryWeakWords,
       exitToMenu,
       endGame,
+      startReviewPhase,
       gameScores,
       settings,
     ]
@@ -632,13 +872,24 @@ export function useGame({
     gameState.mistakeWords.length,
   ])
 
+  // 時間切れフラグを追跡するref
+  const isHandlingTimeoutRef = useRef<boolean>(false)
+
   // Timer effect
   useEffect(() => {
     if (view === 'game' && gameState.isPlaying) {
       const interval = setInterval(() => {
         setGameState(prev => {
           if (prev.timeRemaining <= 0.1) {
-            endGame(false)
+            // 時間切れ - handleTimeoutを呼ぶためにフラグを設定
+            if (!isHandlingTimeoutRef.current) {
+              isHandlingTimeoutRef.current = true
+              // 非同期でhandleTimeoutを呼ぶ
+              setTimeout(() => {
+                handleTimeout()
+                isHandlingTimeoutRef.current = false
+              }, 0)
+            }
             return prev
           }
           return {
@@ -650,7 +901,7 @@ export function useGame({
 
       return () => clearInterval(interval)
     }
-  }, [view, gameState.isPlaying, endGame])
+  }, [view, gameState.isPlaying, handleTimeout])
 
   // Keyboard event effect
   useEffect(() => {

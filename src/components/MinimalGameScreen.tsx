@@ -23,6 +23,14 @@ export function MinimalGameScreen({
 }: MinimalGameScreenProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background p-4">
+      {/* 復習フェーズインジケーター（控えめ） */}
+      {gameState.gamePhase === 'review' && (
+        <div className="text-center text-[10px] text-amber-500/50 font-mono mb-2">
+          // review {gameState.reviewRound > 1 && `r${gameState.reviewRound} `}(
+          {gameState.words.length})
+        </div>
+      )}
+
       {/* メインのタイピングエリア（中央配置） */}
       <div className="flex-1 flex items-center justify-center">
         <div className="w-full max-w-md">

@@ -1,17 +1,21 @@
 import { useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Word, WordPracticePhase } from '@/lib/types'
+import { Word, WordPracticePhase, AppSettings } from '@/lib/types'
+import { GameScoreRecord } from '@/lib/db'
 import { useWordPractice } from '@/hooks/useWordPractice'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { Kbd } from '@/components/ui/kbd'
 import { Check, X, Clock, Target, Zap, Trophy, ArrowLeft } from 'lucide-react'
 
 interface WordPracticeScreenProps {
   word: Word
   onExit: () => void
   updateWordStats?: (wordId: string, correct: boolean) => void
+  gameScores?: GameScoreRecord[]
+  settings?: AppSettings
 }
 
 // フェーズの表示情報
@@ -39,7 +43,13 @@ const PHASE_INFO: Record<
   },
 }
 
-export function WordPracticeScreen({ word, onExit, updateWordStats }: WordPracticeScreenProps) {
+export function WordPracticeScreen({
+  word,
+  onExit,
+  updateWordStats,
+  gameScores = [],
+  settings,
+}: WordPracticeScreenProps) {
   const { t } = useTranslation('practice')
 
   const { state, stats, showError, startPractice, endPractice, isComplete } = useWordPractice({
@@ -48,6 +58,8 @@ export function WordPracticeScreen({ word, onExit, updateWordStats }: WordPracti
       // マスター完了時の処理
     },
     onExit,
+    gameScores,
+    settings,
   })
 
   // 終了ハンドラー
@@ -55,6 +67,22 @@ export function WordPracticeScreen({ word, onExit, updateWordStats }: WordPracti
     endPractice()
     onExit()
   }, [endPractice, onExit])
+
+  // 完了画面でEscキーを押したときに戻る
+  useEffect(() => {
+    if (!isComplete) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onExit()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isComplete, onExit])
 
   // 練習を開始
   useEffect(() => {
@@ -123,9 +151,10 @@ export function WordPracticeScreen({ word, onExit, updateWordStats }: WordPracti
             </div>
           </Card>
 
-          <Button onClick={onExit} size="lg" className="gap-2">
+          <Button onClick={onExit} size="lg" className="gap-2 pr-2">
             <ArrowLeft className="w-4 h-4" />
             {t('back', { defaultValue: '戻る' })}
+            <Kbd>Esc</Kbd>
           </Button>
         </motion.div>
       </div>

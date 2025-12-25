@@ -10,8 +10,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Plus, AlertTriangle } from 'lucide-react'
-import { processTextForTyping, containsKanji } from '@/lib/japanese-utils'
+import { Plus, Info } from 'lucide-react'
+import { processTextForTyping, containsKanji, isEnglishText } from '@/lib/japanese-utils'
 import { Word } from '@/lib/types'
 
 interface AddWordDialogProps {
@@ -78,6 +78,7 @@ export function AddWordDialog({
       // Don't overwrite if user has already entered reading
       if (!reading) {
         setReading('')
+        // For kanji without reading, set romaji to text itself (for display)
         setRomaji('')
       }
     } else {
@@ -111,25 +112,36 @@ export function AddWordDialog({
 
     if (!text.trim()) return
 
-    // Validate that reading is provided for kanji
-    if (containsKanji(text) && !reading.trim()) {
-      return
-    }
+    const trimmedText = text.trim()
 
-    const finalReading = reading.trim() || text.trim()
-    const finalRomaji = romaji.trim() || finalReading.toLowerCase()
+    // Determine final reading and romaji
+    // For English text: reading = text, romaji = text (lowercase)
+    // For Japanese with reading: use the provided reading
+    // For Japanese without reading: use text as fallback
+    let finalReading = reading.trim()
+    let finalRomaji = romaji.trim()
+
+    if (isEnglishText(trimmedText)) {
+      // English text - reading is the text itself, romaji is lowercase
+      finalReading = finalReading || trimmedText
+      finalRomaji = finalRomaji || trimmedText.toLowerCase()
+    } else {
+      // Japanese text
+      finalReading = finalReading || trimmedText
+      finalRomaji = finalRomaji || finalReading.toLowerCase()
+    }
 
     if (isEditMode && editingWord && onEditWord) {
       // 編集モード
       onEditWord(editingWord.id, {
-        text: text.trim(),
+        text: trimmedText,
         reading: finalReading,
         romaji: finalRomaji,
       })
     } else {
       // 追加モード
       onAddWord({
-        text: text.trim(),
+        text: trimmedText,
         reading: finalReading,
         romaji: finalRomaji,
       })
@@ -142,7 +154,8 @@ export function AddWordDialog({
     setOpen(false)
   }
 
-  const isValid = text.trim() && (!needsManualReading || reading.trim())
+  // Only text is required - reading is optional (but recommended for kanji)
+  const isValid = text.trim().length > 0
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -174,9 +187,9 @@ export function AddWordDialog({
             <Label htmlFor="reading" className="flex items-center gap-2">
               {t('dialog.reading')}
               {needsManualReading && (
-                <span className="text-xs text-amber-500 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" />
-                  {t('dialog.reading_required')}
+                <span className="text-xs text-blue-500 flex items-center gap-1">
+                  <Info className="w-3 h-3" />
+                  {t('dialog.reading_recommended')}
                 </span>
               )}
             </Label>
@@ -189,7 +202,6 @@ export function AddWordDialog({
                   ? t('dialog.reading_placeholder_manual')
                   : t('dialog.reading_placeholder_auto')
               }
-              className={needsManualReading && !reading ? 'border-amber-500' : ''}
             />
             {needsManualReading && (
               <p className="text-xs text-muted-foreground">{t('dialog.reading_hint')}</p>

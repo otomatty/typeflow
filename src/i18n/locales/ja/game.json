@@ -35,5 +35,11 @@
   "miss_count_label": "ミス",
   "start_practice": "練習",
   "and_more_words": "他 {{count}} 件",
-  "practice_short": "練習"
+  "practice_short": "練習",
+  "reviewPhase": "復習",
+  "round": "ラウンド",
+  "wordsRemaining": "問",
+  "review_limit_reached": "復習ラウンド上限に達しました",
+  "review_limit_reached_desc": "以下の単語は5回の復習でも成功できませんでした。単語練習モードで集中的に練習することをおすすめします。",
+  "start_word_practice": "単語練習"
 }

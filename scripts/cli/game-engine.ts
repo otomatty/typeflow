@@ -1,6 +1,6 @@
 /**
  * CLI Game Engine
- * ゲームロジック（既存の useGame フックのCLI版）
+ * Game logic (CLI version of the existing useGame hook)
  */
 
 import type {
@@ -17,12 +17,12 @@ import { Display } from './display'
 import { InputManager } from './input'
 import { LocalDBClient, DEFAULT_SETTINGS } from './local-db'
 
-// ローマ字入力検証（既存のロジックを移植）
+// Romaji input validation (ported from existing logic)
 function normalizeRomaji(input: string): string {
   return input.toLowerCase().replace(/\s+/g, '')
 }
 
-// ローマ字バリエーション（簡易版）
+// Romaji variations (simplified version)
 const ROMAJI_VARIANTS: Record<string, string[]> = {
   shi: ['shi', 'si'],
   sha: ['sha', 'sya'],
@@ -46,7 +46,7 @@ const SORTED_CANONICAL_FORMS = Object.keys(ROMAJI_VARIANTS).sort((a, b) => b.len
 function generateAllVariations(target: string): string[] {
   if (target.length === 0) return ['']
 
-  // 'n' の特殊処理
+  // Special handling for 'n'
   if (target.startsWith('xn')) {
     const rest = target.substring(2)
     const restVariations = generateAllVariations(rest)
@@ -67,7 +67,7 @@ function generateAllVariations(target: string): string[] {
     return result
   }
 
-  // カノニカル形式のマッチ
+  // Match canonical forms
   for (const canonical of SORTED_CANONICAL_FORMS) {
     if (target.startsWith(canonical)) {
       const rest = target.substring(canonical.length)
@@ -83,7 +83,7 @@ function generateAllVariations(target: string): string[] {
     }
   }
 
-  // 'n' の処理
+  // Handle 'n'
   if (target[0] === 'n' && target.length >= 2) {
     const nextChar = target[1]
     if (!'aiueony'.includes(nextChar.toLowerCase())) {
@@ -147,7 +147,7 @@ function validateRomajiInput(
   return { isCorrect: false, progress: 0 }
 }
 
-// 時間計算（既存のロジックを移植）
+// Time calculation (ported from existing logic)
 const DEFAULT_KPS = 3.0
 const RECENT_SCORES_FOR_KPS = 10
 
@@ -174,6 +174,11 @@ function calculateWordTimeLimit(
   const targetKps = averageKps * settings.targetKpsMultiplier
   const keystrokeCount = normalizeRomaji(word.romaji).length
 
+  // Prevent division by zero and NaN
+  if (targetKps <= 0 || isNaN(targetKps)) {
+    return settings.minTimeLimitByDifficulty || 2.0
+  }
+
   const theoreticalTime = keystrokeCount / targetKps
   let adjustedTime = theoreticalTime * settings.comfortZoneRatio
 
@@ -181,32 +186,15 @@ function calculateWordTimeLimit(
   adjustedTime = Math.max(adjustedTime, settings.minTimeLimitByDifficulty)
   adjustedTime = Math.min(adjustedTime, settings.maxTimeLimit)
 
+  // NaNチェック
+  if (isNaN(adjustedTime) || !isFinite(adjustedTime)) {
+    return settings.minTimeLimitByDifficulty || 2.0
+  }
+
   return Math.round(adjustedTime * 10) / 10
 }
 
-function calculateMissPenalty(
-  missCount: number,
-  timeRemaining: number,
-  settings: CLISettings
-): number {
-  if (!settings.missPenaltyEnabled) return 0
-
-  const penaltyPercent = Math.min(
-    settings.basePenaltyPercent * Math.pow(settings.penaltyEscalationFactor, missCount - 1),
-    settings.maxPenaltyPercent
-  )
-
-  const penalty = timeRemaining * (penaltyPercent / 100)
-  const minTime = settings.minTimeAfterPenalty
-
-  if (timeRemaining - penalty < minTime) {
-    return Math.max(0, timeRemaining - minTime)
-  }
-
-  return penalty
-}
-
-// ゲームエンジン本体
+// Game engine main class
 export class GameEngine {
   private db: LocalDBClient
   private display: Display
@@ -237,17 +225,17 @@ export class GameEngine {
   }
 
   /**
-   * ゲームを開始
+   * Start the game
    */
   async start(): Promise<GameResult> {
-    // DB確認
+    // Check DB
     const isDBReady = await this.db.healthCheck()
     if (!isDBReady) {
       this.display.error('Local database not found. Run: bun run db:setup')
       process.exit(1)
     }
 
-    // データ読み込み
+    // Load data
     try {
       const [words, settings, scores] = await Promise.all([
         this.db.getWords(),
@@ -263,10 +251,10 @@ export class GameEngine {
       this.settings = settings || DEFAULT_SETTINGS
       this.gameScores = scores
 
-      // 単語をシャッフル
+      // Shuffle words
       const shuffled = [...words].sort(() => Math.random() - 0.5)
 
-      // 単語数を制限
+      // Limit word count
       const count = this.options.count === 'all' ? shuffled.length : this.options.count
       this.state.words = shuffled.slice(0, count)
     } catch (error) {
@@ -274,11 +262,11 @@ export class GameEngine {
       process.exit(1)
     }
 
-    // 画面準備
+    // Prepare display
     this.display.hideCursor()
     this.display.start(this.state.words.length)
 
-    // ゲーム開始
+    // Start game
     return new Promise(resolve => {
       this.resolveGame = resolve
       this.state.isPlaying = true
@@ -287,16 +275,16 @@ export class GameEngine {
       this.state.totalKeystrokes = 0
       this.state.wordResults = []
 
-      // 最初の単語を開始
+      // Start first word
       this.startWord()
 
-      // 入力監視開始
+      // Start input monitoring
       this.input.start(this.handleKeypress.bind(this))
     })
   }
 
   /**
-   * 単語を開始
+   * Start a word
    */
   private startWord(): void {
     const word = this.state.words[this.state.currentIndex]
@@ -312,15 +300,15 @@ export class GameEngine {
       firstKeyTime: null,
     }
 
-    // タイマー開始
+    // Start timer
     this.startTimer()
 
-    // 表示更新
+    // Update display
     this.updateDisplay()
   }
 
   /**
-   * タイマー開始
+   * Start timer
    */
   private startTimer(): void {
     this.timerInterval = setInterval(() => {
@@ -337,7 +325,7 @@ export class GameEngine {
   }
 
   /**
-   * タイマー停止
+   * Stop timer
    */
   private stopTimer(): void {
     if (this.timerInterval) {
@@ -347,7 +335,7 @@ export class GameEngine {
   }
 
   /**
-   * タイムアウト処理
+   * Handle timeout
    */
   private handleTimeout(): void {
     if (!this.state.currentWord) return
@@ -368,83 +356,86 @@ export class GameEngine {
     }
     this.state.wordResults.push(result)
 
-    // 完了表示
+    // Update word stats (timeout is recorded as miss)
+    this.db.updateWordStats(cw.word.id, false).catch(() => {})
+
+    // Show completion (no time display)
     this.display.complete(this.getDisplayData(true, false), false)
 
-    // 次の単語へ
+    // Move to next word
     this.nextWord()
   }
 
   /**
-   * キー入力処理
+   * Handle key press
    */
   private handleKeypress(key: string, ctrl: boolean, _meta: boolean): void {
     if (!this.state.isPlaying || !this.state.currentWord) return
 
-    // Escapeで終了
+    // Exit on Escape
     if (key === 'escape') {
       this.endGame()
       return
     }
 
-    // バックスペース
+    // Backspace
     if (key === 'backspace') {
       this.state.currentWord.input = this.state.currentWord.input.slice(0, -1)
       this.updateDisplay()
       return
     }
 
-    // Ctrl+Z で一時停止表示
+    // Suspend on Ctrl+Z
     if (ctrl && key === 'z') {
       this.stopTimer()
       this.display.info('\n[Process suspended. Press any key to continue...]')
-      // 次のキーで再開（簡易実装）
+      // Resume on next key (simple implementation)
       return
     }
 
-    // 通常のキー入力
+    // Normal key input
     if (key.length === 1 && /[a-zA-Z0-9.\-_?!,;:'"]/.test(key)) {
       this.handleCharInput(key.toLowerCase())
     }
   }
 
   /**
-   * 文字入力処理
+   * Handle character input
    */
   private handleCharInput(char: string): void {
     const cw = this.state.currentWord!
     const newInput = cw.input + char
 
-    // 初動時間記録
+    // Record first key time
     if (cw.input.length === 0) {
       cw.firstKeyTime = Date.now()
     }
 
-    // 入力検証
+    // Validate input
     const prevValidation = validateRomajiInput(cw.word.romaji, cw.input)
     const newValidation = validateRomajiInput(cw.word.romaji, newInput)
 
     this.state.totalKeystrokes++
 
-    // 進捗が増えていない場合はミス
+    // If progress didn't increase, it's a miss
     if (newValidation.progress <= prevValidation.progress && !newValidation.isCorrect) {
       cw.missCount++
 
-      // ミスペナルティ
-      const penalty = calculateMissPenalty(cw.missCount, cw.timeRemaining, this.settings)
-      cw.timeRemaining = Math.max(0, cw.timeRemaining - penalty)
+      // Miss penalty is disabled (CLI mode doesn't reduce time limit)
+      // const penalty = calculateMissPenalty(cw.missCount, cw.timeRemaining, this.settings)
+      // cw.timeRemaining = Math.max(0, cw.timeRemaining - penalty)
 
-      // 単語統計更新（非同期）
+      // Update word stats (async)
       this.db.updateWordStats(cw.word.id, false).catch(() => {})
 
       this.updateDisplay(true)
       return
     }
 
-    // 入力を受け入れ
+    // Accept input
     cw.input = newInput
 
-    // 単語完了チェック
+    // Check if word is complete
     if (newValidation.isCorrect) {
       this.handleWordComplete()
     } else {
@@ -453,7 +444,7 @@ export class GameEngine {
   }
 
   /**
-   * 単語完了処理
+   * Handle word completion
    */
   private handleWordComplete(): void {
     this.stopTimer()
@@ -474,18 +465,18 @@ export class GameEngine {
     }
     this.state.wordResults.push(result)
 
-    // 単語統計更新（非同期）
+    // Update word stats (async)
     this.db.updateWordStats(cw.word.id, true).catch(() => {})
 
-    // 完了表示
+    // Show completion
     this.display.complete(this.getDisplayData(false, true), success)
 
-    // 次の単語へ
+    // Move to next word
     this.nextWord()
   }
 
   /**
-   * 次の単語へ
+   * Move to next word
    */
   private nextWord(): void {
     this.state.currentIndex++
@@ -498,7 +489,7 @@ export class GameEngine {
   }
 
   /**
-   * ゲーム終了
+   * End game
    */
   private endGame(): void {
     this.stopTimer()
@@ -508,7 +499,7 @@ export class GameEngine {
     const endTime = Date.now()
     const totalTime = this.state.startTime ? (endTime - this.state.startTime) / 1000 : 0
 
-    // 結果計算
+    // Calculate results
     const results = this.state.wordResults
     const completedWords = results.filter(r => r.completed).length
     const successfulWords = results.filter(r => r.success).length
@@ -529,11 +520,11 @@ export class GameEngine {
       wordResults: results,
     }
 
-    // 結果表示
+    // Show results
     this.display.result(gameResult)
     this.display.showCursor()
 
-    // スコア保存（オプションで無効化可能）
+    // Save score (can be disabled with option)
     if (!this.options.noSave && results.length > 0) {
       this.db
         .saveGameScore({
@@ -550,7 +541,7 @@ export class GameEngine {
         })
     }
 
-    // DB接続を閉じる
+    // Close DB connection
     this.db.close()
 
     if (this.resolveGame) {
@@ -559,16 +550,24 @@ export class GameEngine {
   }
 
   /**
-   * 表示データを取得
+   * Get display data
    */
   private getDisplayData(isTimeout: boolean = false, isComplete: boolean = false): DisplayData {
     const cw = this.state.currentWord!
     const elapsed = this.state.startTime ? (Date.now() - this.state.startTime) / 1000 : 0
-    const kps = elapsed > 0 ? Math.round((this.state.totalKeystrokes / elapsed) * 10) / 10 : 0
+    const kps =
+      elapsed > 0 && !isNaN(elapsed)
+        ? Math.round((this.state.totalKeystrokes / elapsed) * 10) / 10
+        : 0
 
     const completedCount = this.state.wordResults.filter(r => r.success).length
     const attemptedCount = this.state.wordResults.length
     const accuracy = attemptedCount > 0 ? Math.round((completedCount / attemptedCount) * 100) : 100
+
+    // NaN check
+    const timeRemaining =
+      isNaN(cw.timeRemaining) || !isFinite(cw.timeRemaining) ? 0 : cw.timeRemaining
+    const totalTime = isNaN(cw.totalTime) || !isFinite(cw.totalTime) ? 10 : cw.totalTime
 
     return {
       text: cw.word.text,
@@ -577,8 +576,8 @@ export class GameEngine {
       input: cw.input,
       currentIndex: this.state.currentIndex,
       totalWords: this.state.words.length,
-      timeRemaining: cw.timeRemaining,
-      totalTime: cw.totalTime,
+      timeRemaining,
+      totalTime,
       kps,
       accuracy,
       missCount: cw.missCount,
@@ -589,7 +588,7 @@ export class GameEngine {
   }
 
   /**
-   * 表示を更新
+   * Update display
    */
   private updateDisplay(isError: boolean = false): void {
     const data = this.getDisplayData()

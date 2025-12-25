@@ -1,6 +1,6 @@
 /**
  * CLI Display Module
- * 各偽装モードの表示処理
+ * Display processing for each stealth mode
  */
 
 import type { DisplayData, DisplayMode, GameResult } from './types'
@@ -24,7 +24,7 @@ const CLEAR_LINE = '\x1b[2K'
 const CLEAR_SCREEN = '\x1b[2J\x1b[H'
 
 /**
- * 進捗バーを生成
+ * Generate progress bar
  */
 function progressBar(current: number, total: number, width: number = 10): string {
   const filled = Math.floor((current / total) * width)
@@ -33,14 +33,14 @@ function progressBar(current: number, total: number, width: number = 10): string
 }
 
 /**
- * 時間を整形
+ * Format time
  */
 function formatTime(seconds: number): string {
   return seconds.toFixed(1) + 's'
 }
 
 /**
- * 現在時刻を取得
+ * Get current timestamp
  */
 function getTimestamp(): string {
   const now = new Date()
@@ -48,20 +48,20 @@ function getTimestamp(): string {
 }
 
 // ============================================================
-// Minimal Mode - 超シンプル表示
+// Minimal Mode - Ultra simple display
 // ============================================================
 
 function renderMinimal(data: DisplayData): string {
   const progress = progressBar(data.totalTime - data.timeRemaining, data.totalTime)
   const timeStr = formatTime(data.timeRemaining)
 
-  // 日本語（ふりがな）を表示、入力されたローマ字のみ表示
+  // Display Japanese text (with kanji), show only entered romaji
   const inputPart = data.input || ''
 
-  let line = `${data.reading}: ${GREEN}${inputPart}${RESET}█ ${progress} ${timeStr}`
+  let line = `${data.text}: ${GREEN}${inputPart}${RESET}█ ${progress} ${timeStr}`
 
   if (data.isError) {
-    line = `${data.reading}: ${RED}${inputPart}${RESET}█ ${progress} ${timeStr}`
+    line = `${data.text}: ${RED}${inputPart}${RESET}█ ${progress} ${timeStr}`
   }
 
   return line
@@ -69,7 +69,7 @@ function renderMinimal(data: DisplayData): string {
 
 function renderMinimalComplete(data: DisplayData, success: boolean): string {
   const status = success ? `${GREEN}✓${RESET}` : `${RED}✗${RESET}`
-  return `${status} ${data.reading} → ${data.romaji} (${formatTime(data.totalTime - data.timeRemaining)})`
+  return `${status} ${data.text} → ${data.romaji}`
 }
 
 function renderMinimalResult(result: GameResult): string {
@@ -86,7 +86,7 @@ function renderMinimalResult(result: GameResult): string {
 }
 
 // ============================================================
-// Log Mode - ログ出力風
+// Log Mode - Log output style
 // ============================================================
 
 function renderLog(data: DisplayData): string {
@@ -94,23 +94,22 @@ function renderLog(data: DisplayData): string {
   const progress = progressBar(data.totalTime - data.timeRemaining, data.totalTime)
   const timeStr = formatTime(data.timeRemaining)
 
-  // 日本語を表示、入力されたローマ字のみ表示
+  // Display Japanese text (with kanji), show only entered romaji
   const inputPart = data.input || ''
   const inputDisplay = inputPart ? `${GREEN}${inputPart}${RESET}█` : '█'
 
-  return `${GRAY}[${timestamp}]${RESET} Processing: ${data.reading} > ${inputDisplay} ${progress} ${timeStr}`
+  return `${GRAY}[${timestamp}]${RESET} Processing: ${data.text} > ${inputDisplay} ${progress} ${timeStr}`
 }
 
 function renderLogComplete(data: DisplayData, success: boolean): string {
   const timestamp = getTimestamp()
-  const time = formatTime(data.totalTime - data.timeRemaining)
 
   if (success) {
-    return `${GRAY}[${timestamp}]${RESET} ${GREEN}OK${RESET}: ${data.reading} → ${data.romaji} (${time}, 0 miss)`
+    return `${GRAY}[${timestamp}]${RESET} ${GREEN}OK${RESET}: ${data.text} → ${data.romaji} (0 miss)`
   } else if (data.isTimeout) {
-    return `${GRAY}[${timestamp}]${RESET} ${RED}TIMEOUT${RESET}: ${data.reading}`
+    return `${GRAY}[${timestamp}]${RESET} ${RED}TIMEOUT${RESET}: ${data.text}`
   } else {
-    return `${GRAY}[${timestamp}]${RESET} ${YELLOW}WARN${RESET}: ${data.reading} → ${data.romaji} (${time}, ${data.missCount} miss)`
+    return `${GRAY}[${timestamp}]${RESET} ${YELLOW}WARN${RESET}: ${data.text} → ${data.romaji} (${data.missCount} miss)`
   }
 }
 
@@ -127,29 +126,27 @@ function renderLogResult(result: GameResult): string {
 }
 
 // ============================================================
-// Test Mode - テスト実行風
+// Test Mode - Test execution style
 // ============================================================
 
 function renderTest(data: DisplayData): string {
   const progress = progressBar(data.totalTime - data.timeRemaining, data.totalTime)
   const timeStr = formatTime(data.timeRemaining)
 
-  // 日本語を表示、入力されたローマ字のみ表示
+  // Display Japanese text (with kanji), show only entered romaji
   const inputPart = data.input || ''
   const inputDisplay = inputPart ? `${GREEN}${inputPart}${RESET}█` : '█'
 
-  return `${YELLOW}○${RESET} run:  ${data.reading} → ${inputDisplay} ${progress} ${timeStr}`
+  return `${YELLOW}○${RESET} run:  ${data.text} → ${inputDisplay} ${progress} ${timeStr}`
 }
 
 function renderTestComplete(data: DisplayData, success: boolean): string {
-  const time = formatTime(data.totalTime - data.timeRemaining)
-
   if (success) {
-    return `${GREEN}✓${RESET} pass: ${data.reading} → ${data.romaji} (${time})`
+    return `${GREEN}✓${RESET} pass: ${data.text} → ${data.romaji}`
   } else if (data.isTimeout) {
-    return `${RED}✗${RESET} fail: ${data.reading} → ${data.input}... (timeout ${formatTime(data.totalTime)})`
+    return `${RED}✗${RESET} fail: ${data.text} (timeout)`
   } else {
-    return `${RED}✗${RESET} fail: ${data.reading} → ${data.romaji} (${time}, ${data.missCount} errors)`
+    return `${RED}✗${RESET} fail: ${data.text} → ${data.romaji} (${data.missCount} errors)`
   }
 }
 
@@ -167,7 +164,7 @@ function renderTestResult(result: GameResult): string {
 }
 
 // ============================================================
-// Build Mode - ビルドログ風
+// Build Mode - Build log style
 // ============================================================
 
 function renderBuild(data: DisplayData): string {
@@ -177,12 +174,12 @@ function renderBuild(data: DisplayData): string {
   const empty = width - filled
   const bar = `${'█'.repeat(filled)}${'░'.repeat(empty)}`
 
-  // 日本語を表示、入力されたローマ字のみ表示
+  // Display Japanese text (with kanji), show only entered romaji
   const inputPart = data.input || ''
   const inputDisplay = inputPart ? `${GREEN}${inputPart}${RESET}█` : '█'
 
   const lines = [
-    `${CYAN}Compiling${RESET} word ${data.currentIndex + 1}/${data.totalWords}: ${data.reading}`,
+    `${CYAN}Compiling${RESET} word ${data.currentIndex + 1}/${data.totalWords}: ${data.text}`,
     `  ${DIM}→${RESET} Transpiling: [${bar}] ${percent}%`,
     `  ${DIM}→${RESET} Input: ${inputDisplay}`,
     `  ${DIM}→${RESET} Elapsed: ${formatTime(data.totalTime - data.timeRemaining)} / ${formatTime(data.totalTime)}`,
@@ -192,14 +189,12 @@ function renderBuild(data: DisplayData): string {
 }
 
 function renderBuildComplete(data: DisplayData, success: boolean): string {
-  const time = formatTime(data.totalTime - data.timeRemaining)
-
   if (success) {
-    return `${GREEN}✓${RESET} Compiled ${data.reading} → ${data.romaji} (${time})`
+    return `${GREEN}✓${RESET} Compiled ${data.text} → ${data.romaji}`
   } else if (data.isTimeout) {
-    return `${RED}✗${RESET} Timeout compiling ${data.reading} (exceeded ${formatTime(data.totalTime)})`
+    return `${RED}✗${RESET} Timeout compiling ${data.text}`
   } else {
-    return `${YELLOW}⚠${RESET} Compiled ${data.reading} with ${data.missCount} warnings (${time})`
+    return `${YELLOW}⚠${RESET} Compiled ${data.text} with ${data.missCount} warnings`
   }
 }
 
@@ -223,19 +218,19 @@ function renderBuildResult(result: GameResult): string {
 }
 
 // ============================================================
-// Git Mode - git操作風
+// Git Mode - Git operation style
 // ============================================================
 
 function renderGit(data: DisplayData): string {
   const progress = progressBar(data.totalTime - data.timeRemaining, data.totalTime)
   const timeStr = formatTime(data.timeRemaining)
 
-  // 日本語を表示、入力されたローマ字のみ表示
+  // Display Japanese text (with kanji), show only entered romaji
   const inputPart = data.input || ''
   const inputDisplay = inputPart ? `${GREEN}${inputPart}${RESET}█` : '█'
 
   const lines = [
-    `$ ${CYAN}git commit -m "${data.reading}"${RESET}`,
+    `$ ${CYAN}git commit -m "${data.text}"${RESET}`,
     `${DIM}hint: Waiting for message...${RESET}`,
     `> ${inputDisplay}`,
     `${progress} ${timeStr} remaining`,
@@ -245,15 +240,13 @@ function renderGit(data: DisplayData): string {
 }
 
 function renderGitComplete(data: DisplayData, success: boolean): string {
-  const time = formatTime(data.totalTime - data.timeRemaining)
-
   if (success) {
     const hash = Math.random().toString(16).substring(2, 9)
-    return `[main ${YELLOW}${hash}${RESET}] ${data.reading} → ${data.romaji}\n 1 file changed (${time})`
+    return `[main ${YELLOW}${hash}${RESET}] ${data.text} → ${data.romaji}\n 1 file changed`
   } else if (data.isTimeout) {
-    return `${RED}error:${RESET} commit aborted: timeout (${data.reading})`
+    return `${RED}error:${RESET} commit aborted: timeout (${data.text})`
   } else {
-    return `${YELLOW}warning:${RESET} commit ${data.reading} completed with ${data.missCount} fixups`
+    return `${YELLOW}warning:${RESET} commit ${data.text} completed with ${data.missCount} fixups`
   }
 }
 
@@ -282,31 +275,31 @@ export class Display {
   }
 
   /**
-   * カーソルを非表示
+   * Hide cursor
    */
   hideCursor(): void {
     process.stdout.write(HIDE_CURSOR)
   }
 
   /**
-   * カーソルを表示
+   * Show cursor
    */
   showCursor(): void {
     process.stdout.write(SHOW_CURSOR)
   }
 
   /**
-   * 画面をクリア
+   * Clear screen
    */
   clear(): void {
     process.stdout.write(CLEAR_SCREEN)
   }
 
   /**
-   * 前回の出力をクリアして新しい内容を表示
+   * Clear previous output and display new content
    */
   update(data: DisplayData): void {
-    // 前回の行数分だけ上に移動してクリア
+    // Move up and clear previous lines
     if (this.lastLineCount > 0) {
       process.stdout.write(`\x1b[${this.lastLineCount}A`)
       for (let i = 0; i < this.lastLineCount; i++) {
@@ -342,10 +335,10 @@ export class Display {
   }
 
   /**
-   * 単語完了時の表示
+   * Display when word is completed
    */
   complete(data: DisplayData, success: boolean): void {
-    // 前回の出力をクリア
+    // Clear previous output
     if (this.lastLineCount > 0) {
       process.stdout.write(`\x1b[${this.lastLineCount}A`)
       for (let i = 0; i < this.lastLineCount; i++) {
@@ -380,7 +373,7 @@ export class Display {
   }
 
   /**
-   * ゲーム結果の表示
+   * Display game results
    */
   result(result: GameResult): void {
     let output: string
@@ -408,7 +401,7 @@ export class Display {
   }
 
   /**
-   * 開始メッセージ
+   * Start message
    */
   start(totalWords: number): void {
     switch (this.mode) {
@@ -433,14 +426,14 @@ export class Display {
   }
 
   /**
-   * エラーメッセージ
+   * Error message
    */
   error(message: string): void {
     console.error(`${RED}Error:${RESET} ${message}`)
   }
 
   /**
-   * 情報メッセージ
+   * Info message
    */
   info(message: string): void {
     console.log(`${DIM}${message}${RESET}`)

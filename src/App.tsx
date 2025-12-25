@@ -419,6 +419,8 @@ function AppContent() {
           word={practiceWord}
           onExit={handleExitWordPractice}
           updateWordStats={updateWordStats}
+          gameScores={gameScores}
+          settings={settings}
         />
       </>
     )

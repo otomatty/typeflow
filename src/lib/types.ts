@@ -68,6 +68,11 @@ export function isWordFailed(record: WordPerformanceRecord): boolean {
   return record.result === 'failed'
 }
 
+// ゲームフェーズ
+// - 'main': メインフェーズ（通常の問題出題）
+// - 'review': 復習フェーズ（間違えた/時間切れ問題の再出題）
+export type GamePhase = 'main' | 'review'
+
 export interface GameState {
   isPlaying: boolean
   currentWordIndex: number
@@ -81,6 +86,10 @@ export interface GameState {
   startTime: number | null
   // 初動計測用
   wordStartTime: number | null // 現在の単語の表示開始時刻
+  // 復習フェーズ関連
+  gamePhase: GamePhase // 現在のゲームフェーズ
+  reviewWords: Word[] // 復習対象の単語リスト
+  reviewRound: number // 復習ラウンド（何周目か）
 }
 
 export interface GameStats {
@@ -94,6 +103,9 @@ export interface GameStats {
   totalTime: number // 総時間（秒）
   // 初動統計
   avgReactionTime: number // 平均初動時間（ms）
+  // 復習ラウンド関連
+  reviewRoundLimitReached?: boolean // 復習ラウンド上限に達したか
+  unresolvedWordIds?: string[] // 未解決の単語ID（ラウンド上限で終了した場合）
   firstKeyAccuracy: number // 初動正確率（%）
   wordPerformances: WordPerformanceRecord[] // 単語ごとの詳細
 }

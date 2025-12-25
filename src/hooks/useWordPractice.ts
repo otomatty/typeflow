@@ -5,8 +5,11 @@ import {
   WordPracticePhase,
   WordPracticeStats,
   WordPracticeAttempt,
+  AppSettings,
 } from '@/lib/types'
+import { GameScoreRecord } from '@/lib/db'
 import { validateRomajiInput, getMatchingVariation, normalizeRomaji } from '@/lib/romaji-utils'
+import { calculateWordTimeLimit } from '@/lib/adaptive-time-utils'
 
 // 各フェーズの目標連続成功数
 const PHASE_TARGETS: Record<WordPracticePhase, number> = {
@@ -21,19 +24,24 @@ const SPEED_PHASE_INITIAL_TIME = 10
 // 速度フェーズの時間短縮率
 const SPEED_PHASE_TIME_REDUCTION = 0.9 // 成功ごとに10%短縮
 
-// マスターフェーズの時間制限（秒）
-const MASTERY_PHASE_TIME_LIMIT = 5
+// マスターフェーズの時間倍率（通常のゲームモードの制限時間に対して）
+// 連続5回成功する必要があるため、余裕を持たせる
+const MASTERY_PHASE_TIME_MULTIPLIER = 1.5 // 通常の1.5倍の時間を確保
 
 interface UseWordPracticeProps {
   onComplete?: (word: Word, stats: WordPracticeStats) => void
   updateWordStats?: (wordId: string, correct: boolean) => void
   onExit?: () => void
+  gameScores?: GameScoreRecord[]
+  settings?: AppSettings
 }
 
 export function useWordPractice({
   onComplete,
   updateWordStats,
   onExit,
+  gameScores = [],
+  settings,
 }: UseWordPracticeProps = {}) {
   const [state, setState] = useState<WordPracticeState>({
     word: null,
@@ -115,12 +123,28 @@ export function useWordPractice({
         return prev
       }
 
-      const timeLimit =
-        nextPhase === 'speed'
-          ? SPEED_PHASE_INITIAL_TIME
-          : nextPhase === 'mastery'
-            ? MASTERY_PHASE_TIME_LIMIT
-            : null
+      let timeLimit: number | null = null
+
+      if (nextPhase === 'speed') {
+        timeLimit = SPEED_PHASE_INITIAL_TIME
+      } else if (nextPhase === 'mastery') {
+        // マスターフェーズでは通常のゲームモードと同じロジックで制限時間を計算
+        // ただし、連続5回成功する必要があるため、時間に余裕を持たせる
+        if (prev.word && settings && gameScores) {
+          const baseTimeLimit = calculateWordTimeLimit(prev.word, gameScores, {
+            targetKpsMultiplier: settings.targetKpsMultiplier,
+            comfortZoneRatio: settings.comfortZoneRatio,
+            minTimeLimit: settings.minTimeLimit,
+            maxTimeLimit: settings.maxTimeLimit,
+            minTimeLimitByDifficulty: settings.minTimeLimitByDifficulty,
+          })
+          // マスターフェーズでは通常の1.5倍の時間を確保（連続5回成功のため）
+          timeLimit = Math.min(baseTimeLimit * MASTERY_PHASE_TIME_MULTIPLIER, settings.maxTimeLimit)
+        } else {
+          // フォールバック: 設定がない場合はデフォルト値を使用
+          timeLimit = 5
+        }
+      }
 
       return {
         ...prev,
@@ -134,7 +158,7 @@ export function useWordPractice({
         timeRemaining: timeLimit,
       }
     })
-  }, [])
+  }, [gameScores, settings])
 
   // 試行を完了（成功）
   const completeAttempt = useCallback(

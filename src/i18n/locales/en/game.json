@@ -35,5 +35,11 @@
   "miss_count_label": "misses",
   "start_practice": "Practice",
   "and_more_words": "and {{count}} more",
-  "practice_short": "Practice"
+  "practice_short": "Practice",
+  "reviewPhase": "Review",
+  "round": "Round",
+  "wordsRemaining": " words",
+  "review_limit_reached": "Review Round Limit Reached",
+  "review_limit_reached_desc": "The following words could not be completed even after 5 review rounds. We recommend practicing them in Word Practice mode.",
+  "start_word_practice": "Practice Word"
 }

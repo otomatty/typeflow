@@ -10,6 +10,15 @@ export function containsKanji(text: string): boolean {
 }
 
 /**
+ * Check if text is primarily English/ASCII (no Japanese characters).
+ */
+export function isEnglishText(text: string): boolean {
+  // Check if text contains any Japanese characters (hiragana, katakana, or kanji)
+  const hasJapanese = /[\u3040-\u309F\u30A0-\u30FF\u3400-\u4DBF\u4E00-\u9FAF]/.test(text)
+  return !hasJapanese
+}
+
+/**
  * Check if text contains hiragana.
  */
 export function containsHiragana(text: string): boolean {
