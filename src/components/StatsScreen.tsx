@@ -501,7 +501,11 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                           <stop offset="95%" stopColor="hsl(var(--chart-3))" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                      <CartesianGrid
+                        yAxisId="left"
+                        strokeDasharray="3 3"
+                        className="stroke-muted/30"
+                      />
                       <XAxis dataKey="game" tickLine={false} axisLine={false} className="text-xs" />
                       {/* Left Y-axis for KPS */}
                       <YAxis
@@ -889,7 +893,11 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                               <stop offset="95%" stopColor="hsl(var(--chart-4))" stopOpacity={0} />
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                          <CartesianGrid
+                            yAxisId="left"
+                            strokeDasharray="3 3"
+                            className="stroke-muted/30"
+                          />
                           <XAxis
                             dataKey="date"
                             tickLine={false}
