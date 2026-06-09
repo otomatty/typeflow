@@ -81,6 +81,37 @@ function formatTotalTime(ms: number, isJapanese: boolean): string {
   return `${seconds.toFixed(1)}s`
 }
 
+function SortButton({
+  sortKeyValue,
+  children,
+  sortKey,
+  sortDirection,
+  onSort,
+}: {
+  sortKeyValue: SortKey
+  children: React.ReactNode
+  sortKey: SortKey
+  sortDirection: SortDirection
+  onSort: (key: SortKey) => void
+}) {
+  return (
+    <button
+      onClick={() => onSort(sortKeyValue)}
+      className={`flex items-center gap-1 text-xs font-medium transition-colors hover:text-primary ${
+        sortKey === sortKeyValue ? 'text-primary' : 'text-muted-foreground'
+      }`}
+    >
+      {children}
+      {sortKey === sortKeyValue &&
+        (sortDirection === 'asc' ? (
+          <ChevronUp className="w-3 h-3" />
+        ) : (
+          <ChevronDown className="w-3 h-3" />
+        ))}
+    </button>
+  )
+}
+
 export function GameOverScreen({
   stats,
   hasMistakes,
@@ -175,29 +206,6 @@ export function GameOverScreen({
     }
   }
 
-  const SortButton = ({
-    sortKeyValue,
-    children,
-  }: {
-    sortKeyValue: SortKey
-    children: React.ReactNode
-  }) => (
-    <button
-      onClick={() => handleSort(sortKeyValue)}
-      className={`flex items-center gap-1 text-xs font-medium transition-colors hover:text-primary ${
-        sortKey === sortKeyValue ? 'text-primary' : 'text-muted-foreground'
-      }`}
-    >
-      {children}
-      {sortKey === sortKeyValue &&
-        (sortDirection === 'asc' ? (
-          <ChevronUp className="w-3 h-3" />
-        ) : (
-          <ChevronDown className="w-3 h-3" />
-        ))}
-    </button>
-  )
-
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -290,10 +298,38 @@ export function GameOverScreen({
                 <div className="border rounded-lg overflow-hidden">
                   {/* Table Header */}
                   <div className="grid grid-cols-[1fr_80px_80px_70px_60px_50px] gap-2 px-3 py-2 bg-muted/50 border-b text-xs">
-                    <SortButton sortKeyValue="order">{t('word')}</SortButton>
-                    <SortButton sortKeyValue="reactionTime">{t('reaction')}</SortButton>
-                    <SortButton sortKeyValue="totalTime">{t('time')}</SortButton>
-                    <SortButton sortKeyValue="missCount">{t('miss')}</SortButton>
+                    <SortButton
+                      sortKeyValue="order"
+                      sortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    >
+                      {t('word')}
+                    </SortButton>
+                    <SortButton
+                      sortKeyValue="reactionTime"
+                      sortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    >
+                      {t('reaction')}
+                    </SortButton>
+                    <SortButton
+                      sortKeyValue="totalTime"
+                      sortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    >
+                      {t('time')}
+                    </SortButton>
+                    <SortButton
+                      sortKeyValue="missCount"
+                      sortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    >
+                      {t('miss')}
+                    </SortButton>
                     <span className="text-muted-foreground font-medium">{t('first_key')}</span>
                     <span className="text-muted-foreground font-medium text-center">
                       {t('practice_short', { defaultValue: '練習' })}

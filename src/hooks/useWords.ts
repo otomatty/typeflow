@@ -53,7 +53,9 @@ export function useWords() {
 
   // 初回ロード
   useEffect(() => {
-    fetchWords()
+    void (async () => {
+      await fetchWords()
+    })()
   }, [fetchWords])
 
   const addWord = useCallback(

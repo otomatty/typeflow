@@ -244,7 +244,7 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
 
     const todayStats = dailyStats.find(d => d.date === today)
-    const yesterdayDate = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+    const yesterdayDate = new Date(now.getTime() - 86400000).toISOString().split('T')[0]
     const yesterdayStats = dailyStats.find(d => d.date === yesterdayDate)
 
     const weekStats = dailyStats.filter(d => new Date(d.date) >= thisWeekStart)

@@ -107,6 +107,8 @@ export function useGame({
   const retryStartMistakeWordsRef = useRef<string[]>([])
   // やり直しモード中に全ての単語を正解した場合、新しいゲームを開始するフラグ
   const shouldAutoStartNewGameRef = useRef<boolean>(false)
+  // 未解決の単語IDを保存するref（ラウンド上限で終了した場合）
+  const unresolvedWordIdsRef = useRef<string[]>([])
 
   const endGame = useCallback(
     (completed: boolean = false) => {
@@ -366,9 +368,6 @@ export function useGame({
   const REVIEW_TIME_BONUS_PER_ROUND = 0.05
   // 復習ラウンドの上限
   const MAX_REVIEW_ROUNDS = 5
-
-  // 未解決の単語IDを保存するref（ラウンド上限で終了した場合）
-  const unresolvedWordIdsRef = useRef<string[]>([])
 
   // 復習フェーズを開始
   const startReviewPhase = useCallback(

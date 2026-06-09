@@ -55,7 +55,7 @@ export function useTypingAnalytics() {
     recentResults: [],
     recentWordIds: [],
     sessionWordIds: new Set(),
-    startedAt: Date.now(),
+    startedAt: 0, // マウント時のeffectで実時刻を設定（レンダー中の不純な呼び出しを避ける）
   })
 
   // データを取得
@@ -80,6 +80,7 @@ export function useTypingAnalytics() {
 
   // Initialize stats and scores
   useEffect(() => {
+    sessionStateRef.current.startedAt = Date.now()
     async function init() {
       await Promise.all([fetchStats(), fetchGameScores()])
       setIsInitialized(true)

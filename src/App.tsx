@@ -237,17 +237,17 @@ function AppContent() {
     }
   }, [loadPreset, startGame, getPresetById])
 
-  // クイックスタートで読み込んだ単語のIDを記録
-  useEffect(() => {
-    if (isQuickStartMode && quickStartWordIds.size === 0) {
-      // クイックスタートで読み込んだ単語は最初の5語と仮定
-      // （実際にはloadPresetで読み込まれた単語を記録する）
-      const loadedWords = words.slice(0, 5)
-      if (loadedWords.length > 0) {
-        setQuickStartWordIds(new Set(loadedWords.map(w => w.id)))
-      }
+  // クイックスタートで読み込んだ単語のIDを記録する。
+  // effect 内の setState ではなく、条件を満たした時点でレンダー中に一度だけ記録する
+  // （quickStartWordIds.size が 0 のときのみ実行されるため再レンダーは収束する）。
+  if (isQuickStartMode && quickStartWordIds.size === 0 && words.length > 0) {
+    // クイックスタートで読み込んだ単語は最初の5語と仮定
+    // （実際にはloadPresetで読み込まれた単語を記録する）
+    const loadedWords = words.slice(0, 5)
+    if (loadedWords.length > 0) {
+      setQuickStartWordIds(new Set(loadedWords.map(w => w.id)))
     }
-  }, [isQuickStartMode, words, quickStartWordIds.size])
+  }
 
   // クイックスタートで使用した単語を削除
   const cleanupQuickStartWords = useCallback(async () => {

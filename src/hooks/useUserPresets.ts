@@ -134,7 +134,9 @@ export function useUserPresets() {
 
   // 初回マウント時にプリセットを取得
   useEffect(() => {
-    fetchPresets()
+    void (async () => {
+      await fetchPresets()
+    })()
   }, [fetchPresets])
 
   return {

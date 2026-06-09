@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -52,33 +52,42 @@ export function AddWordDialog({
 
   const isEditMode = !!editingWord
 
-  // 編集モードの場合、初期値を設定
-  useEffect(() => {
-    if (editingWord && open) {
+  // 編集モードでダイアログを開いたとき、対象の単語をフォームに読み込む。
+  // effect 内の setState ではなく、レンダー中に適用済みキーを追跡して同期する
+  // （open の開閉や編集対象の切り替えに追従しつつ、不要な再レンダーを避ける）。
+  const editKey = open && editingWord ? editingWord.id : null
+  const [appliedEditKey, setAppliedEditKey] = useState(editKey)
+  if (editKey !== appliedEditKey) {
+    setAppliedEditKey(editKey)
+    if (open && editingWord) {
       setText(editingWord.text)
       setReading(editingWord.reading)
       setRomaji(editingWord.romaji)
       setNeedsManualReading(containsKanji(editingWord.text))
     }
-  }, [editingWord, open])
+  }
 
-  // Process text when it changes
-  useEffect(() => {
-    if (!text.trim()) {
+  // 本文の変更時に読み・ローマ字・手動読みフラグを導出する（旧 effect の派生処理をイベント側へ移動）。
+  const handleTextChange = (value: string) => {
+    setText(value)
+
+    if (!value.trim()) {
       setReading('')
       setRomaji('')
       setNeedsManualReading(false)
       return
     }
 
-    const result = processTextForTyping(text)
+    const result = processTextForTyping(value)
 
     if (result.needsManualReading) {
       setNeedsManualReading(true)
-      // Don't overwrite if user has already entered reading
-      if (!reading) {
+      if (reading) {
+        // 既に読みが入力済みなら、新しい本文 + 既存の読みでローマ字を再計算
+        setRomaji(processTextForTyping(value, reading).romaji)
+      } else {
+        // 読み未入力の漢字の場合は読み・ローマ字をクリア
         setReading('')
-        // For kanji without reading, set romaji to text itself (for display)
         setRomaji('')
       }
     } else {
@@ -86,18 +95,6 @@ export function AddWordDialog({
       setReading(result.reading)
       setRomaji(result.romaji)
     }
-  }, [text])
-
-  // Update romaji when reading changes (for manual input)
-  useEffect(() => {
-    if (reading && needsManualReading) {
-      const result = processTextForTyping(text, reading)
-      setRomaji(result.romaji)
-    }
-  }, [reading, needsManualReading, text])
-
-  const handleTextChange = (value: string) => {
-    setText(value)
   }
 
   const handleReadingChange = (value: string) => {
