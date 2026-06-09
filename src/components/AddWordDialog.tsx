@@ -55,8 +55,10 @@ export function AddWordDialog({
   // 編集モードでダイアログを開いたとき、対象の単語をフォームに読み込む。
   // effect 内の setState ではなく、レンダー中に適用済みキーを追跡して同期する
   // （open の開閉や編集対象の切り替えに追従しつつ、不要な再レンダーを避ける）。
+  // appliedEditKey は editKey と区別できるセンチネル(undefined)で初期化し、
+  // 「最初から open かつ editingWord あり」でマウントされた場合も初回ハイドレーションされるようにする。
   const editKey = open && editingWord ? editingWord.id : null
-  const [appliedEditKey, setAppliedEditKey] = useState(editKey)
+  const [appliedEditKey, setAppliedEditKey] = useState<string | null | undefined>(undefined)
   if (editKey !== appliedEditKey) {
     setAppliedEditKey(editKey)
     if (open && editingWord) {
@@ -64,6 +66,12 @@ export function AddWordDialog({
       setReading(editingWord.reading)
       setRomaji(editingWord.romaji)
       setNeedsManualReading(containsKanji(editingWord.text))
+    } else {
+      // 追加モードへの切り替え、またはダイアログを閉じたときはフォームをリセットする
+      setText('')
+      setReading('')
+      setRomaji('')
+      setNeedsManualReading(false)
     }
   }
 
