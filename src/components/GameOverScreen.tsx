@@ -94,15 +94,22 @@ function SortButton({
   sortDirection: SortDirection
   onSort: (key: SortKey) => void
 }) {
+  const isActive = sortKey === sortKeyValue
   return (
     <button
       onClick={() => onSort(sortKeyValue)}
+      aria-pressed={isActive}
+      aria-label={
+        isActive
+          ? `${String(children)}: ${sortDirection === 'asc' ? 'ascending' : 'descending'}`
+          : `${String(children)}: not sorted`
+      }
       className={`flex items-center gap-1 text-xs font-medium transition-colors hover:text-primary ${
-        sortKey === sortKeyValue ? 'text-primary' : 'text-muted-foreground'
+        isActive ? 'text-primary' : 'text-muted-foreground'
       }`}
     >
       {children}
-      {sortKey === sortKeyValue &&
+      {isActive &&
         (sortDirection === 'asc' ? (
           <ChevronUp className="w-3 h-3" />
         ) : (

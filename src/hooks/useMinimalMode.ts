@@ -18,7 +18,10 @@ function getWindowWidth(): number {
  * これにより effect 内での同期 setState を避けつつ、props 変更とリサイズの双方に追従する。
  */
 export function useMinimalMode(minimalMode: MinimalModeType, breakpoint: number = 600): boolean {
-  const width = useSyncExternalStore(subscribeToResize, getWindowWidth, getWindowWidth)
+  // サーバスナップショット（第3引数）は window 非依存にして、テスト/プリレンダー/将来のSSRなど
+  // window が無い環境でも安全に評価できるようにする。breakpoint より大きい値を返すことで
+  // 'auto' 時のサーバ側デフォルトは「非ミニマル」になる。
+  const width = useSyncExternalStore(subscribeToResize, getWindowWidth, () => breakpoint + 1)
 
   // 'always' の場合は常にミニマル
   if (minimalMode === 'always') return true
