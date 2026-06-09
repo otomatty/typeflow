@@ -113,8 +113,11 @@ export function useWordPractice({
   }, [state.word, stats, onComplete])
 
   // 次のフェーズに進む
-  const advanceToNextPhase = useCallback(() => {
-    setState(prev => {
+  // 次のフェーズに進んだ状態を計算する純粋なロジック。
+  // 目標達成時に completeAttempt の状態更新内で直接使用することで、
+  // 旧来の「effect 内 setState でフェーズを進める」パターンを排除する。
+  const computeAdvancedPhaseState = useCallback(
+    (prev: WordPracticeState): WordPracticeState => {
       const nextPhase: WordPracticePhase =
         prev.phase === 'accuracy' ? 'speed' : prev.phase === 'speed' ? 'mastery' : 'mastery'
 
@@ -157,8 +160,9 @@ export function useWordPractice({
         timeLimit,
         timeRemaining: timeLimit,
       }
-    })
-  }, [gameScores, settings])
+    },
+    [gameScores, settings]
+  )
 
   // 試行を完了（成功）
   const completeAttempt = useCallback(
@@ -206,10 +210,9 @@ export function useWordPractice({
               isActive: false, // 完了
             }
           }
-          // 次のフェーズに進む準備
+          // 次のフェーズに進む（旧 effect での setState を completeAttempt 内に統合）
           return {
-            ...prev,
-            consecutiveSuccess: newConsecutive,
+            ...computeAdvancedPhaseState(prev),
             attemptCount: prev.attemptCount + 1,
           }
         }
@@ -232,7 +235,7 @@ export function useWordPractice({
         }
       })
     },
-    [state.word, updateWordStats]
+    [state.word, updateWordStats, computeAdvancedPhaseState]
   )
 
   // 試行を失敗（ミスまたはタイムアウト）
@@ -355,23 +358,6 @@ export function useWordPractice({
     [state, endPractice, failAttempt, completeAttempt]
   )
 
-  // フェーズ進行のチェック
-  useEffect(() => {
-    if (
-      state.isActive &&
-      state.consecutiveSuccess >= state.targetConsecutive &&
-      state.phase !== 'mastery'
-    ) {
-      advanceToNextPhase()
-    }
-  }, [
-    state.consecutiveSuccess,
-    state.targetConsecutive,
-    state.phase,
-    state.isActive,
-    advanceToNextPhase,
-  ])
-
   // マスターフェーズ完了時にコールバックを呼ぶ
   useEffect(() => {
     if (
@@ -417,8 +403,13 @@ export function useWordPractice({
   }, [state.isActive, state.timeLimit !== null])
 
   // タイムアウトチェック
+  // 残り時間が 0 以下になったことを検知して失敗扱いにする、タイマー駆動の状態遷移。
+  // カウントダウン（上のタイマー effect）の微妙な境界挙動に依存しているため、
+  // イベント側へ移すと休眠中のタイムアウトを誤って有効化するなどの回帰リスクが高い。
+  // ここでは現挙動を厳密に保持するため、本ルールのみ意図的に無効化する。
   useEffect(() => {
     if (state.isActive && state.timeRemaining !== null && state.timeRemaining <= 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       failAttempt(true)
     }
   }, [state.timeRemaining, state.isActive, failAttempt])

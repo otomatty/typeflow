@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useUser } from '@clerk/clerk-react'
 import { Header } from '@/components/Header'
 import { Button } from '@/components/ui/button'
@@ -20,12 +20,14 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
   const [name, setName] = useState('')
   const [isUpdating, setIsUpdating] = useState(false)
 
-  // ユーザー情報が読み込まれたら名前を設定
-  useEffect(() => {
-    if (user) {
-      setName(user.fullName || user.firstName || '')
-    }
-  }, [user])
+  // ユーザー情報が読み込まれたら名前を初期化する。
+  // effect 内の setState ではなく、レンダー中に前回の user id を追跡して同期することで、
+  // 不要な再レンダーを避けつつ、ユーザーが編集した名前を user オブジェクトの更新で失わないようにする。
+  const [syncedUserId, setSyncedUserId] = useState<string | undefined>(undefined)
+  if (user && user.id !== syncedUserId) {
+    setSyncedUserId(user.id)
+    setName(user.fullName || user.firstName || '')
+  }
 
   if (!isLoaded || !user) {
     return (

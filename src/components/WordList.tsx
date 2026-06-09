@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
@@ -127,10 +127,13 @@ export function WordList({
     setCurrentPage(1)
   }
 
-  // Reset to page 1 when search query changes
-  useEffect(() => {
+  // 検索クエリが変わったらページを1に戻す。
+  // effect 内の setState ではなく、レンダー中に前回値と比較して同期する。
+  const [prevSearchQuery, setPrevSearchQuery] = useState(searchQuery)
+  if (searchQuery !== prevSearchQuery) {
+    setPrevSearchQuery(searchQuery)
     setCurrentPage(1)
-  }, [searchQuery])
+  }
 
   if (words.length === 0) {
     return (
