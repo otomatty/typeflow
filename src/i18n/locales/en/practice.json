@@ -22,5 +22,13 @@
   "phase2_title": "Phase 2 - Speed",
   "phase2_description": "Type within time limit",
   "phase3_title": "Phase 3 - Mastery",
-  "phase3_description": "Consistently type under strict time limit"
+  "phase3_description": "Consistently type under strict time limit",
+  "phase1_label": "Phase 1",
+  "phase1_name": "Accuracy",
+  "phase2_label": "Phase 2",
+  "phase2_name": "Speed",
+  "phase3_label": "Phase 3",
+  "phase3_name": "Mastery",
+  "attempt_success": "Success",
+  "attempt_fail": "Failure"
 }

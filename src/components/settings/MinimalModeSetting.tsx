@@ -21,7 +21,7 @@ export function MinimalModeSetting({
       <Card className="p-6">
         <div className="space-y-4">
           <div>
-            <Label className="text-base font-semibold">{t('minimal_mode.title')}</Label>
+            <h2 className="text-base font-semibold">{t('minimal_mode.title')}</h2>
             <p className="text-sm text-muted-foreground mt-1">{t('minimal_mode.description')}</p>
           </div>
 
@@ -32,6 +32,7 @@ export function MinimalModeSetting({
                 <button
                   key={option.value}
                   onClick={() => onMinimalModeChange(option.value)}
+                  aria-pressed={minimalMode === option.value}
                   className={cn(
                     'relative p-4 rounded-lg border text-left transition-all',
                     'hover:bg-secondary/80',
@@ -41,12 +42,15 @@ export function MinimalModeSetting({
                   )}
                 >
                   <div className="flex items-center gap-2">
-                    <Icon className="w-4 h-4 text-muted-foreground" />
+                    <Icon className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
                     <span className="font-medium">{t(option.labelKey)}</span>
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">{t(option.descKey)}</div>
                   {minimalMode === option.value && (
-                    <Check className="absolute top-2 right-2 w-5 h-5 text-primary" />
+                    <Check
+                      className="absolute top-2 right-2 w-5 h-5 text-primary"
+                      aria-hidden="true"
+                    />
                   )}
                 </button>
               )

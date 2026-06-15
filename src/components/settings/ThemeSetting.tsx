@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SettingSection } from './SettingSection'
@@ -15,7 +14,7 @@ export function ThemeSetting({ theme, onThemeChange }: ThemeSettingProps) {
       <Card className="p-6">
         <div className="space-y-4">
           <div>
-            <Label className="text-base font-semibold">{t('theme.title')}</Label>
+            <h2 className="text-base font-semibold">{t('theme.title')}</h2>
             <p className="text-sm text-muted-foreground mt-1">{t('theme.description')}</p>
           </div>
 
@@ -24,6 +23,7 @@ export function ThemeSetting({ theme, onThemeChange }: ThemeSettingProps) {
               <button
                 key={option.value}
                 onClick={() => onThemeChange(option.value)}
+                aria-pressed={theme === option.value}
                 className={cn(
                   'relative p-4 rounded-lg border text-left transition-all',
                   'hover:bg-secondary/80',
@@ -35,7 +35,10 @@ export function ThemeSetting({ theme, onThemeChange }: ThemeSettingProps) {
                 <div className="font-medium">{t(option.labelKey)}</div>
                 <div className="text-xs text-muted-foreground mt-1">{t(option.descKey)}</div>
                 {theme === option.value && (
-                  <Check className="absolute top-2 right-2 w-5 h-5 text-primary" />
+                  <Check
+                    className="absolute top-2 right-2 w-5 h-5 text-primary"
+                    aria-hidden="true"
+                  />
                 )}
               </button>
             ))}

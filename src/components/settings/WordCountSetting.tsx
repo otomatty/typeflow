@@ -34,7 +34,7 @@ export function WordCountSetting({ wordCount, onWordCountChange }: WordCountSett
       <Card className="p-6">
         <div className="space-y-6">
           <div>
-            <Label className="text-base font-semibold">{t('word_count.title')}</Label>
+            <h2 className="text-base font-semibold">{t('word_count.title')}</h2>
             <p className="text-sm text-muted-foreground mt-1">{t('word_count.description')}</p>
           </div>
 
