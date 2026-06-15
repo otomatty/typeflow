@@ -261,6 +261,9 @@ app.post('/api/words/bulk', async c => {
     if (body.words.length > MAX_BULK_WORDS) {
       return c.json({ error: `Too many words (max ${MAX_BULK_WORDS})` }, 400)
     }
+    if (body.words.some(w => !w?.text || !w?.romaji)) {
+      return c.json({ error: 'Each word must have text and romaji' }, 400)
+    }
     const insertedCount = await bulkInsertWords(
       c.env.DB,
       body.words,
@@ -289,6 +292,9 @@ app.post('/api/words/bulk-with-stats', async c => {
     }
     if (body.words.length > MAX_BULK_WORDS) {
       return c.json({ error: `Too many words (max ${MAX_BULK_WORDS})` }, 400)
+    }
+    if (body.words.some(w => !w?.text || !w?.romaji)) {
+      return c.json({ error: 'Each word must have text and romaji' }, 400)
     }
     const insertedCount = await bulkInsertWordsWithStats(
       c.env.DB,

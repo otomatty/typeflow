@@ -49,6 +49,9 @@ export function AddWordDialog({
   const [reading, setReading] = useState('')
   const [romaji, setRomaji] = useState('')
   const [needsManualReading, setNeedsManualReading] = useState(false)
+  // 読み欄に触れた（blur した / 送信を試みた）かどうか。
+  // 漢字入力直後に即エラーを出さず、blur 後にのみ表示するために使う。
+  const [readingTouched, setReadingTouched] = useState(false)
 
   const isEditMode = !!editingWord
 
@@ -61,6 +64,7 @@ export function AddWordDialog({
   const [appliedEditKey, setAppliedEditKey] = useState<string | null | undefined>(undefined)
   if (editKey !== appliedEditKey) {
     setAppliedEditKey(editKey)
+    setReadingTouched(false)
     if (open && editingWord) {
       setText(editingWord.text)
       setReading(editingWord.reading)
@@ -115,6 +119,12 @@ export function AddWordDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    // 送信を試みた時点でエラー表示を解禁する
+    if (missingRequiredReading) {
+      setReadingTouched(true)
+      return
+    }
+
     if (!text.trim()) return
 
     const trimmedText = text.trim()
@@ -156,11 +166,15 @@ export function AddWordDialog({
     setReading('')
     setRomaji('')
     setNeedsManualReading(false)
+    setReadingTouched(false)
     setOpen(false)
   }
 
   // 漢字を含む場合は読みの入力を必須とする（正確なローマ字生成のため）
   const missingRequiredReading = needsManualReading && !reading.trim()
+  // エラーの「表示」は読み欄に触れた後のみ（入力直後のストレスを避ける）。
+  // 送信可否(isValid)とは分離する。
+  const showReadingError = missingRequiredReading && readingTouched
   const isValid = text.trim().length > 0 && !missingRequiredReading
 
   return (
@@ -195,11 +209,11 @@ export function AddWordDialog({
               {needsManualReading && (
                 <span
                   className={`text-xs flex items-center gap-1 ${
-                    missingRequiredReading ? 'text-destructive' : 'text-blue-500'
+                    showReadingError ? 'text-destructive' : 'text-blue-500'
                   }`}
                 >
                   <Info className="w-3 h-3" aria-hidden="true" />
-                  {missingRequiredReading
+                  {showReadingError
                     ? t('dialog.reading_required')
                     : t('dialog.reading_recommended')}
                 </span>
@@ -209,15 +223,16 @@ export function AddWordDialog({
               id="reading"
               value={reading}
               onChange={e => handleReadingChange(e.target.value)}
+              onBlur={() => setReadingTouched(true)}
               placeholder={
                 needsManualReading
                   ? t('dialog.reading_placeholder_manual')
                   : t('dialog.reading_placeholder_auto')
               }
-              aria-invalid={missingRequiredReading}
-              aria-describedby={missingRequiredReading ? 'reading-error' : undefined}
+              aria-invalid={showReadingError}
+              aria-describedby={showReadingError ? 'reading-error' : undefined}
             />
-            {missingRequiredReading ? (
+            {showReadingError ? (
               <p id="reading-error" className="text-xs text-destructive">
                 {t('dialog.reading_error')}
               </p>

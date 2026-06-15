@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, lazy, Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import { SignedIn, SignedOut, AuthenticateWithRedirectCallback } from '@clerk/clerk-react'
 import { Toaster } from '@/components/ui/sonner'
 import { Header } from '@/components/Header'
@@ -65,6 +66,7 @@ function App() {
 }
 
 function AppContent() {
+  const { t: tCommon } = useTranslation('common')
   const {
     words,
     addWord,
@@ -463,7 +465,11 @@ function AppContent() {
           showTrigger={false}
         />
         <Header currentView={view} onNavigate={handleNavigate} />
-        <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading…</div>}>
+        <Suspense
+          fallback={
+            <div className="p-8 text-center text-muted-foreground">{tCommon('loading')}</div>
+          }
+        >
           <StatsScreen
             keyStats={aggregatedStats?.keyStats ?? {}}
             transitionStats={aggregatedStats?.transitionStats ?? {}}
