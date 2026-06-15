@@ -14,6 +14,12 @@
   "yes": "はい",
   "no": "いいえ",
   "language": "言語",
+  "errorBoundary": {
+    "title": "TypeFlow で予期しないエラーが発生しました",
+    "description": "アプリの実行中に問題が発生しました。エラーの詳細を以下に表示します。もう一度お試しください。問題が続く場合はご報告ください。",
+    "detailsLabel": "エラーの詳細:",
+    "retry": "もう一度試す"
+  },
   "header": {
     "home": "ホーム",
     "words": "単語",

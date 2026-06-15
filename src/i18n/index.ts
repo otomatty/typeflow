@@ -58,4 +58,17 @@ i18n
     },
   })
 
+// H1: <html lang> を言語切替に合わせて更新する
+const updateDocumentLang = (lng?: string) => {
+  if (typeof document !== 'undefined' && lng) {
+    document.documentElement.lang = lng
+  }
+}
+
+// 初期化直後に現在の言語を反映
+updateDocumentLang(i18n.resolvedLanguage ?? i18n.language)
+
+// 言語切替イベントを購読
+i18n.on('languageChanged', updateDocumentLang)
+
 export default i18n

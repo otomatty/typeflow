@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { GameStats, DifficultyPreset } from '@/lib/types'
 
@@ -28,6 +29,11 @@ export function MinimalGameOverScreen({
 }: MinimalGameOverScreenProps) {
   const { t, i18n } = useTranslation('game')
   const isJapanese = i18n.language?.startsWith('ja') ?? false
+  const headingRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    headingRef.current?.focus()
+  }, [])
 
   // 時間をフォーマット
   const formatTime = (ms: number): string => {
@@ -39,12 +45,22 @@ export function MinimalGameOverScreen({
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background p-4 font-mono">
+    <div
+      className="min-h-screen flex flex-col bg-background p-4 font-mono"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="minimal-game-over-title"
+    >
       {/* メインコンテンツ（中央配置） */}
       <div className="flex-1 flex items-center justify-center">
         <div className="w-full max-w-md space-y-4">
           {/* タイトル（コメント風） */}
-          <div className="text-muted-foreground/40 text-xs">
+          <div
+            id="minimal-game-over-title"
+            ref={headingRef}
+            tabIndex={-1}
+            className="text-muted-foreground/40 text-xs outline-none"
+          >
             // {isQuickStartMode ? t('skill_check_complete') : t('game_over')}
           </div>
 

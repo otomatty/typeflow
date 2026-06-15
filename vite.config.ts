@@ -41,6 +41,17 @@ export default defineConfig(() => {
       sourcemap: false,
       // Tauriでは特定のターゲットを指定
       target: isTauri ? ['es2021', 'chrome100', 'safari13'] : 'esnext',
+      rollupOptions: {
+        output: {
+          // 重いベンダーを分割して初回ロードとキャッシュ効率を改善
+          manualChunks: {
+            react: ['react', 'react-dom'],
+            charts: ['recharts'],
+            motion: ['framer-motion'],
+            clerk: ['@clerk/clerk-react'],
+          },
+        },
+      },
     },
   }
 })

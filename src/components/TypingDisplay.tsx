@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { Word } from '@/lib/types'
@@ -8,7 +9,13 @@ interface TypingDisplayProps {
   showError: boolean
 }
 
-export function TypingDisplay({ word, currentInput, showError }: TypingDisplayProps) {
+// memo 化により、タイマーの100ms更新では再レンダリングせず、
+// 入力や単語が変わったときだけ更新する。
+export const TypingDisplay = memo(function TypingDisplay({
+  word,
+  currentInput,
+  showError,
+}: TypingDisplayProps) {
   const { t } = useTranslation('game')
 
   // 練習回数を計算
@@ -22,15 +29,24 @@ export function TypingDisplay({ word, currentInput, showError }: TypingDisplayPr
       transition={{ duration: 0.2 }}
       className="flex flex-col items-center justify-center gap-2 p-4"
     >
-      <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-center tracking-tight">
-        {word.text}
-      </div>
+      <div
+        role="status"
+        aria-live="polite"
+        aria-label={t('a11y.current_word', { word: word.text, reading: word.reading })}
+      >
+        <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-center tracking-tight">
+          {word.text}
+        </div>
 
-      <div className="text-sm sm:text-base text-muted-foreground text-center">{word.reading}</div>
+        <div className="text-sm sm:text-base text-muted-foreground text-center">{word.reading}</div>
+      </div>
 
       <div className="text-base sm:text-lg md:text-xl font-medium tracking-wider mt-2">
         <span className="text-primary">{currentInput}</span>
-        <span className="inline-block w-0.5 h-4 bg-primary animate-pulse mx-0.5 align-middle" />
+        <span
+          aria-hidden="true"
+          className="inline-block w-0.5 h-4 bg-primary motion-safe:animate-pulse mx-0.5 align-middle"
+        />
       </div>
 
       {/* 単語の過去統計（正確率・練習回数） */}
@@ -61,6 +77,7 @@ export function TypingDisplay({ word, currentInput, showError }: TypingDisplayPr
 
       {showError && (
         <motion.div
+          aria-hidden="true"
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.3 }}
           exit={{ opacity: 0 }}
@@ -70,4 +87,4 @@ export function TypingDisplay({ word, currentInput, showError }: TypingDisplayPr
       )}
     </motion.div>
   )
-}
+})

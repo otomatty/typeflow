@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
@@ -74,6 +75,7 @@ export function PresetScreen({
       const preset = await getPresetById(presetId)
       if (!preset) {
         console.error(`Preset not found: ${presetId}`)
+        toast.error(t('preset_toast.load_error'))
         return
       }
 
@@ -84,6 +86,7 @@ export function PresetScreen({
           clearExisting: isAfterQuickStart ? true : false,
           presetName: preset.name,
         })
+        toast.success(t('preset_toast.load_success', { name: preset.name }))
         // プリセット読み込み後、メニューに戻る
         onNavigate('menu')
       } finally {
@@ -91,6 +94,7 @@ export function PresetScreen({
       }
     } catch (error) {
       console.error('Failed to load preset:', error)
+      toast.error(t('preset_toast.load_error'))
       setLoadingPresetId(null)
     }
   }
@@ -100,6 +104,7 @@ export function PresetScreen({
       const preset = await getUserPresetById(presetId)
       if (!preset) {
         console.error(`User preset not found: ${presetId}`)
+        toast.error(t('preset_toast.load_error'))
         return
       }
 
@@ -111,12 +116,14 @@ export function PresetScreen({
           clearExisting: isAfterQuickStart ? true : false,
           presetName: preset.name,
         })
+        toast.success(t('preset_toast.load_success', { name: preset.name }))
         onNavigate('menu')
       } finally {
         setLoadingPresetId(null)
       }
     } catch (error) {
       console.error('Failed to load user preset:', error)
+      toast.error(t('preset_toast.load_error'))
       setLoadingPresetId(null)
     }
   }
@@ -126,6 +133,10 @@ export function PresetScreen({
     try {
       await removePreset(presetId)
       setDeleteDialogOpen(false)
+      toast.success(t('preset_toast.delete_success'))
+    } catch (error) {
+      console.error('Failed to delete preset:', error)
+      toast.error(t('preset_toast.delete_error'))
     } finally {
       setDeletingPresetId(null)
     }
@@ -255,9 +266,10 @@ export function PresetScreen({
                           setDeleteDialogOpen(true)
                         }}
                         disabled={deletingPresetId !== null}
+                        aria-label={t('preset_toast.delete_preset_label', { name: preset.name })}
                         className="gap-2"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
                       </Button>
                     </div>
                   </div>
@@ -285,8 +297,8 @@ export function PresetScreen({
         )}
         <div className="space-y-4">
           {presetsLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <div className="flex items-center justify-center py-12" role="status">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
               <span className="ml-3 text-muted-foreground">
                 {t('loading', { defaultValue: '読み込み中...' })}
               </span>

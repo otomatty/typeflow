@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, lazy, Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import { SignedIn, SignedOut, AuthenticateWithRedirectCallback } from '@clerk/clerk-react'
 import { Toaster } from '@/components/ui/sonner'
 import { Header } from '@/components/Header'
@@ -6,7 +7,10 @@ import { MenuScreen } from '@/components/MenuScreen'
 import { GameScreen } from '@/components/GameScreen'
 import { GameOverScreen } from '@/components/GameOverScreen'
 import { WordManagementScreen } from '@/components/WordManagementScreen'
-import { StatsScreen } from '@/components/StatsScreen'
+// StatsScreen は recharts(d3) を含み重いため遅延ロードする
+const StatsScreen = lazy(() =>
+  import('@/components/StatsScreen').then(m => ({ default: m.StatsScreen }))
+)
 import { SettingsScreen } from '@/components/SettingsScreen'
 import { PresetScreen } from '@/components/PresetScreen'
 import { ProfileScreen } from '@/components/ProfileScreen'
@@ -49,6 +53,8 @@ function App() {
 
   return (
     <>
+      {/* Toaster はアプリ全体で 1 つだけマウントする（重複による通知の競合を防ぐ） */}
+      <Toaster />
       <SignedOut>
         <AuthScreen />
       </SignedOut>
@@ -60,6 +66,7 @@ function App() {
 }
 
 function AppContent() {
+  const { t: tCommon } = useTranslation('common')
   const {
     words,
     addWord,
@@ -360,7 +367,6 @@ function AppContent() {
   if (view === 'gameover') {
     return (
       <>
-        <Toaster />
         <AddWordDialog
           onAddWord={addWord}
           open={isAddWordDialogOpen}
@@ -398,7 +404,6 @@ function AppContent() {
 
     return (
       <>
-        <Toaster />
         <GameScreen
           currentWord={currentWord}
           gameState={gameState}
@@ -414,7 +419,6 @@ function AppContent() {
   if (view === 'word-practice' && practiceWord) {
     return (
       <>
-        <Toaster />
         <WordPracticeScreen
           word={practiceWord}
           onExit={handleExitWordPractice}
@@ -429,7 +433,6 @@ function AppContent() {
   if (view === 'words') {
     return (
       <>
-        <Toaster />
         <AddWordDialog
           onAddWord={addWord}
           open={isAddWordDialogOpen}
@@ -455,7 +458,6 @@ function AppContent() {
   if (view === 'stats') {
     return (
       <>
-        <Toaster />
         <AddWordDialog
           onAddWord={addWord}
           open={isAddWordDialogOpen}
@@ -463,12 +465,18 @@ function AppContent() {
           showTrigger={false}
         />
         <Header currentView={view} onNavigate={handleNavigate} />
-        <StatsScreen
-          keyStats={aggregatedStats?.keyStats ?? {}}
-          transitionStats={aggregatedStats?.transitionStats ?? {}}
-          gameScores={gameScores}
-          onReset={resetStats}
-        />
+        <Suspense
+          fallback={
+            <div className="p-8 text-center text-muted-foreground">{tCommon('loading')}</div>
+          }
+        >
+          <StatsScreen
+            keyStats={aggregatedStats?.keyStats ?? {}}
+            transitionStats={aggregatedStats?.transitionStats ?? {}}
+            gameScores={gameScores}
+            onReset={resetStats}
+          />
+        </Suspense>
       </>
     )
   }
@@ -476,7 +484,6 @@ function AppContent() {
   if (view === 'presets') {
     return (
       <>
-        <Toaster />
         <AddWordDialog
           onAddWord={addWord}
           open={isAddWordDialogOpen}
@@ -498,7 +505,6 @@ function AppContent() {
   if (view === 'profile') {
     return (
       <>
-        <Toaster />
         <AddWordDialog
           onAddWord={addWord}
           open={isAddWordDialogOpen}
@@ -513,7 +519,6 @@ function AppContent() {
   if (view === 'settings') {
     return (
       <>
-        <Toaster />
         <AddWordDialog
           onAddWord={addWord}
           open={isAddWordDialogOpen}
@@ -567,7 +572,6 @@ function AppContent() {
 
   return (
     <>
-      <Toaster />
       <AddWordDialog
         onAddWord={addWord}
         open={isAddWordDialogOpen}

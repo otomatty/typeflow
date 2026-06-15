@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
 import { Check, Flame } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SettingSection } from './SettingSection'
@@ -21,8 +20,8 @@ export function DifficultyPresetSetting({
         <div className="space-y-6">
           <div>
             <div className="flex items-center gap-2">
-              <Flame className="w-5 h-5 text-primary" />
-              <Label className="text-base font-semibold">{t('difficulty.title')}</Label>
+              <Flame className="w-5 h-5 text-primary" aria-hidden="true" />
+              <h2 className="text-base font-semibold">{t('difficulty.title')}</h2>
             </div>
             <p className="text-sm text-muted-foreground mt-1">{t('difficulty.description')}</p>
           </div>
@@ -34,6 +33,7 @@ export function DifficultyPresetSetting({
                 <button
                   key={option.value}
                   onClick={() => onDifficultyPresetChange(option.value)}
+                  aria-pressed={difficultyPreset === option.value}
                   className={cn(
                     'relative p-4 rounded-lg border text-left transition-all',
                     'hover:bg-secondary/80',
@@ -43,11 +43,14 @@ export function DifficultyPresetSetting({
                   )}
                 >
                   <div className="flex items-center gap-2">
-                    <Icon className={cn('w-5 h-5', option.color)} />
+                    <Icon className={cn('w-5 h-5', option.color)} aria-hidden="true" />
                     <span className="font-medium text-sm">{t(option.labelKey)}</span>
                   </div>
                   {difficultyPreset === option.value && (
-                    <Check className="absolute top-2 right-2 w-4 h-4 text-primary" />
+                    <Check
+                      className="absolute top-2 right-2 w-4 h-4 text-primary"
+                      aria-hidden="true"
+                    />
                   )}
                 </button>
               )

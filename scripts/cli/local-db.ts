@@ -46,7 +46,9 @@ export class LocalDBClient {
    */
   async getSettings(): Promise<CLISettings | null> {
     try {
-      const result = await this.client.execute('SELECT * FROM settings WHERE id = 1')
+      // settings は user_id をキーにした 1ユーザー1行構造（migration 0007）。
+      // CLI はユーザーの概念を持たないため、存在する最初の行を読む。
+      const result = await this.client.execute('SELECT * FROM settings LIMIT 1')
       if (result.rows.length === 0) return null
 
       const row = result.rows[0]

@@ -10,7 +10,13 @@ function createTursoClient(): ReturnType<typeof createClient> {
   const authToken = process.env.TURSO_AUTH_TOKEN
 
   // 環境変数が設定されていない場合、ローカルDBをデフォルトで使用
+  // ただし本番環境では設定漏れを無認証ローカルDBへ静かにフォールバックさせない
   if (!url) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'TURSO_DATABASE_URL is required in production (refusing to fall back to local database)'
+      )
+    }
     const localPath = process.env.TURSO_LOCAL_DB_PATH || './local.db'
     url = `file:${localPath}`
     console.log(`ℹ️  TURSO_DATABASE_URL not set, using local database: ${url}`)
@@ -57,6 +63,9 @@ serverApp.use('/*', async (c, next) => {
     ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
     TURSO_DATABASE_URL: process.env.TURSO_DATABASE_URL,
     TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN,
+    CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
+    CLERK_AUTHORIZED_PARTIES: process.env.CLERK_AUTHORIZED_PARTIES,
+    NODE_ENV: process.env.NODE_ENV,
   } as Env
 
   await next()

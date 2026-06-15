@@ -8,7 +8,6 @@
         "@clerk/backend": "^1.0.0",
         "@clerk/clerk-react": "^5.0.0",
         "@heroicons/react": "^2.2.0",
-        "@hookform/resolvers": "^5.2.2",
         "@libsql/client": "^0.15.15",
         "@octokit/core": "^6.1.4",
         "@radix-ui/colors": "^3.0.0",
@@ -72,7 +71,6 @@
         "uuid": "^13.0.0",
         "vaul": "^1.1.2",
         "wanakana": "^5.3.1",
-        "zod": "^4.1.13",
       },
       "devDependencies": {
         "@cloudflare/workers-types": "^4.20241106.0",
@@ -272,8 +270,6 @@
     "@floating-ui/utils": ["@floating-ui/utils@0.2.10", "", {}, "sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ=="],
 
     "@heroicons/react": ["@heroicons/react@2.2.0", "", { "peerDependencies": { "react": ">= 16 || ^19.0.0-rc" } }, "sha512-LMcepvRaS9LYHJGsF0zzmgKCUim/X3N/DQKc4jepAXJ7l8QxJ1PmxJzqplF2Z3FE4PqBAIGyJAQ/w4B5dsqbtQ=="],
-
-    "@hookform/resolvers": ["@hookform/resolvers@5.2.2", "", { "dependencies": { "@standard-schema/utils": "^0.3.0" }, "peerDependencies": { "react-hook-form": "^7.55.0" } }, "sha512-A/IxlMLShx3KjV/HeTcTfaMxdwy690+L/ZADoeaTltLx+CVuzkeVIPuybK3jrRfw7YZnmdKsVVHAlEPIAEUNlA=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 

@@ -96,3 +96,19 @@
     box-shadow: 0 0 20px oklch(0.75 0.15 195);
   }
 }
+
+/* M1: モーション軽減設定時はパルス/フラッシュ系アニメを抑制 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-pulse {
+    animation: none !important;
+  }
+}

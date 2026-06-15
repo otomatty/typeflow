@@ -46,5 +46,16 @@
   "daily_trend": "日別トレンド",
   "last_n_days": "直近 {{count}} 日",
   "no_daily_data": "日別データがありません",
-  "no_daily_data_desc": "ゲームをプレイすると日別統計が表示されます"
+  "no_daily_data_desc": "ゲームをプレイすると日別統計が表示されます",
+  "best_records": "ベスト記録",
+  "heatmap": {
+    "group_label": "ミス率によるキーボードヒートマップ",
+    "key_label": "{{key}}: ミス率 {{percent}}%（{{count}}回）",
+    "key_label_no_data": "{{key}}: データなし",
+    "legend_high": "ミス多い（30%以上）",
+    "legend_medium": "やや多い（15〜30%）",
+    "legend_low": "やや少ない（5〜15%）",
+    "legend_good": "良好（5%未満）",
+    "legend_no_data": "データなし"
+  }
 }

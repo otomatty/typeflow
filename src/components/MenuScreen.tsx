@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Keyboard, Zap, ArrowRight } from 'lucide-react'
 import { Word, PresetWord } from '@/lib/types'
 import { Button } from '@/components/ui/button'
@@ -28,6 +28,7 @@ export function MenuScreen({
 }: MenuScreenProps) {
   const { t } = useTranslation('menu')
   const { t: tc } = useTranslation('common')
+  const shouldReduceMotion = useReducedMotion()
   const canStart = words.length > 0
   const showQuickStart = isFirstTime && words.length === 0 && gameScoresCount === 0
   const showRecommendedPresets = !canStart && !showQuickStart && onLoadPreset
@@ -82,12 +83,15 @@ export function MenuScreen({
             </div>
 
             <motion.div
-              animate={{ opacity: [0.5, 1, 0.5] }}
+              animate={shouldReduceMotion ? {} : { opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
               className="pt-8"
             >
               <div className="inline-flex items-center gap-3 px-6 py-3 rounded-lg bg-secondary/50 border border-border/50">
-                <kbd className="px-3 py-1.5 text-sm font-mono bg-background rounded border border-border shadow-sm">
+                <kbd
+                  aria-hidden="true"
+                  className="px-3 py-1.5 text-sm font-mono bg-background rounded border border-border shadow-sm"
+                >
                   Space
                 </kbd>
                 <span className="text-muted-foreground">{t('press_to_start')}</span>

@@ -41,5 +41,16 @@
   "wordsRemaining": " words",
   "review_limit_reached": "Review Round Limit Reached",
   "review_limit_reached_desc": "The following words could not be completed even after 5 review rounds. We recommend practicing them in Word Practice mode.",
-  "start_word_practice": "Practice Word"
+  "start_word_practice": "Practice Word",
+  "a11y": {
+    "metrics_label": "Game statistics",
+    "time_remaining": "{{count}} seconds remaining",
+    "time_low": "Time is running low",
+    "current_word": "Type: {{word}} ({{reading}})",
+    "typing_area": "Typing area",
+    "results_dialog": "Game results",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "practice_word": "Practice \"{{word}}\""
+  }
 }

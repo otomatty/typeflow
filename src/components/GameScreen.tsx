@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { TypingDisplay } from '@/components/TypingDisplay'
@@ -27,6 +28,14 @@ export function GameScreen({
 }: GameScreenProps) {
   const { t } = useTranslation()
   const isMinimal = useMinimalMode(minimalMode, minimalModeBreakpoint)
+  const typingAreaRef = useRef<HTMLDivElement>(null)
+
+  // ゲーム開始時にタイピング領域へフォーカス（支援技術が現在位置を把握できるように）
+  useEffect(() => {
+    if (!isMinimal) {
+      typingAreaRef.current?.focus()
+    }
+  }, [isMinimal])
 
   // ミニマルモードの場合はシンプルな画面を表示
   if (isMinimal) {
@@ -65,7 +74,12 @@ export function GameScreen({
       )}
 
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-3xl">
+        <div
+          ref={typingAreaRef}
+          tabIndex={-1}
+          aria-label={t('game.a11y.typing_area')}
+          className="w-full max-w-3xl outline-none"
+        >
           <AnimatePresence mode="wait">
             <TypingDisplay
               key={currentWord.id}
@@ -79,7 +93,13 @@ export function GameScreen({
 
       <div className="space-y-3 pb-6">
         <TimeGauge timeRemaining={gameState.timeRemaining} totalTime={gameState.totalTime} />
-        <GameMetrics gameState={gameState} kps={liveStats.kps} accuracy={liveStats.accuracy} />
+        <GameMetrics
+          totalKeystrokes={gameState.totalKeystrokes}
+          currentWordIndex={gameState.currentWordIndex}
+          wordsLength={gameState.words.length}
+          kps={liveStats.kps}
+          accuracy={liveStats.accuracy}
+        />
       </div>
     </div>
   )

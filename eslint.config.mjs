@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import prettier from 'eslint-config-prettier'
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'coverage', 'public'] },
+  { ignores: ['dist', 'node_modules', 'coverage', 'public', '.claude'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended, prettier],
     files: ['**/*.{ts,tsx}'],
@@ -29,6 +29,15 @@ export default tseslint.config(
         { argsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
+      // デバッグ用の console.log の残存を防ぐ（警告/エラーログは許可）
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+    },
+  },
+  {
+    // サーバー/スクリプトの起動ログ等では console.log を許可
+    files: ['src/server/**/*.ts', 'scripts/**/*.ts'],
+    rules: {
+      'no-console': 'off',
     },
   }
 )

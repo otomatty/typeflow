@@ -7,6 +7,16 @@ import type {
   DifficultyPreset,
 } from '../lib/types'
 
+// クライアントと共有するレコード型（単一定義を import して再エクスポート）
+import type {
+  WordRecord,
+  GameScoreRecord,
+  UserPresetWord,
+  UserPresetRecord,
+  CreateUserPresetInput,
+} from '../shared/api-types'
+export type { WordRecord, GameScoreRecord, UserPresetWord, UserPresetRecord, CreateUserPresetInput }
+
 /**
  * Tursoデータベース（libSQL/SQLite）の生のレコード型（snake_case）
  *
@@ -32,21 +42,7 @@ export interface WordRow {
   consecutive_correct: number
 }
 
-// API用のWord型（camelCase）
-export interface WordRecord {
-  id: number
-  text: string
-  reading: string
-  romaji: string
-  correct: number
-  miss: number
-  lastPlayed: number
-  accuracy: number
-  createdAt: number
-  masteryLevel: number
-  nextReviewAt: number
-  consecutiveCorrect: number
-}
+// API用のWord型（camelCase）は ../shared/api-types から再エクスポート
 
 // Word作成用の型
 export interface CreateWordInput {
@@ -111,7 +107,7 @@ export interface BulkInsertWithStatsInput {
  * Aggregated Stats - Tursoデータベースの生のレコード型（snake_case）
  */
 export interface AggregatedStatsRow {
-  id: number
+  user_id: string
   key_stats: string
   transition_stats: string
   last_updated: number
@@ -134,7 +130,7 @@ export interface UpdateAggregatedStatsInput {
  * Settings - Tursoデータベースの生のレコード型（snake_case）
  */
 export interface SettingsRow {
-  id: number
+  user_id: string
   word_count: string
   theme: string
   practice_mode: string
@@ -214,17 +210,7 @@ export interface GameScoreRow {
   played_at: number
 }
 
-export interface GameScoreRecord {
-  id: number
-  kps: number
-  totalKeystrokes: number
-  accuracy: number
-  completedWords: number // 入力完了した単語数（時間切れでないもの）
-  successfulWords: number // 成功した単語数（ミスなく完了）
-  totalWords: number
-  totalTime: number
-  playedAt: number
-}
+// GameScoreRecord は ../shared/api-types から再エクスポート
 
 export interface CreateGameScoreInput {
   kps: number
@@ -331,86 +317,14 @@ export interface UserPresetWordRow {
   created_at: number
 }
 
-export interface UserPresetWord {
-  text: string
-  reading: string
-  romaji: string
-  stats: {
-    correct: number
-    miss: number
-    lastPlayed: number
-    accuracy: number
-    masteryLevel: number
-    nextReviewAt: number
-    consecutiveCorrect: number
-  }
-}
-
-export interface UserPresetRecord {
-  id: string
-  name: string
-  description: string
-  difficulty: 'easy' | 'normal' | 'hard'
-  wordCount: number
-  words: UserPresetWord[]
-  createdAt: number
-  updatedAt: number
-}
-
-export interface CreateUserPresetInput {
-  id: string
-  name: string
-  description?: string
-  difficulty: 'easy' | 'normal' | 'hard'
-  words: UserPresetWord[]
-}
+// UserPresetWord / UserPresetRecord / CreateUserPresetInput は
+// ../shared/api-types から再エクスポート
 
 export interface UpdateUserPresetInput {
   name?: string
   description?: string
   difficulty?: 'easy' | 'normal' | 'hard'
   words?: UserPresetWord[]
-}
-
-/**
- * Users - ユーザー認証テーブルの型定義
- */
-export interface UserRow {
-  id: string
-  username: string
-  email: string
-  password_hash: string
-  created_at: number
-  updated_at: number
-  last_login_at: number | null
-}
-
-export interface UserRecord {
-  id: string
-  username: string
-  email: string
-  createdAt: number
-  updatedAt: number
-  lastLoginAt: number | null
-}
-
-export interface CreateUserInput {
-  username: string
-  email: string
-  passwordHash: string
-}
-
-export interface SignupInput {
-  username: string
-  email: string
-  password: string
-  passwordConfirm: string
-}
-
-export interface LoginInput {
-  usernameOrEmail: string
-  password: string
-  rememberMe?: boolean
 }
 
 /**
@@ -431,4 +345,8 @@ export interface Env {
   ALLOWED_ORIGINS?: string
   /** Clerk認証のシークレットキー */
   CLERK_SECRET_KEY?: string
+  /** Clerk JWT の azp(authorized parties) 検証に使う許可オリジン（カンマ区切り） */
+  CLERK_AUTHORIZED_PARTIES?: string
+  /** 実行環境（'production' の場合はローカルDBフォールバックを禁止） */
+  NODE_ENV?: string
 }

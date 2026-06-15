@@ -76,8 +76,16 @@ export async function authMiddleware(
       throw new Error('CLERK_SECRET_KEY environment variable is required')
     }
     const clerk = getClerkClient(c.env)
+    // azp(authorized parties) を検証してトークン混同攻撃を防ぐ。
+    // CLERK_AUTHORIZED_PARTIES が未設定の場合は ALLOWED_ORIGINS をフォールバックに使う。
+    const authorizedPartiesStr = c.env.CLERK_AUTHORIZED_PARTIES || c.env.ALLOWED_ORIGINS || ''
+    const authorizedParties = authorizedPartiesStr
+      .split(',')
+      .map(o => o.trim())
+      .filter(o => o.length > 0 && o !== '*')
     const payload = await verifyToken(token, {
       secretKey,
+      ...(authorizedParties.length > 0 ? { authorizedParties } : {}),
     })
 
     if (!payload) {

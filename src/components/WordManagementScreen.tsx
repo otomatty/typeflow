@@ -8,6 +8,7 @@ import { WordList } from '@/components/WordList'
 import { ScreenHeader } from '@/components/ScreenHeader'
 import { Container } from '@/components/Container'
 import { SavePresetDialog } from '@/components/SavePresetDialog'
+import { toast } from 'sonner'
 import { Word, PresetWord } from '@/lib/types'
 import { Trash2, MoreVertical, Package, Search, Save } from 'lucide-react'
 import {
@@ -74,6 +75,11 @@ export function WordManagementScreen({
     setIsClearing(true)
     try {
       await onClearAllWords()
+      setDeleteDialogOpen(false)
+      toast.success(t('toast.delete_all_success'))
+    } catch (error) {
+      console.error('Failed to clear all words:', error)
+      toast.error(t('toast.delete_all_error'))
     } finally {
       setIsClearing(false)
     }
@@ -102,20 +108,25 @@ export function WordManagementScreen({
               {/* ドロップダウンメニュー（全画面サイズ共通） */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="shrink-0">
-                    <MoreVertical className="w-5 h-5" />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    aria-label={t('word_menu_label', { defaultValue: 'Word options' })}
+                    className="shrink-0"
+                  >
+                    <MoreVertical className="w-5 h-5" aria-hidden="true" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={handleNavigateToPresets}>
-                    <Package className="w-4 h-4 mr-2" />
+                    <Package className="w-4 h-4 mr-2" aria-hidden="true" />
                     {t('preset')}
                   </DropdownMenuItem>
                   {words.length > 0 && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => setSavePresetDialogOpen(true)}>
-                        <Save className="w-4 h-4 mr-2" />
+                        <Save className="w-4 h-4 mr-2" aria-hidden="true" />
                         {t('save_preset', { defaultValue: 'プリセットとして保存' })}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -123,7 +134,7 @@ export function WordManagementScreen({
                         onClick={() => setDeleteDialogOpen(true)}
                         className="text-destructive focus:text-destructive"
                       >
-                        <Trash2 className="w-4 h-4 mr-2" />
+                        <Trash2 className="w-4 h-4 mr-2" aria-hidden="true" />
                         {t('delete_all')}
                       </DropdownMenuItem>
                     </>

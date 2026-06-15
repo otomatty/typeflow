@@ -10,6 +10,16 @@ import type {
   MinimalModeType,
 } from './types'
 
+// サーバーと共有するレコード型（単一定義を import して再エクスポート）
+import type {
+  WordRecord,
+  GameScoreRecord,
+  UserPresetWord,
+  UserPresetRecord,
+  CreateUserPresetInput,
+} from '@/shared/api-types'
+export type { WordRecord, GameScoreRecord, UserPresetWord, UserPresetRecord, CreateUserPresetInput }
+
 // APIベースURL（環境変数から取得、デフォルトはローカル）
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3456/api'
 
@@ -18,6 +28,7 @@ let getClerkToken: (() => Promise<string | null>) | null = null
 
 export function setClerkTokenGetter(fn: () => Promise<string | null>) {
   getClerkToken = fn
+  clerkTokenCache = null
 }
 
 // Turso用のJWTトークンを取得する関数（turso-jwtテンプレート使用）
@@ -25,24 +36,31 @@ let getTursoToken: (() => Promise<string | null>) | null = null
 
 export function setTursoTokenGetter(fn: () => Promise<string | null>) {
   getTursoToken = fn
+  tursoTokenCache = null
 }
 
-// Word interface for database
-export interface WordRecord {
-  id: number
-  text: string
-  reading: string
-  romaji: string
-  correct: number
-  miss: number
-  lastPlayed: number
-  accuracy: number
-  createdAt: number
-  // SRS (Spaced Repetition System) 用フィールド
-  masteryLevel: number // 習熟度レベル (0-5)
-  nextReviewAt: number // 次回復習推奨時刻 (timestamp)
-  consecutiveCorrect: number // 連続正解数
+// トークン取得は API 呼び出しのたびに await が発生するため、Clerk JWT の有効期限
+// より十分短い TTL でキャッシュしてホットパスのオーバーヘッドを抑える。
+const TOKEN_CACHE_TTL_MS = 30_000
+let clerkTokenCache: { value: string | null; expiresAt: number } | null = null
+let tursoTokenCache: { value: string | null; expiresAt: number } | null = null
+
+async function getCachedToken(
+  getter: (() => Promise<string | null>) | null,
+  cache: { value: string | null; expiresAt: number } | null,
+  store: (next: { value: string | null; expiresAt: number }) => void
+): Promise<string | null> {
+  if (!getter) return null
+  const now = Date.now()
+  if (cache && cache.expiresAt > now) {
+    return cache.value
+  }
+  const value = await getter()
+  store({ value, expiresAt: now + TOKEN_CACHE_TTL_MS })
+  return value
 }
+
+// WordRecord は @/shared/api-types から再エクスポート
 
 // Aggregated stats record for database
 export interface AggregatedStatsRecord {
@@ -80,18 +98,7 @@ export interface SettingsRecord {
   updatedAt: number
 }
 
-// Game score record for database
-export interface GameScoreRecord {
-  id: number
-  kps: number
-  totalKeystrokes: number
-  accuracy: number
-  completedWords: number // 入力完了した単語数（時間切れでないもの）
-  successfulWords: number // 成功した単語数（ミスなく完了）
-  totalWords: number
-  totalTime: number
-  playedAt: number
-}
+// GameScoreRecord は @/shared/api-types から再エクスポート
 
 // API helper
 async function api<T>(path: string, options?: RequestInit): Promise<T> {
@@ -101,19 +108,19 @@ async function api<T>(path: string, options?: RequestInit): Promise<T> {
   }
 
   // ClerkのJWTトークンを取得してヘッダーに追加（認証用）
-  if (getClerkToken) {
-    const token = await getClerkToken()
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`
-    }
+  const token = await getCachedToken(getClerkToken, clerkTokenCache, next => {
+    clerkTokenCache = next
+  })
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
   }
 
   // Turso用のJWTトークンを取得してヘッダーに追加（データベースアクセス用）
-  if (getTursoToken) {
-    const tursoToken = await getTursoToken()
-    if (tursoToken) {
-      headers['X-Turso-Token'] = tursoToken
-    }
+  const tursoToken = await getCachedToken(getTursoToken, tursoTokenCache, next => {
+    tursoTokenCache = next
+  })
+  if (tursoToken) {
+    headers['X-Turso-Token'] = tursoToken
   }
 
   const response = await fetch(`${API_BASE}${path}`, {
@@ -149,25 +156,6 @@ export async function updateWord(id: number, updates: Partial<WordRecord>): Prom
   await api(`/words/${id}`, {
     method: 'PUT',
     body: JSON.stringify(updates),
-  })
-}
-
-export async function updateWordStats(id: number, correct: boolean): Promise<void> {
-  // まず現在の単語を取得
-  const words = await getAllWords()
-  const word = words.find(w => w.id === id)
-  if (!word) return
-
-  const newCorrect = correct ? word.correct + 1 : word.correct
-  const newMiss = correct ? word.miss : word.miss + 1
-  const total = newCorrect + newMiss
-  const accuracy = total > 0 ? (newCorrect / total) * 100 : 100
-
-  await updateWord(id, {
-    correct: newCorrect,
-    miss: newMiss,
-    lastPlayed: Date.now(),
-    accuracy,
   })
 }
 
@@ -356,39 +344,8 @@ export async function getPresetById(id: string): Promise<PresetRecord | undefine
 }
 
 // User Presets helper functions
-export interface UserPresetWord {
-  text: string
-  reading: string
-  romaji: string
-  stats: {
-    correct: number
-    miss: number
-    lastPlayed: number
-    accuracy: number
-    masteryLevel: number
-    nextReviewAt: number
-    consecutiveCorrect: number
-  }
-}
-
-export interface UserPresetRecord {
-  id: string
-  name: string
-  description: string
-  difficulty: 'easy' | 'normal' | 'hard'
-  wordCount: number
-  words: UserPresetWord[]
-  createdAt: number
-  updatedAt: number
-}
-
-export interface CreateUserPresetInput {
-  id: string
-  name: string
-  description?: string
-  difficulty: 'easy' | 'normal' | 'hard'
-  words: UserPresetWord[]
-}
+// UserPresetWord / UserPresetRecord / CreateUserPresetInput は
+// @/shared/api-types から再エクスポート
 
 export async function getAllUserPresets(): Promise<UserPresetRecord[]> {
   return api<UserPresetRecord[]>('/user-presets')

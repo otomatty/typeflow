@@ -26,10 +26,11 @@ import type {
   UserPresetRecord,
   CreateUserPresetInput,
   UpdateUserPresetInput,
-  UserRow,
-  UserRecord,
-  CreateUserInput,
 } from './types'
+
+// words テーブルの挿入カラム（DRY: createWord / bulkInsert 系で共有）
+const WORD_INSERT_COLUMNS =
+  'text, reading, romaji, correct, miss, last_played, accuracy, created_at, mastery_level, next_review_at, consecutive_correct, user_id'
 
 // snake_case → camelCase 変換
 export function wordRowToRecord(row: WordRow): WordRecord {
@@ -49,25 +50,36 @@ export function wordRowToRecord(row: WordRow): WordRecord {
   }
 }
 
-// Words操作
-export async function getAllWords(db: Client): Promise<WordRecord[]> {
-  const result = await db.execute('SELECT * FROM words ORDER BY created_at DESC')
+// Words操作（すべて user_id でスコープする）
+export async function getAllWords(db: Client, userId: string): Promise<WordRecord[]> {
+  const result = await db.execute({
+    sql: 'SELECT * FROM words WHERE user_id = ? ORDER BY created_at DESC',
+    args: [userId],
+  })
   return result.rows.map(row => wordRowToRecord(row as unknown as WordRow))
 }
 
-export async function getWordById(db: Client, id: number): Promise<WordRecord | null> {
+export async function getWordById(
+  db: Client,
+  id: number,
+  userId: string
+): Promise<WordRecord | null> {
   const result = await db.execute({
-    sql: 'SELECT * FROM words WHERE id = ?',
-    args: [id],
+    sql: 'SELECT * FROM words WHERE id = ? AND user_id = ?',
+    args: [id, userId],
   })
   const row = result.rows[0] as unknown as WordRow | undefined
   return row ? wordRowToRecord(row) : null
 }
 
-export async function createWord(db: Client, input: CreateWordInput): Promise<number> {
+export async function createWord(
+  db: Client,
+  input: CreateWordInput,
+  userId: string
+): Promise<number> {
   await db.execute({
-    sql: `INSERT INTO words (text, reading, romaji, correct, miss, last_played, accuracy, created_at, mastery_level, next_review_at, consecutive_correct)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO words (${WORD_INSERT_COLUMNS})
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       input.text,
       input.reading,
@@ -80,6 +92,7 @@ export async function createWord(db: Client, input: CreateWordInput): Promise<nu
       input.masteryLevel ?? 0,
       input.nextReviewAt ?? 0,
       input.consecutiveCorrect ?? 0,
+      userId,
     ],
   })
 
@@ -88,7 +101,12 @@ export async function createWord(db: Client, input: CreateWordInput): Promise<nu
   return (lastIdResult.rows[0]?.id as number) ?? 0
 }
 
-export async function updateWord(db: Client, id: number, input: UpdateWordInput): Promise<void> {
+export async function updateWord(
+  db: Client,
+  id: number,
+  input: UpdateWordInput,
+  userId: string
+): Promise<void> {
   const updates: string[] = []
   const values: InValue[] = []
 
@@ -134,32 +152,36 @@ export async function updateWord(db: Client, id: number, input: UpdateWordInput)
   }
 
   if (updates.length > 0) {
-    values.push(id)
+    values.push(id, userId)
     await db.execute({
-      sql: `UPDATE words SET ${updates.join(', ')} WHERE id = ?`,
+      sql: `UPDATE words SET ${updates.join(', ')} WHERE id = ? AND user_id = ?`,
       args: values,
     })
   }
 }
 
-export async function deleteWord(db: Client, id: number): Promise<void> {
+export async function deleteWord(db: Client, id: number, userId: string): Promise<void> {
   await db.execute({
-    sql: 'DELETE FROM words WHERE id = ?',
-    args: [id],
+    sql: 'DELETE FROM words WHERE id = ? AND user_id = ?',
+    args: [id, userId],
   })
 }
 
-export async function deleteAllWords(db: Client): Promise<void> {
-  await db.execute('DELETE FROM words')
+export async function deleteAllWords(db: Client, userId: string): Promise<void> {
+  await db.execute({
+    sql: 'DELETE FROM words WHERE user_id = ?',
+    args: [userId],
+  })
 }
 
 export async function bulkInsertWords(
   db: Client,
   words: BulkInsertWord[],
+  userId: string,
   clearExisting: boolean = false
 ): Promise<number> {
   if (clearExisting) {
-    await deleteAllWords(db)
+    await deleteAllWords(db, userId)
   }
 
   const now = Date.now()
@@ -167,9 +189,9 @@ export async function bulkInsertWords(
 
   // バッチ処理で挿入
   const statements = words.map(word => ({
-    sql: `INSERT INTO words (text, reading, romaji, correct, miss, last_played, accuracy, created_at, mastery_level, next_review_at, consecutive_correct)
-     VALUES (?, ?, ?, 0, 0, 0, 100, ?, 0, 0, 0)`,
-    args: [word.text, word.reading, word.romaji, now],
+    sql: `INSERT INTO words (${WORD_INSERT_COLUMNS})
+     VALUES (?, ?, ?, 0, 0, 0, 100, ?, 0, 0, 0, ?)`,
+    args: [word.text, word.reading, word.romaji, now, userId],
   }))
 
   const results = await db.batch(statements)
@@ -186,10 +208,11 @@ export async function bulkInsertWords(
 export async function bulkInsertWordsWithStats(
   db: Client,
   words: BulkInsertWordWithStats[],
+  userId: string,
   clearExisting: boolean = false
 ): Promise<number> {
   if (clearExisting) {
-    await deleteAllWords(db)
+    await deleteAllWords(db, userId)
   }
 
   const now = Date.now()
@@ -197,8 +220,8 @@ export async function bulkInsertWordsWithStats(
 
   // バッチ処理で挿入（統計データも含む）
   const statements = words.map(word => ({
-    sql: `INSERT INTO words (text, reading, romaji, correct, miss, last_played, accuracy, created_at, mastery_level, next_review_at, consecutive_correct)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO words (${WORD_INSERT_COLUMNS})
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       word.text,
       word.reading,
@@ -211,6 +234,7 @@ export async function bulkInsertWordsWithStats(
       word.masteryLevel ?? 0,
       word.nextReviewAt ?? 0,
       word.consecutiveCorrect ?? 0,
+      userId,
     ],
   }))
 
@@ -225,10 +249,14 @@ export async function bulkInsertWordsWithStats(
   return insertedCount
 }
 
-// Aggregated Stats操作
-export async function getAggregatedStats(db: Client): Promise<AggregatedStatsRecord | null> {
+// Aggregated Stats操作（user_id をキーにした 1ユーザー1行）
+export async function getAggregatedStats(
+  db: Client,
+  userId: string
+): Promise<AggregatedStatsRecord | null> {
   const result = await db.execute({
-    sql: 'SELECT * FROM aggregated_stats WHERE id = 1',
+    sql: 'SELECT * FROM aggregated_stats WHERE user_id = ?',
+    args: [userId],
   })
 
   const row = result.rows[0] as unknown as AggregatedStatsRow | undefined
@@ -237,7 +265,7 @@ export async function getAggregatedStats(db: Client): Promise<AggregatedStatsRec
   }
 
   return {
-    id: row.id,
+    id: 1,
     keyStats: JSON.parse(row.key_stats),
     transitionStats: JSON.parse(row.transition_stats),
     lastUpdated: row.last_updated,
@@ -246,12 +274,14 @@ export async function getAggregatedStats(db: Client): Promise<AggregatedStatsRec
 
 export async function upsertAggregatedStats(
   db: Client,
-  input: AggregatedStatsRecord
+  userId: string,
+  input: Pick<AggregatedStatsRecord, 'keyStats' | 'transitionStats' | 'lastUpdated'>
 ): Promise<void> {
   await db.execute({
-    sql: `INSERT OR REPLACE INTO aggregated_stats (id, key_stats, transition_stats, last_updated)
-       VALUES (1, ?, ?, ?)`,
+    sql: `INSERT OR REPLACE INTO aggregated_stats (user_id, key_stats, transition_stats, last_updated)
+       VALUES (?, ?, ?, ?)`,
     args: [
+      userId,
       JSON.stringify(input.keyStats ?? {}),
       JSON.stringify(input.transitionStats ?? {}),
       input.lastUpdated ?? Date.now(),
@@ -259,16 +289,18 @@ export async function upsertAggregatedStats(
   })
 }
 
-export async function deleteAggregatedStats(db: Client): Promise<void> {
+export async function deleteAggregatedStats(db: Client, userId: string): Promise<void> {
   await db.execute({
-    sql: 'DELETE FROM aggregated_stats WHERE id = 1',
+    sql: 'DELETE FROM aggregated_stats WHERE user_id = ?',
+    args: [userId],
   })
 }
 
-// Settings操作
-export async function getSettings(db: Client): Promise<SettingsRecord | null> {
+// Settings操作（user_id をキーにした 1ユーザー1行）
+export async function getSettings(db: Client, userId: string): Promise<SettingsRecord | null> {
   const result = await db.execute({
-    sql: 'SELECT * FROM settings WHERE id = 1',
+    sql: 'SELECT * FROM settings WHERE user_id = ?',
+    args: [userId],
   })
 
   const row = result.rows[0] as unknown as SettingsRow | undefined
@@ -277,7 +309,7 @@ export async function getSettings(db: Client): Promise<SettingsRecord | null> {
   }
 
   return {
-    id: row.id,
+    id: 1,
     wordCount: row.word_count as WordCountPreset,
     theme: row.theme as ThemeType,
     practiceMode: row.practice_mode as PracticeMode,
@@ -299,8 +331,12 @@ export async function getSettings(db: Client): Promise<SettingsRecord | null> {
   }
 }
 
-export async function upsertSettings(db: Client, input: UpdateSettingsInput): Promise<void> {
-  const existing = await getSettings(db)
+export async function upsertSettings(
+  db: Client,
+  userId: string,
+  input: UpdateSettingsInput
+): Promise<void> {
+  const existing = await getSettings(db, userId)
 
   if (existing) {
     const updates: string[] = []
@@ -378,16 +414,18 @@ export async function upsertSettings(db: Client, input: UpdateSettingsInput): Pr
     values.push(Date.now())
 
     if (updates.length > 0) {
+      values.push(userId)
       await db.execute({
-        sql: `UPDATE settings SET ${updates.join(', ')} WHERE id = 1`,
+        sql: `UPDATE settings SET ${updates.join(', ')} WHERE user_id = ?`,
         args: values,
       })
     }
   } else {
     await db.execute({
-      sql: `INSERT INTO settings (id, word_count, theme, practice_mode, srs_enabled, warmup_enabled, difficulty_preset, time_limit_mode, fixed_time_limit, comfort_zone_ratio, min_time_limit, max_time_limit, min_time_limit_by_difficulty, miss_penalty_enabled, base_penalty_percent, penalty_escalation_factor, max_penalty_percent, min_time_after_penalty, updated_at)
-         VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      sql: `INSERT INTO settings (user_id, word_count, theme, practice_mode, srs_enabled, warmup_enabled, difficulty_preset, time_limit_mode, fixed_time_limit, comfort_zone_ratio, min_time_limit, max_time_limit, min_time_limit_by_difficulty, miss_penalty_enabled, base_penalty_percent, penalty_escalation_factor, max_penalty_percent, min_time_after_penalty, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
+        userId,
         input.wordCount ?? 'all',
         input.theme ?? 'dark',
         input.practiceMode ?? 'balanced',
@@ -411,10 +449,11 @@ export async function upsertSettings(db: Client, input: UpdateSettingsInput): Pr
   }
 }
 
-// Game Scores操作
-export async function getAllGameScores(db: Client): Promise<GameScoreRecord[]> {
+// Game Scores操作（user_id でスコープ）
+export async function getAllGameScores(db: Client, userId: string): Promise<GameScoreRecord[]> {
   const result = await db.execute({
-    sql: 'SELECT * FROM game_scores ORDER BY played_at DESC',
+    sql: 'SELECT * FROM game_scores WHERE user_id = ? ORDER BY played_at DESC',
+    args: [userId],
   })
 
   return result.rows.map(row => {
@@ -433,10 +472,14 @@ export async function getAllGameScores(db: Client): Promise<GameScoreRecord[]> {
   })
 }
 
-export async function createGameScore(db: Client, input: CreateGameScoreInput): Promise<number> {
+export async function createGameScore(
+  db: Client,
+  input: CreateGameScoreInput,
+  userId: string
+): Promise<number> {
   await db.execute({
-    sql: `INSERT INTO game_scores (kps, total_keystrokes, accuracy, correct_words, perfect_words, total_words, total_time, played_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO game_scores (kps, total_keystrokes, accuracy, correct_words, perfect_words, total_words, total_time, played_at, user_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       input.kps,
       input.totalKeystrokes,
@@ -446,6 +489,7 @@ export async function createGameScore(db: Client, input: CreateGameScoreInput): 
       input.totalWords,
       input.totalTime,
       Date.now(),
+      userId,
     ],
   })
 
@@ -454,44 +498,47 @@ export async function createGameScore(db: Client, input: CreateGameScoreInput): 
   return (lastIdResult.rows[0]?.id as number) ?? 0
 }
 
-export async function deleteAllGameScores(db: Client): Promise<void> {
-  await db.execute('DELETE FROM game_scores')
+export async function deleteAllGameScores(db: Client, userId: string): Promise<void> {
+  await db.execute({
+    sql: 'DELETE FROM game_scores WHERE user_id = ?',
+    args: [userId],
+  })
 }
 
-// Presets操作
+// Presets操作（共有カタログ: 全ユーザーで共通。認証は必須だが user_id では絞らない）
 export async function getAllPresets(db: Client): Promise<PresetRecord[]> {
   const presetsResult = await db.execute('SELECT * FROM presets ORDER BY created_at DESC')
-  const presets: PresetRecord[] = []
-
-  for (const presetRow of presetsResult.rows) {
-    const row = presetRow as unknown as PresetRow
-    const wordsResult = await db.execute({
-      sql: 'SELECT * FROM preset_words WHERE preset_id = ? ORDER BY word_order ASC',
-      args: [row.id],
-    })
-
-    const words = wordsResult.rows.map(wordRow => {
-      const w = wordRow as unknown as PresetWordRow
-      return {
-        text: w.text,
-        reading: w.reading,
-        romaji: w.romaji,
-      }
-    })
-
-    presets.push({
-      id: row.id,
-      name: row.name,
-      description: row.description,
-      difficulty: row.difficulty as 'easy' | 'normal' | 'hard',
-      wordCount: row.word_count,
-      words,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    })
+  const presetRows = presetsResult.rows.map(r => r as unknown as PresetRow)
+  if (presetRows.length === 0) {
+    return []
   }
 
-  return presets
+  // N+1 を避けるため、全プリセットの単語を 1 クエリでまとめて取得
+  const ids = presetRows.map(r => r.id)
+  const placeholders = ids.map(() => '?').join(', ')
+  const wordsResult = await db.execute({
+    sql: `SELECT * FROM preset_words WHERE preset_id IN (${placeholders}) ORDER BY preset_id, word_order ASC`,
+    args: ids,
+  })
+
+  const wordsByPreset = new Map<string, { text: string; reading: string; romaji: string }[]>()
+  for (const wordRow of wordsResult.rows) {
+    const w = wordRow as unknown as PresetWordRow
+    const list = wordsByPreset.get(w.preset_id) ?? []
+    list.push({ text: w.text, reading: w.reading, romaji: w.romaji })
+    wordsByPreset.set(w.preset_id, list)
+  }
+
+  return presetRows.map(row => ({
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    difficulty: row.difficulty as 'easy' | 'normal' | 'hard',
+    wordCount: row.word_count,
+    words: wordsByPreset.get(row.id) ?? [],
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }))
 }
 
 export async function getPresetById(db: Client, id: string): Promise<PresetRecord | null> {
@@ -628,55 +675,71 @@ export async function deleteAllPresets(db: Client): Promise<void> {
   await db.execute('DELETE FROM presets')
 }
 
-// User Presets操作
-export async function getAllUserPresets(db: Client): Promise<UserPresetRecord[]> {
-  const presetResult = await db.execute('SELECT * FROM user_presets ORDER BY updated_at DESC')
-  const presets: UserPresetRecord[] = []
-
-  for (const row of presetResult.rows) {
-    const presetRow = row as unknown as UserPresetRow
-    const wordsResult = await db.execute({
-      sql: 'SELECT * FROM user_preset_words WHERE preset_id = ? ORDER BY word_order ASC',
-      args: [presetRow.id],
-    })
-
-    const words = wordsResult.rows.map(wordRow => {
-      const w = wordRow as unknown as UserPresetWordRow
-      return {
-        text: w.text,
-        reading: w.reading,
-        romaji: w.romaji,
-        stats: {
-          correct: w.correct,
-          miss: w.miss,
-          lastPlayed: w.last_played,
-          accuracy: w.accuracy,
-          masteryLevel: w.mastery_level,
-          nextReviewAt: w.next_review_at,
-          consecutiveCorrect: w.consecutive_correct,
-        },
-      }
-    })
-
-    presets.push({
-      id: presetRow.id,
-      name: presetRow.name,
-      description: presetRow.description || '',
-      difficulty: presetRow.difficulty as 'easy' | 'normal' | 'hard',
-      wordCount: presetRow.word_count,
-      words,
-      createdAt: presetRow.created_at,
-      updatedAt: presetRow.updated_at,
-    })
+// User Presets操作（user_id でスコープ）
+function userPresetWordRowToRecord(wordRow: unknown) {
+  const w = wordRow as unknown as UserPresetWordRow
+  return {
+    text: w.text,
+    reading: w.reading,
+    romaji: w.romaji,
+    stats: {
+      correct: w.correct,
+      miss: w.miss,
+      lastPlayed: w.last_played,
+      accuracy: w.accuracy,
+      masteryLevel: w.mastery_level,
+      nextReviewAt: w.next_review_at,
+      consecutiveCorrect: w.consecutive_correct,
+    },
   }
-
-  return presets
 }
 
-export async function getUserPresetById(db: Client, id: string): Promise<UserPresetRecord | null> {
+export async function getAllUserPresets(db: Client, userId: string): Promise<UserPresetRecord[]> {
   const presetResult = await db.execute({
-    sql: 'SELECT * FROM user_presets WHERE id = ?',
-    args: [id],
+    sql: 'SELECT * FROM user_presets WHERE user_id = ? ORDER BY updated_at DESC',
+    args: [userId],
+  })
+  const presetRows = presetResult.rows.map(r => r as unknown as UserPresetRow)
+  if (presetRows.length === 0) {
+    return []
+  }
+
+  // N+1 を避けるため、全プリセットの単語を 1 クエリでまとめて取得
+  const ids = presetRows.map(r => r.id)
+  const placeholders = ids.map(() => '?').join(', ')
+  const wordsResult = await db.execute({
+    sql: `SELECT * FROM user_preset_words WHERE preset_id IN (${placeholders}) ORDER BY preset_id, word_order ASC`,
+    args: ids,
+  })
+
+  const wordsByPreset = new Map<string, ReturnType<typeof userPresetWordRowToRecord>[]>()
+  for (const wordRow of wordsResult.rows) {
+    const w = wordRow as unknown as UserPresetWordRow
+    const list = wordsByPreset.get(w.preset_id) ?? []
+    list.push(userPresetWordRowToRecord(wordRow))
+    wordsByPreset.set(w.preset_id, list)
+  }
+
+  return presetRows.map(presetRow => ({
+    id: presetRow.id,
+    name: presetRow.name,
+    description: presetRow.description || '',
+    difficulty: presetRow.difficulty as 'easy' | 'normal' | 'hard',
+    wordCount: presetRow.word_count,
+    words: wordsByPreset.get(presetRow.id) ?? [],
+    createdAt: presetRow.created_at,
+    updatedAt: presetRow.updated_at,
+  }))
+}
+
+export async function getUserPresetById(
+  db: Client,
+  id: string,
+  userId: string
+): Promise<UserPresetRecord | null> {
+  const presetResult = await db.execute({
+    sql: 'SELECT * FROM user_presets WHERE id = ? AND user_id = ?',
+    args: [id, userId],
   })
 
   const presetRow = presetResult.rows[0] as unknown as UserPresetRow | undefined
@@ -689,23 +752,7 @@ export async function getUserPresetById(db: Client, id: string): Promise<UserPre
     args: [id],
   })
 
-  const words = wordsResult.rows.map(wordRow => {
-    const w = wordRow as unknown as UserPresetWordRow
-    return {
-      text: w.text,
-      reading: w.reading,
-      romaji: w.romaji,
-      stats: {
-        correct: w.correct,
-        miss: w.miss,
-        lastPlayed: w.last_played,
-        accuracy: w.accuracy,
-        masteryLevel: w.mastery_level,
-        nextReviewAt: w.next_review_at,
-        consecutiveCorrect: w.consecutive_correct,
-      },
-    }
-  })
+  const words = wordsResult.rows.map(userPresetWordRowToRecord)
 
   return {
     id: presetRow.id,
@@ -719,13 +766,17 @@ export async function getUserPresetById(db: Client, id: string): Promise<UserPre
   }
 }
 
-export async function createUserPreset(db: Client, input: CreateUserPresetInput): Promise<void> {
+export async function createUserPreset(
+  db: Client,
+  input: CreateUserPresetInput,
+  userId: string
+): Promise<void> {
   const now = Date.now()
 
   // プリセットを作成
   await db.execute({
-    sql: `INSERT INTO user_presets (id, name, description, difficulty, word_count, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO user_presets (id, name, description, difficulty, word_count, created_at, updated_at, user_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       input.id,
       input.name,
@@ -734,6 +785,7 @@ export async function createUserPreset(db: Client, input: CreateUserPresetInput)
       input.words.length,
       now,
       now,
+      userId,
     ],
   })
 
@@ -769,9 +821,10 @@ export async function createUserPreset(db: Client, input: CreateUserPresetInput)
 export async function updateUserPreset(
   db: Client,
   id: string,
-  input: UpdateUserPresetInput
+  input: UpdateUserPresetInput,
+  userId: string
 ): Promise<void> {
-  const existing = await getUserPresetById(db, id)
+  const existing = await getUserPresetById(db, id, userId)
   if (!existing) {
     throw new Error(`User preset with id ${id} not found`)
   }
@@ -836,101 +889,19 @@ export async function updateUserPreset(
   if (updates.length > 0) {
     updates.push('updated_at = ?')
     values.push(Date.now())
-    values.push(id)
+    values.push(id, userId)
 
     await db.execute({
-      sql: `UPDATE user_presets SET ${updates.join(', ')} WHERE id = ?`,
+      sql: `UPDATE user_presets SET ${updates.join(', ')} WHERE id = ? AND user_id = ?`,
       args: values,
     })
   }
 }
 
-export async function deleteUserPreset(db: Client, id: string): Promise<void> {
+export async function deleteUserPreset(db: Client, id: string, userId: string): Promise<void> {
   // 外部キー制約により、user_preset_wordsも自動的に削除される
   await db.execute({
-    sql: 'DELETE FROM user_presets WHERE id = ?',
-    args: [id],
-  })
-}
-
-export async function deleteAllUserPresets(db: Client): Promise<void> {
-  // 外部キー制約により、user_preset_wordsも自動的に削除される
-  await db.execute('DELETE FROM user_presets')
-}
-
-// Users操作
-export function userRowToRecord(row: UserRow): UserRecord {
-  return {
-    id: row.id,
-    username: row.username,
-    email: row.email,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    lastLoginAt: row.last_login_at,
-  }
-}
-
-export async function getUserById(db: Client, id: string): Promise<UserRecord | null> {
-  const result = await db.execute({
-    sql: 'SELECT * FROM users WHERE id = ?',
-    args: [id],
-  })
-  const row = result.rows[0] as unknown as UserRow | undefined
-  return row ? userRowToRecord(row) : null
-}
-
-export async function getUserByUsername(db: Client, username: string): Promise<UserRecord | null> {
-  const result = await db.execute({
-    sql: 'SELECT * FROM users WHERE username = ?',
-    args: [username],
-  })
-  const row = result.rows[0] as unknown as UserRow | undefined
-  return row ? userRowToRecord(row) : null
-}
-
-export async function getUserByEmail(db: Client, email: string): Promise<UserRecord | null> {
-  const result = await db.execute({
-    sql: 'SELECT * FROM users WHERE email = ?',
-    args: [email],
-  })
-  const row = result.rows[0] as unknown as UserRow | undefined
-  return row ? userRowToRecord(row) : null
-}
-
-export async function getUserByUsernameOrEmail(
-  db: Client,
-  usernameOrEmail: string
-): Promise<(UserRecord & { passwordHash: string }) | null> {
-  const result = await db.execute({
-    sql: 'SELECT * FROM users WHERE username = ? OR email = ?',
-    args: [usernameOrEmail, usernameOrEmail],
-  })
-  const row = result.rows[0] as unknown as UserRow | undefined
-  if (!row) {
-    return null
-  }
-  return {
-    ...userRowToRecord(row),
-    passwordHash: row.password_hash,
-  }
-}
-
-export async function createUser(db: Client, input: CreateUserInput): Promise<string> {
-  const id = crypto.randomUUID()
-  const now = Date.now()
-
-  await db.execute({
-    sql: `INSERT INTO users (id, username, email, password_hash, created_at, updated_at, last_login_at)
-       VALUES (?, ?, ?, ?, ?, ?, NULL)`,
-    args: [id, input.username, input.email, input.passwordHash, now, now],
-  })
-
-  return id
-}
-
-export async function updateUserLastLogin(db: Client, id: string): Promise<void> {
-  await db.execute({
-    sql: 'UPDATE users SET last_login_at = ?, updated_at = ? WHERE id = ?',
-    args: [Date.now(), Date.now(), id],
+    sql: 'DELETE FROM user_presets WHERE id = ? AND user_id = ?',
+    args: [id, userId],
   })
 }
