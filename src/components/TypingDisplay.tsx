@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { Word } from '@/lib/types'
@@ -8,7 +9,13 @@ interface TypingDisplayProps {
   showError: boolean
 }
 
-export function TypingDisplay({ word, currentInput, showError }: TypingDisplayProps) {
+// memo 化により、タイマーの100ms更新では再レンダリングせず、
+// 入力や単語が変わったときだけ更新する。
+export const TypingDisplay = memo(function TypingDisplay({
+  word,
+  currentInput,
+  showError,
+}: TypingDisplayProps) {
   const { t } = useTranslation('game')
 
   // 練習回数を計算
@@ -80,4 +87,4 @@ export function TypingDisplay({ word, currentInput, showError }: TypingDisplayPr
       )}
     </motion.div>
   )
-}
+})

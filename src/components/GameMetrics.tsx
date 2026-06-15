@@ -1,13 +1,24 @@
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { GameState } from '@/lib/types'
 
 interface GameMetricsProps {
-  gameState: GameState
+  totalKeystrokes: number
+  currentWordIndex: number
+  wordsLength: number
   kps: number
   accuracy: number
 }
 
-export function GameMetrics({ gameState, kps, accuracy }: GameMetricsProps) {
+// プリミティブな props のみを受け取り memo 化する。
+// （gameState オブジェクト全体を渡すとタイマーの100ms更新ごとに参照が変わり
+//  再レンダリングを避けられないため、必要な値だけを渡す）
+export const GameMetrics = memo(function GameMetrics({
+  totalKeystrokes,
+  currentWordIndex,
+  wordsLength,
+  kps,
+  accuracy,
+}: GameMetricsProps) {
   const { t } = useTranslation('game')
 
   return (
@@ -29,13 +40,13 @@ export function GameMetrics({ gameState, kps, accuracy }: GameMetricsProps) {
 
       <div className="flex items-center gap-1.5">
         <span className="text-muted-foreground uppercase tracking-wide">{t('keys')}</span>
-        <span className="text-primary font-bold tabular-nums">{gameState.totalKeystrokes}</span>
+        <span className="text-primary font-bold tabular-nums">{totalKeystrokes}</span>
       </div>
 
       <div className="flex items-center gap-1.5">
         <span className="text-muted-foreground uppercase tracking-wide">{t('words')}</span>
         <span className="text-primary font-bold tabular-nums">
-          {gameState.currentWordIndex}/{gameState.words.length}
+          {currentWordIndex}/{wordsLength}
         </span>
       </div>
 
@@ -50,4 +61,4 @@ export function GameMetrics({ gameState, kps, accuracy }: GameMetricsProps) {
       </div>
     </div>
   )
-}
+})

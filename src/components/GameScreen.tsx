@@ -93,7 +93,13 @@ export function GameScreen({
 
       <div className="space-y-3 pb-6">
         <TimeGauge timeRemaining={gameState.timeRemaining} totalTime={gameState.totalTime} />
-        <GameMetrics gameState={gameState} kps={liveStats.kps} accuracy={liveStats.accuracy} />
+        <GameMetrics
+          totalKeystrokes={gameState.totalKeystrokes}
+          currentWordIndex={gameState.currentWordIndex}
+          wordsLength={gameState.words.length}
+          kps={liveStats.kps}
+          accuracy={liveStats.accuracy}
+        />
       </div>
     </div>
   )

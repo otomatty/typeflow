@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Word } from '@/lib/types'
 
@@ -10,8 +11,13 @@ interface MinimalTypingDisplayProps {
 /**
  * ミニマルモード用のタイピング表示コンポーネント
  * テキストエディタ風のシンプルなUIで、仕事中でも目立たない
+ * memo 化により入力/単語が変わったときだけ再レンダリングする。
  */
-export function MinimalTypingDisplay({ word, currentInput, showError }: MinimalTypingDisplayProps) {
+export const MinimalTypingDisplay = memo(function MinimalTypingDisplay({
+  word,
+  currentInput,
+  showError,
+}: MinimalTypingDisplayProps) {
   const { t } = useTranslation('game')
 
   return (
@@ -58,4 +64,4 @@ export function MinimalTypingDisplay({ word, currentInput, showError }: MinimalT
       </div>
     </div>
   )
-}
+})
