@@ -818,8 +818,8 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                   >
                     <Card className="p-4 sm:p-6">
                       <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <Trophy className="w-5 h-5 text-yellow-500" />
-                        Best Records
+                        <Trophy className="w-5 h-5 text-yellow-500" aria-hidden="true" />
+                        {t('best_records')}
                       </h2>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {dailySummary.bestKpsDay && (
@@ -967,24 +967,43 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                     </h2>
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
+                        <caption className="sr-only">{t('daily_stats_title')}</caption>
                         <thead>
                           <tr className="border-b border-border">
-                            <th className="text-left py-2 px-2 font-medium text-muted-foreground">
+                            <th
+                              scope="col"
+                              className="text-left py-2 px-2 font-medium text-muted-foreground"
+                            >
                               {t('date')}
                             </th>
-                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">
+                            <th
+                              scope="col"
+                              className="text-right py-2 px-2 font-medium text-muted-foreground"
+                            >
                               {t('games_played')}
                             </th>
-                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">
+                            <th
+                              scope="col"
+                              className="text-right py-2 px-2 font-medium text-muted-foreground"
+                            >
                               {t('total_words')}
                             </th>
-                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">
+                            <th
+                              scope="col"
+                              className="text-right py-2 px-2 font-medium text-muted-foreground"
+                            >
                               {t('avg_kps')}
                             </th>
-                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">
+                            <th
+                              scope="col"
+                              className="text-right py-2 px-2 font-medium text-muted-foreground"
+                            >
                               {t('accuracy')}
                             </th>
-                            <th className="text-right py-2 px-2 font-medium text-muted-foreground">
+                            <th
+                              scope="col"
+                              className="text-right py-2 px-2 font-medium text-muted-foreground"
+                            >
                               {t('total_time')}
                             </th>
                           </tr>
@@ -995,7 +1014,9 @@ export function StatsScreen({ keyStats, transitionStats, gameScores, onReset }: 
                               key={day.date}
                               className={`border-b border-border/50 ${index === 0 ? 'bg-primary/5' : ''}`}
                             >
-                              <td className="py-2 px-2 font-medium">{day.dateLabel}</td>
+                              <th scope="row" className="text-left py-2 px-2 font-medium">
+                                {day.dateLabel}
+                              </th>
                               <td className="text-right py-2 px-2">{day.games}</td>
                               <td className="text-right py-2 px-2">{day.totalWords}</td>
                               <td className="text-right py-2 px-2 font-semibold text-primary">

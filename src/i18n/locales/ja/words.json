@@ -45,7 +45,8 @@
     "reading_placeholder_auto": "自動生成",
     "reading_hint": "漢字を含む場合は、正確なローマ字生成のため読み仮名の入力を推奨します",
     "romaji": "ローマ字（タイピング用）",
-    "romaji_placeholder": "自動生成 / 手動入力可"
+    "romaji_placeholder": "自動生成 / 手動入力可",
+    "reading_error": "漢字を含む単語のため、読み仮名を入力してください"
   },
   "word_list": {
     "search_placeholder": "単語を検索...",

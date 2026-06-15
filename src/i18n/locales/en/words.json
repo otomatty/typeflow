@@ -45,7 +45,8 @@
     "reading_placeholder_auto": "Auto-generated",
     "reading_hint": "For kanji, entering the reading is recommended for accurate romaji generation",
     "romaji": "Romaji (for typing)",
-    "romaji_placeholder": "Auto-generated / Manual entry"
+    "romaji_placeholder": "Auto-generated / Manual entry",
+    "reading_error": "Please enter the reading for this word containing kanji"
   },
   "word_list": {
     "search_placeholder": "Search words...",
