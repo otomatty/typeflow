@@ -7,6 +7,16 @@ import type {
   DifficultyPreset,
 } from '../lib/types'
 
+// クライアントと共有するレコード型（単一定義を import して再エクスポート）
+import type {
+  WordRecord,
+  GameScoreRecord,
+  UserPresetWord,
+  UserPresetRecord,
+  CreateUserPresetInput,
+} from '../shared/api-types'
+export type { WordRecord, GameScoreRecord, UserPresetWord, UserPresetRecord, CreateUserPresetInput }
+
 /**
  * Tursoデータベース（libSQL/SQLite）の生のレコード型（snake_case）
  *
@@ -32,21 +42,7 @@ export interface WordRow {
   consecutive_correct: number
 }
 
-// API用のWord型（camelCase）
-export interface WordRecord {
-  id: number
-  text: string
-  reading: string
-  romaji: string
-  correct: number
-  miss: number
-  lastPlayed: number
-  accuracy: number
-  createdAt: number
-  masteryLevel: number
-  nextReviewAt: number
-  consecutiveCorrect: number
-}
+// API用のWord型（camelCase）は ../shared/api-types から再エクスポート
 
 // Word作成用の型
 export interface CreateWordInput {
@@ -214,17 +210,7 @@ export interface GameScoreRow {
   played_at: number
 }
 
-export interface GameScoreRecord {
-  id: number
-  kps: number
-  totalKeystrokes: number
-  accuracy: number
-  completedWords: number // 入力完了した単語数（時間切れでないもの）
-  successfulWords: number // 成功した単語数（ミスなく完了）
-  totalWords: number
-  totalTime: number
-  playedAt: number
-}
+// GameScoreRecord は ../shared/api-types から再エクスポート
 
 export interface CreateGameScoreInput {
   kps: number
@@ -331,39 +317,8 @@ export interface UserPresetWordRow {
   created_at: number
 }
 
-export interface UserPresetWord {
-  text: string
-  reading: string
-  romaji: string
-  stats: {
-    correct: number
-    miss: number
-    lastPlayed: number
-    accuracy: number
-    masteryLevel: number
-    nextReviewAt: number
-    consecutiveCorrect: number
-  }
-}
-
-export interface UserPresetRecord {
-  id: string
-  name: string
-  description: string
-  difficulty: 'easy' | 'normal' | 'hard'
-  wordCount: number
-  words: UserPresetWord[]
-  createdAt: number
-  updatedAt: number
-}
-
-export interface CreateUserPresetInput {
-  id: string
-  name: string
-  description?: string
-  difficulty: 'easy' | 'normal' | 'hard'
-  words: UserPresetWord[]
-}
+// UserPresetWord / UserPresetRecord / CreateUserPresetInput は
+// ../shared/api-types から再エクスポート
 
 export interface UpdateUserPresetInput {
   name?: string

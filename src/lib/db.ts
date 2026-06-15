@@ -10,6 +10,16 @@ import type {
   MinimalModeType,
 } from './types'
 
+// サーバーと共有するレコード型（単一定義を import して再エクスポート）
+import type {
+  WordRecord,
+  GameScoreRecord,
+  UserPresetWord,
+  UserPresetRecord,
+  CreateUserPresetInput,
+} from '@/shared/api-types'
+export type { WordRecord, GameScoreRecord, UserPresetWord, UserPresetRecord, CreateUserPresetInput }
+
 // APIベースURL（環境変数から取得、デフォルトはローカル）
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3456/api'
 
@@ -50,22 +60,7 @@ async function getCachedToken(
   return value
 }
 
-// Word interface for database
-export interface WordRecord {
-  id: number
-  text: string
-  reading: string
-  romaji: string
-  correct: number
-  miss: number
-  lastPlayed: number
-  accuracy: number
-  createdAt: number
-  // SRS (Spaced Repetition System) 用フィールド
-  masteryLevel: number // 習熟度レベル (0-5)
-  nextReviewAt: number // 次回復習推奨時刻 (timestamp)
-  consecutiveCorrect: number // 連続正解数
-}
+// WordRecord は @/shared/api-types から再エクスポート
 
 // Aggregated stats record for database
 export interface AggregatedStatsRecord {
@@ -103,18 +98,7 @@ export interface SettingsRecord {
   updatedAt: number
 }
 
-// Game score record for database
-export interface GameScoreRecord {
-  id: number
-  kps: number
-  totalKeystrokes: number
-  accuracy: number
-  completedWords: number // 入力完了した単語数（時間切れでないもの）
-  successfulWords: number // 成功した単語数（ミスなく完了）
-  totalWords: number
-  totalTime: number
-  playedAt: number
-}
+// GameScoreRecord は @/shared/api-types から再エクスポート
 
 // API helper
 async function api<T>(path: string, options?: RequestInit): Promise<T> {
@@ -360,39 +344,8 @@ export async function getPresetById(id: string): Promise<PresetRecord | undefine
 }
 
 // User Presets helper functions
-export interface UserPresetWord {
-  text: string
-  reading: string
-  romaji: string
-  stats: {
-    correct: number
-    miss: number
-    lastPlayed: number
-    accuracy: number
-    masteryLevel: number
-    nextReviewAt: number
-    consecutiveCorrect: number
-  }
-}
-
-export interface UserPresetRecord {
-  id: string
-  name: string
-  description: string
-  difficulty: 'easy' | 'normal' | 'hard'
-  wordCount: number
-  words: UserPresetWord[]
-  createdAt: number
-  updatedAt: number
-}
-
-export interface CreateUserPresetInput {
-  id: string
-  name: string
-  description?: string
-  difficulty: 'easy' | 'normal' | 'hard'
-  words: UserPresetWord[]
-}
+// UserPresetWord / UserPresetRecord / CreateUserPresetInput は
+// @/shared/api-types から再エクスポート
 
 export async function getAllUserPresets(): Promise<UserPresetRecord[]> {
   return api<UserPresetRecord[]>('/user-presets')
