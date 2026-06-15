@@ -111,7 +111,7 @@ export interface BulkInsertWithStatsInput {
  * Aggregated Stats - Tursoデータベースの生のレコード型（snake_case）
  */
 export interface AggregatedStatsRow {
-  id: number
+  user_id: string
   key_stats: string
   transition_stats: string
   last_updated: number
@@ -134,7 +134,7 @@ export interface UpdateAggregatedStatsInput {
  * Settings - Tursoデータベースの生のレコード型（snake_case）
  */
 export interface SettingsRow {
-  id: number
+  user_id: string
   word_count: string
   theme: string
   practice_mode: string
@@ -373,47 +373,6 @@ export interface UpdateUserPresetInput {
 }
 
 /**
- * Users - ユーザー認証テーブルの型定義
- */
-export interface UserRow {
-  id: string
-  username: string
-  email: string
-  password_hash: string
-  created_at: number
-  updated_at: number
-  last_login_at: number | null
-}
-
-export interface UserRecord {
-  id: string
-  username: string
-  email: string
-  createdAt: number
-  updatedAt: number
-  lastLoginAt: number | null
-}
-
-export interface CreateUserInput {
-  username: string
-  email: string
-  passwordHash: string
-}
-
-export interface SignupInput {
-  username: string
-  email: string
-  password: string
-  passwordConfirm: string
-}
-
-export interface LoginInput {
-  usernameOrEmail: string
-  password: string
-  rememberMe?: boolean
-}
-
-/**
  * サーバー環境変数の型定義（Turso対応）
  *
  * デプロイ先:
@@ -431,4 +390,8 @@ export interface Env {
   ALLOWED_ORIGINS?: string
   /** Clerk認証のシークレットキー */
   CLERK_SECRET_KEY?: string
+  /** Clerk JWT の azp(authorized parties) 検証に使う許可オリジン（カンマ区切り） */
+  CLERK_AUTHORIZED_PARTIES?: string
+  /** 実行環境（'production' の場合はローカルDBフォールバックを禁止） */
+  NODE_ENV?: string
 }

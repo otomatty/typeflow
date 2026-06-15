@@ -32,7 +32,7 @@
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "tauri:icon": "tauri icon",
-    "typecheck": "tsc -b",
+    "typecheck": "tsc -b && tsc -p tsconfig.server.json",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{ts,tsx,json,css,md}\" \"*.{ts,tsx,json,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,json,css,md}\" \"*.{ts,tsx,json,md}\"",

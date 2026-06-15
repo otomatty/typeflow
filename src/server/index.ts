@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import type { Context } from 'hono'
 import { cors } from 'hono/cors'
 import { createClient } from '@libsql/client'
 import type { Env } from './types'
@@ -43,7 +44,7 @@ import type {
   CreateUserPresetInput,
   UpdateUserPresetInput,
 } from './types'
-import { authMiddleware, requireAuth } from './auth'
+import { authMiddleware, requireAuth, getUserId } from './auth'
 
 // Honoのコンテキスト変数の型定義（auth.tsと一致させる）
 type HonoVariables = {
@@ -70,22 +71,37 @@ const app = new Hono<HonoEnv>()
 // Honoインスタンスを名前付きエクスポート（Bunサーバー用）
 export { app }
 
+// 一括挿入の最大件数（DoS / DB肥大化対策）
+const MAX_BULK_WORDS = 5000
+
+// クライアントへ内部エラー詳細を漏らさず、サーバーログにのみ記録するヘルパー
+function fail(c: Context<HonoEnv>, context: string, error: unknown) {
+  console.error(`${context}:`, error)
+  return c.json({ error: context }, 500)
+}
+
 // CORSミドルウェア
 app.use('/*', async (c, next) => {
-  // const origin = c.req.header('Origin') // Not used in current implementation
-  const allowedOriginsStr = c.env.ALLOWED_ORIGINS || '*'
-  const allowedOrigins = allowedOriginsStr.split(',').map(o => o.trim())
+  const allowedOriginsStr = c.env.ALLOWED_ORIGINS || ''
+  const allowedOrigins = allowedOriginsStr
+    .split(',')
+    .map(o => o.trim())
+    .filter(o => o.length > 0)
+  const isWildcard = allowedOrigins.length === 0 || allowedOrigins.includes('*')
 
   const corsOptions = {
     origin: (origin: string) => {
-      if (allowedOrigins.includes('*')) {
+      if (isWildcard) {
         return '*'
       }
       return allowedOrigins.includes(origin) ? origin : null
     },
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization', 'X-Turso-Token'],
-    credentials: true,
+    // ワイルドカード許可時に資格情報を伴うのは安全でないため、
+    // 明示的な許可リストがある場合のみ credentials を有効化する。
+    // （本APIは Bearer トークン認証なので cookie は使わない）
+    credentials: !isWildcard,
   }
 
   return cors(corsOptions)(c, next)
@@ -100,10 +116,10 @@ app.get('/health', async c => {
     }
     return c.json({ status: 'ok', timestamp: new Date().toISOString() })
   } catch (error) {
+    console.error('Health check failed:', error)
     return c.json(
       {
         status: 'error',
-        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString(),
       },
       500
@@ -158,6 +174,9 @@ app.use('/*', async (c, next) => {
   await next()
 })
 
+// すべての /api/* ルートで認証を必須にする（IDOR / 無認証アクセス対策）
+app.use('/api/*', requireAuth)
+
 // Root endpoint - API情報を返す
 app.get('/', async c => {
   return c.json({
@@ -177,7 +196,7 @@ app.get('/', async c => {
 })
 
 // Auth API - Clerkを使用するため、ユーザー情報のみ返す
-app.get('/api/auth/me', requireAuth, async c => {
+app.get('/api/auth/me', async c => {
   const auth = c.get('auth')
   if (!auth || !auth.isAuthenticated || !auth.user) {
     return c.json({ error: 'Unauthorized' }, 401)
@@ -188,87 +207,64 @@ app.get('/api/auth/me', requireAuth, async c => {
   })
 })
 
-// Words API - 認証が必要なエンドポイント
-app.get('/api/words', requireAuth, async c => {
+// Words API
+app.get('/api/words', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
-    const words = await getAllWords(c.env.DB)
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
+    const words = await getAllWords(c.env.DB, userId)
     return c.json(words)
   } catch (error) {
-    console.error('Failed to get words:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to get words' }, 500)
+    return fail(c, 'Failed to get words', error)
   }
 })
 
-app.post('/api/words', requireAuth, async c => {
+app.post('/api/words', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
     const body = await c.req.json<CreateWordInput>()
-    const id = await createWord(c.env.DB, body)
+    if (!body?.text || !body?.romaji) {
+      return c.json({ error: 'text and romaji are required' }, 400)
+    }
+    const id = await createWord(c.env.DB, body, userId)
     return c.json({ id })
   } catch (error) {
-    console.error('Failed to create word:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to create word' }, 500)
+    return fail(c, 'Failed to create word', error)
   }
 })
 
 app.delete('/api/words', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
-    await deleteAllWords(c.env.DB)
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
+    await deleteAllWords(c.env.DB, userId)
     return c.json({ success: true })
   } catch (error) {
-    console.error('Failed to delete all words:', error)
-    return c.json(
-      { error: error instanceof Error ? error.message : 'Failed to delete all words' },
-      500
-    )
+    return fail(c, 'Failed to delete all words', error)
   }
 })
 
 // Bulk insert
 app.post('/api/words/bulk', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
     const body = await c.req.json<BulkInsertInput>()
-    const insertedCount = await bulkInsertWords(c.env.DB, body.words, body.clearExisting ?? false)
-    return c.json({
-      success: true,
-      insertedCount,
-      totalWords: body.words.length,
-    })
-  } catch (error) {
-    console.error('Failed to bulk insert words:', error)
-    return c.json(
-      { error: error instanceof Error ? error.message : 'Failed to bulk insert words' },
-      500
-    )
-  }
-})
-
-// Bulk insert with stats (for user presets)
-app.post('/api/words/bulk-with-stats', async c => {
-  try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
+    if (!Array.isArray(body?.words)) {
+      return c.json({ error: 'words must be an array' }, 400)
     }
-    const body = await c.req.json<BulkInsertWithStatsInput>()
-    const insertedCount = await bulkInsertWordsWithStats(
+    if (body.words.length > MAX_BULK_WORDS) {
+      return c.json({ error: `Too many words (max ${MAX_BULK_WORDS})` }, 400)
+    }
+    const insertedCount = await bulkInsertWords(
       c.env.DB,
       body.words,
+      userId,
       body.clearExisting ?? false
     )
     return c.json({
@@ -277,206 +273,195 @@ app.post('/api/words/bulk-with-stats', async c => {
       totalWords: body.words.length,
     })
   } catch (error) {
-    console.error('Failed to bulk insert words with stats:', error)
-    return c.json(
-      { error: error instanceof Error ? error.message : 'Failed to bulk insert words with stats' },
-      500
+    return fail(c, 'Failed to bulk insert words', error)
+  }
+})
+
+// Bulk insert with stats (for user presets)
+app.post('/api/words/bulk-with-stats', async c => {
+  try {
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
+    const body = await c.req.json<BulkInsertWithStatsInput>()
+    if (!Array.isArray(body?.words)) {
+      return c.json({ error: 'words must be an array' }, 400)
+    }
+    if (body.words.length > MAX_BULK_WORDS) {
+      return c.json({ error: `Too many words (max ${MAX_BULK_WORDS})` }, 400)
+    }
+    const insertedCount = await bulkInsertWordsWithStats(
+      c.env.DB,
+      body.words,
+      userId,
+      body.clearExisting ?? false
     )
+    return c.json({
+      success: true,
+      insertedCount,
+      totalWords: body.words.length,
+    })
+  } catch (error) {
+    return fail(c, 'Failed to bulk insert words with stats', error)
   }
 })
 
 // Single word operations
 app.delete('/api/words/:id', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
     const id = parseInt(c.req.param('id'))
     if (isNaN(id)) {
       return c.json({ error: 'Invalid ID' }, 400)
     }
-    await deleteWord(c.env.DB, id)
+    await deleteWord(c.env.DB, id, userId)
     return c.json({ success: true })
   } catch (error) {
-    console.error('Failed to delete word:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to delete word' }, 500)
+    return fail(c, 'Failed to delete word', error)
   }
 })
 
 app.put('/api/words/:id', async c => {
   try {
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
     const id = parseInt(c.req.param('id'))
     if (isNaN(id)) {
       return c.json({ error: 'Invalid ID' }, 400)
     }
     const body = await c.req.json<UpdateWordInput>()
-
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
-
-    await updateWord(c.env.DB, id, body)
+    await updateWord(c.env.DB, id, body, userId)
     return c.json({ success: true })
   } catch (error) {
-    console.error('Failed to update word:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to update word' }, 500)
+    return fail(c, 'Failed to update word', error)
   }
 })
 
 // Aggregated Stats API
 app.get('/api/stats', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
-    const stats = await getAggregatedStats(c.env.DB)
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
+    const stats = await getAggregatedStats(c.env.DB, userId)
     return c.json(stats)
   } catch (error) {
-    console.error('Failed to get stats:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to get stats' }, 500)
+    return fail(c, 'Failed to get stats', error)
   }
 })
 
 app.put('/api/stats', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
     const body = await c.req.json<UpdateAggregatedStatsInput>()
-    const existing = await getAggregatedStats(c.env.DB)
+    const existing = await getAggregatedStats(c.env.DB, userId)
 
-    await upsertAggregatedStats(c.env.DB, {
-      id: 1,
+    await upsertAggregatedStats(c.env.DB, userId, {
       keyStats: body.keyStats ?? existing?.keyStats ?? {},
       transitionStats: body.transitionStats ?? existing?.transitionStats ?? {},
       lastUpdated: body.lastUpdated ?? Date.now(),
     })
     return c.json({ success: true })
   } catch (error) {
-    console.error('Failed to update stats:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to update stats' }, 500)
+    return fail(c, 'Failed to update stats', error)
   }
 })
 
 app.delete('/api/stats', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
-    await deleteAggregatedStats(c.env.DB)
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
+    await deleteAggregatedStats(c.env.DB, userId)
     return c.json({ success: true })
   } catch (error) {
-    console.error('Failed to delete stats:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to delete stats' }, 500)
+    return fail(c, 'Failed to delete stats', error)
   }
 })
 
 // Game Scores API
 app.get('/api/scores', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
-    const scores = await getAllGameScores(c.env.DB)
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
+    const scores = await getAllGameScores(c.env.DB, userId)
     return c.json(scores)
   } catch (error) {
-    console.error('Failed to get scores:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to get scores' }, 500)
+    return fail(c, 'Failed to get scores', error)
   }
 })
 
 app.post('/api/scores', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
     const body = await c.req.json<CreateGameScoreInput>()
-    const id = await createGameScore(c.env.DB, body)
+    const id = await createGameScore(c.env.DB, body, userId)
     return c.json({ id })
   } catch (error) {
-    console.error('Failed to create score:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to create score' }, 500)
+    return fail(c, 'Failed to create score', error)
   }
 })
 
 app.delete('/api/scores', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
-    await deleteAllGameScores(c.env.DB)
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
+    await deleteAllGameScores(c.env.DB, userId)
     return c.json({ success: true })
   } catch (error) {
-    console.error('Failed to delete all scores:', error)
-    return c.json(
-      { error: error instanceof Error ? error.message : 'Failed to delete all scores' },
-      500
-    )
+    return fail(c, 'Failed to delete all scores', error)
   }
 })
 
 // Settings API
 app.get('/api/settings', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
-    const settings = await getSettings(c.env.DB)
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
+    const settings = await getSettings(c.env.DB, userId)
     return c.json(settings)
   } catch (error) {
-    console.error('Failed to get settings:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to get settings' }, 500)
+    return fail(c, 'Failed to get settings', error)
   }
 })
 
 app.put('/api/settings', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
     const body = await c.req.json<UpdateSettingsInput>()
-    await upsertSettings(c.env.DB, body)
+    await upsertSettings(c.env.DB, userId, body)
     return c.json({ success: true })
   } catch (error) {
-    console.error('Failed to update settings:', error)
-    return c.json(
-      { error: error instanceof Error ? error.message : 'Failed to update settings' },
-      500
-    )
+    return fail(c, 'Failed to update settings', error)
   }
 })
 
-// Presets API
+// Presets API（共有カタログ。閲覧・更新には認証が必要だが user_id では絞らない）
 app.get('/api/presets', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
     const presets = await getAllPresets(c.env.DB)
     return c.json(presets)
   } catch (error) {
-    console.error('Failed to get presets:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to get presets' }, 500)
+    return fail(c, 'Failed to get presets', error)
   }
 })
 
 app.get('/api/presets/:id', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
     const id = c.req.param('id')
     const preset = await getPresetById(c.env.DB, id)
     if (!preset) {
@@ -484,174 +469,120 @@ app.get('/api/presets/:id', async c => {
     }
     return c.json(preset)
   } catch (error) {
-    console.error('Failed to get preset:', error)
-    return c.json({ error: error instanceof Error ? error.message : 'Failed to get preset' }, 500)
+    return fail(c, 'Failed to get preset', error)
   }
 })
 
 app.post('/api/presets', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
     const body = await c.req.json<CreatePresetInput>()
     await createPreset(c.env.DB, body)
     return c.json({ success: true })
   } catch (error) {
-    console.error('Failed to create preset:', error)
-    return c.json(
-      { error: error instanceof Error ? error.message : 'Failed to create preset' },
-      500
-    )
+    return fail(c, 'Failed to create preset', error)
   }
 })
 
 app.put('/api/presets/:id', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
     const id = c.req.param('id')
     const body = await c.req.json<UpdatePresetInput>()
     await updatePreset(c.env.DB, id, body)
     return c.json({ success: true })
   } catch (error) {
-    console.error('Failed to update preset:', error)
-    return c.json(
-      { error: error instanceof Error ? error.message : 'Failed to update preset' },
-      500
-    )
+    return fail(c, 'Failed to update preset', error)
   }
 })
 
 app.delete('/api/presets/:id', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
     const id = c.req.param('id')
     await deletePreset(c.env.DB, id)
     return c.json({ success: true })
   } catch (error) {
-    console.error('Failed to delete preset:', error)
-    return c.json(
-      { error: error instanceof Error ? error.message : 'Failed to delete preset' },
-      500
-    )
+    return fail(c, 'Failed to delete preset', error)
   }
 })
 
 app.delete('/api/presets', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
     await deleteAllPresets(c.env.DB)
     return c.json({ success: true })
   } catch (error) {
-    console.error('Failed to delete all presets:', error)
-    return c.json(
-      { error: error instanceof Error ? error.message : 'Failed to delete all presets' },
-      500
-    )
+    return fail(c, 'Failed to delete all presets', error)
   }
 })
 
 // User Presets API
 app.get('/api/user-presets', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
-    const presets = await getAllUserPresets(c.env.DB)
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
+    const presets = await getAllUserPresets(c.env.DB, userId)
     return c.json(presets)
   } catch (error) {
-    console.error('Failed to get user presets:', error)
-    return c.json(
-      { error: error instanceof Error ? error.message : 'Failed to get user presets' },
-      500
-    )
+    return fail(c, 'Failed to get user presets', error)
   }
 })
 
 app.get('/api/user-presets/:id', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
     const id = c.req.param('id')
-    const preset = await getUserPresetById(c.env.DB, id)
+    const preset = await getUserPresetById(c.env.DB, id, userId)
     if (!preset) {
       return c.json({ error: 'User preset not found' }, 404)
     }
     return c.json(preset)
   } catch (error) {
-    console.error('Failed to get user preset:', error)
-    return c.json(
-      { error: error instanceof Error ? error.message : 'Failed to get user preset' },
-      500
-    )
+    return fail(c, 'Failed to get user preset', error)
   }
 })
 
 app.post('/api/user-presets', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
     const body = await c.req.json<CreateUserPresetInput>()
-    await createUserPreset(c.env.DB, body)
+    await createUserPreset(c.env.DB, body, userId)
     return c.json({ success: true })
   } catch (error) {
-    console.error('Failed to create user preset:', error)
-    return c.json(
-      { error: error instanceof Error ? error.message : 'Failed to create user preset' },
-      500
-    )
+    return fail(c, 'Failed to create user preset', error)
   }
 })
 
 app.put('/api/user-presets/:id', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
     const id = c.req.param('id')
     const body = await c.req.json<UpdateUserPresetInput>()
-    await updateUserPreset(c.env.DB, id, body)
+    await updateUserPreset(c.env.DB, id, body, userId)
     return c.json({ success: true })
   } catch (error) {
-    console.error('Failed to update user preset:', error)
-    return c.json(
-      { error: error instanceof Error ? error.message : 'Failed to update user preset' },
-      500
-    )
+    return fail(c, 'Failed to update user preset', error)
   }
 })
 
 app.delete('/api/user-presets/:id', async c => {
   try {
-    if (!c.env.DB) {
-      console.error('Database not available')
-      return c.json({ error: 'Database not configured' }, 500)
-    }
+    if (!c.env.DB) return c.json({ error: 'Database not configured' }, 500)
+    const userId = getUserId(c)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
     const id = c.req.param('id')
-    await deleteUserPreset(c.env.DB, id)
+    await deleteUserPreset(c.env.DB, id, userId)
     return c.json({ success: true })
   } catch (error) {
-    console.error('Failed to delete user preset:', error)
-    return c.json(
-      { error: error instanceof Error ? error.message : 'Failed to delete user preset' },
-      500
-    )
+    return fail(c, 'Failed to delete user preset', error)
   }
 })
 
