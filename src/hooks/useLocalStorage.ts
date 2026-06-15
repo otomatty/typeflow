@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 export function useLocalStorage<T>(
   key: string,
@@ -18,9 +18,16 @@ export function useLocalStorage<T>(
     }
   })
 
-  // Update localStorage when value changes
+  // Update localStorage when value changes.
+  // 初回マウント時は localStorage から読んだ値をそのまま書き戻すだけの
+  // 無駄な同期I/Oになるためスキップする。
+  const isFirstRender = useRef(true)
   useEffect(() => {
     if (typeof window === 'undefined') {
+      return
+    }
+    if (isFirstRender.current) {
+      isFirstRender.current = false
       return
     }
     try {

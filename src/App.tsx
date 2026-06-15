@@ -49,6 +49,8 @@ function App() {
 
   return (
     <>
+      {/* Toaster はアプリ全体で 1 つだけマウントする（重複による通知の競合を防ぐ） */}
+      <Toaster />
       <SignedOut>
         <AuthScreen />
       </SignedOut>
@@ -360,7 +362,6 @@ function AppContent() {
   if (view === 'gameover') {
     return (
       <>
-        <Toaster />
         <AddWordDialog
           onAddWord={addWord}
           open={isAddWordDialogOpen}
@@ -398,7 +399,6 @@ function AppContent() {
 
     return (
       <>
-        <Toaster />
         <GameScreen
           currentWord={currentWord}
           gameState={gameState}
@@ -414,7 +414,6 @@ function AppContent() {
   if (view === 'word-practice' && practiceWord) {
     return (
       <>
-        <Toaster />
         <WordPracticeScreen
           word={practiceWord}
           onExit={handleExitWordPractice}
@@ -429,7 +428,6 @@ function AppContent() {
   if (view === 'words') {
     return (
       <>
-        <Toaster />
         <AddWordDialog
           onAddWord={addWord}
           open={isAddWordDialogOpen}
@@ -455,7 +453,6 @@ function AppContent() {
   if (view === 'stats') {
     return (
       <>
-        <Toaster />
         <AddWordDialog
           onAddWord={addWord}
           open={isAddWordDialogOpen}
@@ -476,7 +473,6 @@ function AppContent() {
   if (view === 'presets') {
     return (
       <>
-        <Toaster />
         <AddWordDialog
           onAddWord={addWord}
           open={isAddWordDialogOpen}
@@ -498,7 +494,6 @@ function AppContent() {
   if (view === 'profile') {
     return (
       <>
-        <Toaster />
         <AddWordDialog
           onAddWord={addWord}
           open={isAddWordDialogOpen}
@@ -513,7 +508,6 @@ function AppContent() {
   if (view === 'settings') {
     return (
       <>
-        <Toaster />
         <AddWordDialog
           onAddWord={addWord}
           open={isAddWordDialogOpen}
@@ -567,7 +561,6 @@ function AppContent() {
 
   return (
     <>
-      <Toaster />
       <AddWordDialog
         onAddWord={addWord}
         open={isAddWordDialogOpen}

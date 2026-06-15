@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   getAllWords,
   addWord as addWordApi,
@@ -119,44 +119,55 @@ export function useWords() {
     [fetchWords]
   )
 
-  const updateWordStats = useCallback(
-    async (wordId: string, correct: boolean) => {
-      try {
-        const id = Number(wordId)
-        const word = words.find(w => w.id === wordId)
-        if (!word) return
+  // タイピング中のホットパス。1キー/1単語ごとに呼ばれるため、
+  // 全件再取得(fetchWords)はせず、該当単語だけをローカルに楽観更新する。
+  // 直近の words 配列を ref で参照することで useCallback を安定させ、
+  // ハンドラ再生成による再レンダリング連鎖を防ぐ。
+  const wordsRef = useRef(words)
+  useEffect(() => {
+    wordsRef.current = words
+  }, [words])
 
-        const newCorrect = correct ? word.stats.correct + 1 : word.stats.correct
-        const newMiss = correct ? word.stats.miss : word.stats.miss + 1
-        const total = newCorrect + newMiss
-        const accuracy = total > 0 ? (newCorrect / total) * 100 : 100
+  const updateWordStats = useCallback(async (wordId: string, correct: boolean) => {
+    const id = Number(wordId)
+    const word = wordsRef.current.find(w => w.id === wordId)
+    if (!word) return
 
-        // SRS（間隔反復）の更新
-        const { newLevel, newConsecutiveCorrect } = updateMasteryLevel(
-          word.stats.masteryLevel,
-          correct,
-          word.stats.consecutiveCorrect
-        )
-        const now = Date.now()
-        const nextReviewAt = calculateNextReviewAt(newLevel, now)
+    const newCorrect = correct ? word.stats.correct + 1 : word.stats.correct
+    const newMiss = correct ? word.stats.miss : word.stats.miss + 1
+    const total = newCorrect + newMiss
+    const accuracy = total > 0 ? (newCorrect / total) * 100 : 100
 
-        await updateWord(id, {
-          correct: newCorrect,
-          miss: newMiss,
-          lastPlayed: now,
-          accuracy,
-          masteryLevel: newLevel,
-          nextReviewAt,
-          consecutiveCorrect: newConsecutiveCorrect,
-        })
-        // データを再取得
-        await fetchWords()
-      } catch (error) {
-        console.error('Failed to update word stats:', error)
-      }
-    },
-    [words, fetchWords]
-  )
+    // SRS（間隔反復）の更新
+    const { newLevel, newConsecutiveCorrect } = updateMasteryLevel(
+      word.stats.masteryLevel,
+      correct,
+      word.stats.consecutiveCorrect
+    )
+    const now = Date.now()
+    const nextReviewAt = calculateNextReviewAt(newLevel, now)
+
+    const updatedStats = {
+      correct: newCorrect,
+      miss: newMiss,
+      lastPlayed: now,
+      accuracy,
+      masteryLevel: newLevel,
+      nextReviewAt,
+      consecutiveCorrect: newConsecutiveCorrect,
+    }
+
+    // 楽観的にローカル状態を更新（全件再取得しない）
+    setWords(prev =>
+      prev.map(w => (w.id === wordId ? { ...w, stats: { ...w.stats, ...updatedStats } } : w))
+    )
+
+    try {
+      await updateWord(id, updatedStats)
+    } catch (error) {
+      console.error('Failed to update word stats:', error)
+    }
+  }, [])
 
   // プリセットを読み込む
   const loadPreset = useCallback(

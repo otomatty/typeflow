@@ -51,6 +51,11 @@ interface CurrentWordPerformance {
   missCount: number
 }
 
+// 復習ラウンドごとの制限時間ボーナス（5%ずつ増加）
+const REVIEW_TIME_BONUS_PER_ROUND = 0.05
+// 復習ラウンドの上限
+const MAX_REVIEW_ROUNDS = 5
+
 export function useGame({
   words,
   updateWordStats,
@@ -363,11 +368,6 @@ export function useGame({
     setView('menu')
     setGameState(prev => ({ ...prev, isPlaying: false }))
   }, [])
-
-  // 復習ラウンドごとの制限時間ボーナス（5%ずつ増加）
-  const REVIEW_TIME_BONUS_PER_ROUND = 0.05
-  // 復習ラウンドの上限
-  const MAX_REVIEW_ROUNDS = 5
 
   // 復習フェーズを開始
   const startReviewPhase = useCallback(
@@ -874,7 +874,17 @@ export function useGame({
   // 時間切れフラグを追跡するref
   const isHandlingTimeoutRef = useRef<boolean>(false)
 
-  // Timer effect
+  // 最新のハンドラを ref に保持し、イベントリスナー/インターバルの
+  // 張り替えを抑える（キー入力ごとに add/removeEventListener や
+  // clear/setInterval が走るのを防ぎ、再レンダリング連鎖を断つ）。
+  const handleKeyPressRef = useRef(handleKeyPress)
+  const handleTimeoutRef = useRef(handleTimeout)
+  useEffect(() => {
+    handleKeyPressRef.current = handleKeyPress
+    handleTimeoutRef.current = handleTimeout
+  }, [handleKeyPress, handleTimeout])
+
+  // Timer effect（依存は view と isPlaying のみ。ハンドラは ref 経由で参照）
   useEffect(() => {
     if (view === 'game' && gameState.isPlaying) {
       const interval = setInterval(() => {
@@ -885,7 +895,7 @@ export function useGame({
               isHandlingTimeoutRef.current = true
               // 非同期でhandleTimeoutを呼ぶ
               setTimeout(() => {
-                handleTimeout()
+                handleTimeoutRef.current()
                 isHandlingTimeoutRef.current = false
               }, 0)
             }
@@ -900,13 +910,14 @@ export function useGame({
 
       return () => clearInterval(interval)
     }
-  }, [view, gameState.isPlaying, handleTimeout])
+  }, [view, gameState.isPlaying])
 
-  // Keyboard event effect
+  // Keyboard event effect（リスナーは一度だけ登録）
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyPress)
-    return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [handleKeyPress])
+    const listener = (e: KeyboardEvent) => handleKeyPressRef.current(e)
+    window.addEventListener('keydown', listener)
+    return () => window.removeEventListener('keydown', listener)
+  }, [])
 
   return {
     view,
