@@ -11,7 +11,12 @@ export function GameMetrics({ gameState, kps, accuracy }: GameMetricsProps) {
   const { t } = useTranslation('game')
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm px-2">
+    <div
+      role="status"
+      aria-live="off"
+      aria-label={t('a11y.metrics_label')}
+      className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm px-2"
+    >
       <div className="flex items-center gap-1.5">
         <span className="text-muted-foreground uppercase tracking-wide">{t('kps')}</span>
         <span className="text-primary font-bold tabular-nums">{kps}</span>
@@ -35,7 +40,10 @@ export function GameMetrics({ gameState, kps, accuracy }: GameMetricsProps) {
       </div>
 
       <div className="hidden sm:flex items-center gap-1.5 text-muted-foreground/60">
-        <kbd className="px-1.5 py-0.5 text-xs bg-secondary/50 rounded border border-border/30">
+        <kbd
+          aria-hidden="true"
+          className="px-1.5 py-0.5 text-xs bg-secondary/50 rounded border border-border/30"
+        >
           Esc
         </kbd>
         <span className="text-xs">{t('exit')}</span>

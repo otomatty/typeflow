@@ -41,5 +41,16 @@
   "wordsRemaining": "問",
   "review_limit_reached": "復習ラウンド上限に達しました",
   "review_limit_reached_desc": "以下の単語は5回の復習でも成功できませんでした。単語練習モードで集中的に練習することをおすすめします。",
-  "start_word_practice": "単語練習"
+  "start_word_practice": "単語練習",
+  "a11y": {
+    "metrics_label": "ゲーム統計",
+    "time_remaining": "残り {{count}} 秒",
+    "time_low": "残り時間がわずかです",
+    "current_word": "入力: {{word}}（{{reading}}）",
+    "typing_area": "入力エリア",
+    "results_dialog": "ゲーム結果",
+    "correct": "正解",
+    "incorrect": "不正解",
+    "practice_word": "「{{word}}」を練習"
+  }
 }

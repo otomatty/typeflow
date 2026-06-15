@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
@@ -136,6 +136,14 @@ export function GameOverScreen({
   const [sortKey, setSortKey] = useState<SortKey>('order')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const isMinimal = useMinimalMode(minimalMode, minimalModeBreakpoint)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+
+  // 結果表示時に見出しへフォーカス（支援技術が結果ダイアログを認識できるように）
+  useEffect(() => {
+    if (!isMinimal) {
+      headingRef.current?.focus()
+    }
+  }, [isMinimal])
 
   // 日本語かどうかを判定
   const isJapanese = i18n.language?.startsWith('ja') ?? false
@@ -219,10 +227,20 @@ export function GameOverScreen({
       animate={{ opacity: 1, scale: 1 }}
       className="flex items-center justify-center min-h-screen p-4"
     >
-      <Card className="w-full max-w-2xl p-6 sm:p-8 max-h-[90vh] overflow-hidden flex flex-col">
+      <Card
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="game-over-title"
+        className="w-full max-w-2xl p-6 sm:p-8 max-h-[90vh] overflow-hidden flex flex-col"
+      >
         {/* Fixed Header */}
         <div className="text-center shrink-0 pb-6">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-2">
+          <h2
+            id="game-over-title"
+            ref={headingRef}
+            tabIndex={-1}
+            className="text-2xl sm:text-3xl font-bold mb-2 outline-none"
+          >
             {isQuickStartMode ? t('skill_check_complete') : t('game_over')}
           </h2>
           <p className="text-muted-foreground">{t('great_session')}</p>
@@ -522,7 +540,10 @@ export function GameOverScreen({
             <Button onClick={onRestart} variant="secondary" className="w-full gap-2">
               <Play className="w-4 h-4" />
               {t('play_again')}
-              <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">
+              <kbd
+                aria-hidden="true"
+                className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50"
+              >
                 Space
               </kbd>
             </Button>
@@ -531,7 +552,10 @@ export function GameOverScreen({
             <Button onClick={onRetryWeak} className="w-full gap-2">
               <RotateCcw className="w-4 h-4" />
               {t('retry_weak_words')}
-              <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">
+              <kbd
+                aria-hidden="true"
+                className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50"
+              >
                 Space
               </kbd>
             </Button>
@@ -540,7 +564,10 @@ export function GameOverScreen({
             <Button onClick={onRestart} variant="secondary" className="w-full gap-2">
               <Play className="w-4 h-4" />
               {t('play_again')}
-              <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">
+              <kbd
+                aria-hidden="true"
+                className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50"
+              >
                 Space
               </kbd>
             </Button>
@@ -548,7 +575,10 @@ export function GameOverScreen({
 
           <Button onClick={onExit} variant="outline" className="w-full gap-2">
             {isQuickStartMode ? t('select_preset') : t('back_to_menu')}
-            <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50">
+            <kbd
+              aria-hidden="true"
+              className="ml-auto px-1.5 py-0.5 text-xs bg-background/50 rounded border border-border/50"
+            >
               Esc
             </kbd>
           </Button>
@@ -560,7 +590,7 @@ export function GameOverScreen({
 
 interface WordPerformanceRowProps {
   performance: WordPerformanceRecord & { originalIndex: number }
-  t: (key: string) => string
+  t: (key: string, options?: Record<string, unknown>) => string
   isJapanese: boolean
   word?: Word
   onStartWordPractice?: (word: Word) => void
@@ -624,11 +654,13 @@ function WordPerformanceRow({
         {performance.firstKeyExpected ? (
           performance.firstKeyCorrect ? (
             <div className="flex items-center gap-1">
-              <Check className="w-4 h-4 text-green-500" />
+              <Check className="w-4 h-4 text-green-500" aria-hidden="true" />
+              <span className="sr-only">{t('a11y.correct')}</span>
             </div>
           ) : (
             <div className="flex items-center gap-1 text-red-500">
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" aria-hidden="true" />
+              <span className="sr-only">{t('a11y.incorrect')}</span>
               <span className="text-xs font-mono">{performance.firstKeyActual.toUpperCase()}</span>
             </div>
           )
@@ -644,8 +676,9 @@ function WordPerformanceRow({
             onClick={() => onStartWordPractice(word)}
             className="p-1 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
             title={t('start_practice')}
+            aria-label={t('a11y.practice_word', { word: performance.wordText })}
           >
-            <Target className="w-4 h-4" />
+            <Target className="w-4 h-4" aria-hidden="true" />
           </button>
         ) : (
           <span className="text-muted-foreground">-</span>

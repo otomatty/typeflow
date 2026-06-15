@@ -27,6 +27,16 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Word } from '@/lib/types'
 import { AddWordDialog } from '@/components/AddWordDialog'
 
@@ -57,6 +67,21 @@ export function WordList({
   const [currentPage, setCurrentPage] = useState(1)
   const [editingWord, setEditingWord] = useState<Word | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [deletingWord, setDeletingWord] = useState<Word | null>(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
+  const handleDeleteClick = (word: Word) => {
+    setDeletingWord(word)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (deletingWord) {
+      onDeleteWord(deletingWord.id)
+    }
+    setIsDeleteDialogOpen(false)
+    setDeletingWord(null)
+  }
 
   const handleEditClick = (word: Word) => {
     setEditingWord(word)
@@ -338,24 +363,25 @@ export function WordList({
                     <Button
                       size="icon"
                       variant="ghost"
+                      aria-label={t('word_list.actions_for', { word: word.text })}
                       className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground shrink-0"
                     >
-                      <MoreVertical className="w-4 h-4" />
+                      <MoreVertical className="w-4 h-4" aria-hidden="true" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     {onEditWord && (
                       <DropdownMenuItem onClick={() => handleEditClick(word)}>
-                        <Pencil className="w-4 h-4 mr-2" />
+                        <Pencil className="w-4 h-4 mr-2" aria-hidden="true" />
                         {t('word_list.edit')}
                       </DropdownMenuItem>
                     )}
                     {onEditWord && <DropdownMenuSeparator />}
                     <DropdownMenuItem
-                      onClick={() => onDeleteWord(word.id)}
+                      onClick={() => handleDeleteClick(word)}
                       className="text-destructive focus:text-destructive"
                     >
-                      <Trash2 className="w-4 h-4 mr-2" />
+                      <Trash2 className="w-4 h-4 mr-2" aria-hidden="true" />
                       {t('word_list.delete')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -399,6 +425,27 @@ export function WordList({
           showTrigger={false}
         />
       )}
+
+      {/* 単語削除の確認ダイアログ */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('word_list.delete_confirm_title')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('word_list.delete_confirm_description', { word: deletingWord?.text ?? '' })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('word_list.delete_cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t('word_list.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   )
 }

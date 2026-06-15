@@ -14,6 +14,12 @@
   "yes": "Yes",
   "no": "No",
   "language": "Language",
+  "errorBoundary": {
+    "title": "TypeFlow encountered an unexpected error",
+    "description": "Something went wrong while running the app. The error details are shown below. Try again, and if the problem persists, please report it.",
+    "detailsLabel": "Error Details:",
+    "retry": "Try Again"
+  },
   "header": {
     "home": "Home",
     "words": "Words",
