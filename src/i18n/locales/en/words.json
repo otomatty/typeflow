@@ -1,4 +1,11 @@
 {
+  "loading": "Loading...",
+  "save_preset": "Save as preset",
+  "word_menu_label": "Word options",
+  "toast": {
+    "delete_all_success": "All words deleted",
+    "delete_all_error": "Failed to delete words"
+  },
   "title": "Word Management",
   "description": "Add and manage your typing practice words",
   "add_word": "Add Word",
@@ -15,6 +22,13 @@
   "preset_load": "Load",
   "preset_hint": "💡 Hint: Import feature for external word lists (like Sushida) coming soon",
   "preset_after_quickstart": "Temporary words used in the skill check will be automatically deleted. Please select a preset you want to use.",
+  "preset_toast": {
+    "load_success": "Loaded preset \"{{name}}\"",
+    "load_error": "Failed to load preset",
+    "delete_success": "Preset deleted",
+    "delete_error": "Failed to delete preset",
+    "delete_preset_label": "Delete preset \"{{name}}\""
+  },
   "difficulty_beginner": "Beginner",
   "difficulty_intermediate": "Intermediate",
   "difficulty_advanced": "Advanced",
