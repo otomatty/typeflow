@@ -355,7 +355,7 @@ export function useWordPractice({
         }
       }
     },
-    [state, endPractice, failAttempt, completeAttempt]
+    [state, endPractice, failAttempt, completeAttempt, onExit]
   )
 
   // マスターフェーズ完了時にコールバックを呼ぶ
@@ -373,6 +373,10 @@ export function useWordPractice({
   }, [state.isActive, state.word, state.phase, state.consecutiveSuccess, stats, onComplete])
 
   // タイマー管理
+  // インターバルは「アクティブか」「制限時間が設定されているか」が変わったときだけ
+  // 張り直す。残り時間(timeRemaining)は setState(prev) 内で参照するため依存に含めない
+  // （含めると100msごとにインターバルが再生成される）。
+  const hasTimeLimit = state.timeLimit !== null
   useEffect(() => {
     if (state.isActive && state.timeLimit !== null && state.timeRemaining !== null) {
       timerRef.current = setInterval(() => {
@@ -400,7 +404,9 @@ export function useWordPractice({
         }
       }
     }
-  }, [state.isActive, state.timeLimit !== null])
+    // timeRemaining は意図的に依存から除外（上のコメント参照）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.isActive, hasTimeLimit])
 
   // タイムアウトチェック
   // 残り時間が 0 以下になったことを検知して失敗扱いにする、タイマー駆動の状態遷移。

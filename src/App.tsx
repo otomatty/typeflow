@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, lazy, Suspense } from 'react'
 import { SignedIn, SignedOut, AuthenticateWithRedirectCallback } from '@clerk/clerk-react'
 import { Toaster } from '@/components/ui/sonner'
 import { Header } from '@/components/Header'
@@ -6,7 +6,10 @@ import { MenuScreen } from '@/components/MenuScreen'
 import { GameScreen } from '@/components/GameScreen'
 import { GameOverScreen } from '@/components/GameOverScreen'
 import { WordManagementScreen } from '@/components/WordManagementScreen'
-import { StatsScreen } from '@/components/StatsScreen'
+// StatsScreen は recharts(d3) を含み重いため遅延ロードする
+const StatsScreen = lazy(() =>
+  import('@/components/StatsScreen').then(m => ({ default: m.StatsScreen }))
+)
 import { SettingsScreen } from '@/components/SettingsScreen'
 import { PresetScreen } from '@/components/PresetScreen'
 import { ProfileScreen } from '@/components/ProfileScreen'
@@ -460,12 +463,14 @@ function AppContent() {
           showTrigger={false}
         />
         <Header currentView={view} onNavigate={handleNavigate} />
-        <StatsScreen
-          keyStats={aggregatedStats?.keyStats ?? {}}
-          transitionStats={aggregatedStats?.transitionStats ?? {}}
-          gameScores={gameScores}
-          onReset={resetStats}
-        />
+        <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading…</div>}>
+          <StatsScreen
+            keyStats={aggregatedStats?.keyStats ?? {}}
+            transitionStats={aggregatedStats?.transitionStats ?? {}}
+            gameScores={gameScores}
+            onReset={resetStats}
+          />
+        </Suspense>
       </>
     )
   }
