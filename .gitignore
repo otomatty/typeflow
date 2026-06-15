@@ -52,4 +52,7 @@ scripts/output/*.json
 # Tauri
 src-tauri/target/
 src-tauri/Cargo.lock
-src-tauri/gen/.claude/worktrees/
+src-tauri/gen/
+
+# Claude Code (temporary agent worktrees, etc.)
+.claude/
