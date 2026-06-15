@@ -71,8 +71,11 @@ export function AuthScreen() {
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
+        <div className="text-center" role="status">
+          <div
+            className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"
+            aria-hidden="true"
+          ></div>
           <p className="text-muted-foreground">{t('loading', { defaultValue: '読み込み中...' })}</p>
         </div>
       </div>

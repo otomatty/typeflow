@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
 import { Gauge, ArrowRight, TrendingUp } from 'lucide-react'
 import { SettingSection } from './SettingSection'
 import type { TimeLimitSettingProps } from './types'
@@ -19,8 +18,8 @@ export function TimeLimitSetting({
         <div className="space-y-6">
           <div>
             <div className="flex items-center gap-2">
-              <Gauge className="w-5 h-5 text-primary" />
-              <Label className="text-base font-semibold">{t('time_limit.title')}</Label>
+              <Gauge className="w-5 h-5 text-primary" aria-hidden="true" />
+              <h2 className="text-base font-semibold">{t('time_limit.title')}</h2>
             </div>
             <p className="text-sm text-muted-foreground mt-1">{t('time_limit.description')}</p>
           </div>

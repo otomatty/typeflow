@@ -18,28 +18,28 @@ interface WordPracticeScreenProps {
   settings?: AppSettings
 }
 
-// フェーズの表示情報
-const PHASE_INFO: Record<
+// フェーズの表示情報（ラベル・説明は i18n から取得）
+const PHASE_META: Record<
   WordPracticePhase,
-  { icon: React.ReactNode; label: string; description: string; color: string }
+  { icon: React.ReactNode; color: string; labelKey: string; nameKey: string }
 > = {
   accuracy: {
-    icon: <Target className="w-5 h-5" />,
-    label: 'Phase 1',
-    description: '正確性',
+    icon: <Target className="w-5 h-5" aria-hidden="true" />,
     color: 'text-blue-500',
+    labelKey: 'phase1_label',
+    nameKey: 'phase1_name',
   },
   speed: {
-    icon: <Zap className="w-5 h-5" />,
-    label: 'Phase 2',
-    description: 'スピード',
+    icon: <Zap className="w-5 h-5" aria-hidden="true" />,
     color: 'text-yellow-500',
+    labelKey: 'phase2_label',
+    nameKey: 'phase2_name',
   },
   mastery: {
-    icon: <Trophy className="w-5 h-5" />,
-    label: 'Phase 3',
-    description: 'マスター',
+    icon: <Trophy className="w-5 h-5" aria-hidden="true" />,
     color: 'text-green-500',
+    labelKey: 'phase3_label',
+    nameKey: 'phase3_name',
   },
 }
 
@@ -165,14 +165,14 @@ export function WordPracticeScreen({
   if (!state.isActive || !state.word) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-muted-foreground">
+        <div className="text-muted-foreground" role="status">
           {t('loading', { defaultValue: '読み込み中...' })}
         </div>
       </div>
     )
   }
 
-  const phaseInfo = PHASE_INFO[state.phase]
+  const phaseMeta = PHASE_META[state.phase]
   const progressPercent = (state.consecutiveSuccess / state.targetConsecutive) * 100
 
   // 入力済み部分のみ表示（残り部分は非表示）
@@ -187,11 +187,13 @@ export function WordPracticeScreen({
           <span className="hidden sm:inline">{t('exit', { defaultValue: '終了' })}</span>
         </Button>
 
-        <div className={`flex items-center gap-2 ${phaseInfo.color}`}>
-          {phaseInfo.icon}
-          <span className="font-semibold">{phaseInfo.label}</span>
-          <span className="text-muted-foreground">-</span>
-          <span>{phaseInfo.description}</span>
+        <div className={`flex items-center gap-2 ${phaseMeta.color}`}>
+          {phaseMeta.icon}
+          <span className="font-semibold">{t(phaseMeta.labelKey)}</span>
+          <span className="text-muted-foreground" aria-hidden="true">
+            -
+          </span>
+          <span>{t(phaseMeta.nameKey)}</span>
         </div>
 
         <div className="text-sm text-muted-foreground">
@@ -275,7 +277,10 @@ export function WordPracticeScreen({
                 {/* ローマ字表示 */}
                 <div className="text-base sm:text-lg md:text-xl font-medium tracking-wider mt-4">
                   <span className="text-primary">{inputPart}</span>
-                  <span className="inline-block w-0.5 h-4 bg-primary animate-pulse mx-0.5 align-middle" />
+                  <span
+                    aria-hidden="true"
+                    className="inline-block w-0.5 h-4 bg-primary motion-safe:animate-pulse mx-0.5 align-middle"
+                  />
                 </div>
               </Card>
             </motion.div>
@@ -313,7 +318,17 @@ export function WordPracticeScreen({
                       : 'bg-red-500/10 text-red-500'
                   }`}
                 >
-                  {attempt.success ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                  {attempt.success ? (
+                    <>
+                      <Check className="w-3 h-3" aria-hidden="true" />
+                      <span className="sr-only">{t('attempt_success')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <X className="w-3 h-3" aria-hidden="true" />
+                      <span className="sr-only">{t('attempt_fail')}</span>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
@@ -323,7 +338,9 @@ export function WordPracticeScreen({
 
       {/* フッター */}
       <div className="p-4 text-center text-xs text-muted-foreground">
-        <kbd className="px-2 py-1 bg-muted rounded text-muted-foreground">Esc</kbd>
+        <kbd aria-hidden="true" className="px-2 py-1 bg-muted rounded text-muted-foreground">
+          Esc
+        </kbd>
         <span className="ml-2">{t('press_esc_to_exit', { defaultValue: 'で終了' })}</span>
       </div>
     </div>

@@ -22,5 +22,13 @@
   "phase2_title": "Phase 2 - スピード",
   "phase2_description": "時間制限内に入力できるようになろう",
   "phase3_title": "Phase 3 - マスター",
-  "phase3_description": "厳しい時間制限で安定して入力できるようになろう"
+  "phase3_description": "厳しい時間制限で安定して入力できるようになろう",
+  "phase1_label": "Phase 1",
+  "phase1_name": "正確性",
+  "phase2_label": "Phase 2",
+  "phase2_name": "スピード",
+  "phase3_label": "Phase 3",
+  "phase3_name": "マスター",
+  "attempt_success": "成功",
+  "attempt_fail": "失敗"
 }

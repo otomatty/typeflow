@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
+import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -51,6 +52,7 @@ export function RecommendedPresets({ onLoadPreset, isLoading }: RecommendedPrese
       const preset = await getPresetById(presetId)
       if (!preset) {
         console.error(`Preset not found: ${presetId}`)
+        toast.error(tWords('preset_toast.load_error'))
         return
       }
 
@@ -60,11 +62,13 @@ export function RecommendedPresets({ onLoadPreset, isLoading }: RecommendedPrese
           clearExisting: false,
           presetName: preset.name,
         })
+        toast.success(tWords('preset_toast.load_success', { name: preset.name }))
       } finally {
         setLoadingPresetId(null)
       }
     } catch (error) {
       console.error('Failed to load preset:', error)
+      toast.error(tWords('preset_toast.load_error'))
       setLoadingPresetId(null)
     }
   }
@@ -124,10 +128,13 @@ export function RecommendedPresets({ onLoadPreset, isLoading }: RecommendedPrese
                     className="shrink-0"
                   >
                     {loadingPresetId === preset.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span role="status">
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                        <span className="sr-only">{tWords('loading')}</span>
+                      </span>
                     ) : (
                       <>
-                        <Download className="h-4 w-4 mr-1" />
+                        <Download className="h-4 w-4 mr-1" aria-hidden="true" />
                         {tWords('preset_load')}
                       </>
                     )}

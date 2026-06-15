@@ -34,8 +34,11 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
       <>
         <Header currentView="profile" onNavigate={onNavigate} />
         <div className="pt-14 min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
+          <div className="text-center" role="status">
+            <div
+              className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"
+              aria-hidden="true"
+            ></div>
             <p className="text-muted-foreground">
               {t('loading', { defaultValue: '読み込み中...' })}
             </p>

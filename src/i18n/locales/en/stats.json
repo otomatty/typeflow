@@ -46,5 +46,16 @@
   "daily_trend": "Daily Trend",
   "last_n_days": "Last {{count}} days",
   "no_daily_data": "No Daily Data",
-  "no_daily_data_desc": "Play some games to see your daily statistics"
+  "no_daily_data_desc": "Play some games to see your daily statistics",
+  "best_records": "Best Records",
+  "heatmap": {
+    "group_label": "Keyboard heatmap by miss rate",
+    "key_label": "{{key}}: {{percent}}% miss rate ({{count}} presses)",
+    "key_label_no_data": "{{key}}: no data",
+    "legend_high": "High misses (30%+)",
+    "legend_medium": "Medium (15-30%)",
+    "legend_low": "Low (5-15%)",
+    "legend_good": "Good (under 5%)",
+    "legend_no_data": "No data"
+  }
 }

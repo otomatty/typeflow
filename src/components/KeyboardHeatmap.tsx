@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { KeyStats } from '@/lib/types'
 
 interface KeyboardHeatmapProps {
@@ -31,6 +32,8 @@ function getKeyColor(errorRate: number | null): string {
 }
 
 export function KeyboardHeatmap({ keyStats }: KeyboardHeatmapProps) {
+  const { t } = useTranslation('stats')
+
   // 各キーのエラー率を計算
   const keyErrorRates = useMemo(() => {
     const rates: Record<string, number | null> = {}
@@ -51,7 +54,11 @@ export function KeyboardHeatmap({ keyStats }: KeyboardHeatmapProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col items-center gap-1.5">
+      <div
+        className="flex flex-col items-center gap-1.5"
+        role="group"
+        aria-label={t('heatmap.group_label')}
+      >
         {KEYBOARD_ROWS.map((row, rowIndex) => (
           <div
             key={rowIndex}
@@ -63,23 +70,30 @@ export function KeyboardHeatmap({ keyStats }: KeyboardHeatmapProps) {
               const stats = keyStats[key]
               const hasData = errorRate !== null
 
+              const ariaLabel =
+                hasData && stats
+                  ? t('heatmap.key_label', {
+                      key: key.toUpperCase(),
+                      percent: Math.round((errorRate ?? 0) * 100),
+                      count: stats.totalCount,
+                    })
+                  : t('heatmap.key_label_no_data', { key: key.toUpperCase() })
+
               return (
                 <div
                   key={key}
+                  role="img"
+                  aria-label={ariaLabel}
                   className={`
-                    w-8 h-8 sm:w-10 sm:h-10 
-                    flex items-center justify-center 
+                    w-8 h-8 sm:w-10 sm:h-10
+                    flex items-center justify-center
                     rounded-md border font-mono text-sm sm:text-base font-medium
                     transition-colors
                     ${getKeyColor(errorRate)}
                   `}
-                  title={
-                    hasData && stats
-                      ? `${key.toUpperCase()}: ${Math.round((errorRate ?? 0) * 100)}% ミス率 (${stats.totalCount}回)`
-                      : `${key.toUpperCase()}: データなし`
-                  }
+                  title={ariaLabel}
                 >
-                  {key.toUpperCase()}
+                  <span aria-hidden="true">{key.toUpperCase()}</span>
                 </div>
               )
             })}
@@ -90,22 +104,36 @@ export function KeyboardHeatmap({ keyStats }: KeyboardHeatmapProps) {
       {/* 凡例 */}
       <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-red-500/20 border border-red-500/30" />
-          <span>ミス多い</span>
+          <div
+            className="w-3 h-3 rounded bg-red-500/20 border border-red-500/30"
+            aria-hidden="true"
+          />
+          <span>{t('heatmap.legend_high')}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-orange-500/20 border border-orange-500/30" />
+          <div
+            className="w-3 h-3 rounded bg-orange-500/20 border border-orange-500/30"
+            aria-hidden="true"
+          />
+          <span>{t('heatmap.legend_medium')}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-yellow-500/20 border border-yellow-500/30" />
+          <div
+            className="w-3 h-3 rounded bg-yellow-500/20 border border-yellow-500/30"
+            aria-hidden="true"
+          />
+          <span>{t('heatmap.legend_low')}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-green-500/20 border border-green-500/30" />
-          <span>良好</span>
+          <div
+            className="w-3 h-3 rounded bg-green-500/20 border border-green-500/30"
+            aria-hidden="true"
+          />
+          <span>{t('heatmap.legend_good')}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-muted border border-border" />
-          <span>データなし</span>
+          <div className="w-3 h-3 rounded bg-muted border border-border" aria-hidden="true" />
+          <span>{t('heatmap.legend_no_data')}</span>
         </div>
       </div>
     </div>
